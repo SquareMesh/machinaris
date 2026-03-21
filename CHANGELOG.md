@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.7.0] - 2026-03-21
+### Changed
+ - **Chia-only focus**: Removed all non-Chia blockchain forks from the Docker build. This project now exclusively supports the Chia blockchain, resulting in significantly faster build times and a smaller Docker image.
+ - Removed DockerHub publishing from CI/CD workflows. All images now publish to GitHub Container Registry (GHCR) only, using `github.repository_owner` for automatic namespace alignment.
+ - Dropped Ubuntu Jammy (22.04) base image — Noble (24.04) only going forward.
+### Updated
+ - [Chia](https://github.com/Chia-Network/chia-blockchain/releases/tag/2.6.1) to v2.6.1 — Structured RPC errors, TransactionQueue optimizations, fast forward state validation, BYC and CRT added to default CAT list.
+### Removed
+ - All non-Chia blockchain fork support: achi, apple, ballcoin, bpx, btcgreen, cactus, chinilla, chives, coffee, cryptodoge, ecostake, flax, flora, gigahorse, gold, greenbtc, hddcoin, littlelambocoin, maize, mint, mmx, moon, nchain, one, petroleum, pipscoin, profit, shibgreen, silicoin, staicoin, stor, tad, wheat.
+ - Gigahorse separate image build from CI/CD workflows.
+ - Forktools and fd-cli build args from Dockerfile (Chia-only, not needed).
+
 ## [2.6.0] - 2026-02-16
 ### Added
 ### Changed

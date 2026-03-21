@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Machinaris — Unraid Docker Migration Guide</title>
+<style>
+  :root {
+    --bg: #1a1d21;
+    --surface: #22262b;
+    --surface-alt: #2a2f35;
+    --border: #363b42;
+    --text: #d4d4d4;
+    --text-muted: #8b919a;
+    --accent: #3aac59;
+    --accent-dim: #2d8a47;
+    --warning: #e5a940;
+    --danger: #d94f4f;
+    --info: #4a9ade;
+    --code-bg: #181b1f;
+    --step-line: #363b42;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    padding: 0;
+  }
+
+  header {
+    background: linear-gradient(135deg, #1e2329 0%, #2a3038 100%);
+    border-bottom: 2px solid var(--accent);
+    padding: 2.5rem 2rem;
+    text-align: center;
+  }
+
+  header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 0.5rem;
+  }
+
+  header h1 span { color: var(--accent); }
+
+  header p {
+    color: var(--text-muted);
+    font-size: 1.05rem;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+  }
+
+  /* -- Overview box -- */
+  .overview {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.8rem 2rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .overview h2 {
+    font-size: 1.15rem;
+    color: var(--accent);
+    margin-bottom: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .overview ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  .overview li {
+    padding: 0.35rem 0;
+    padding-left: 1.4rem;
+    position: relative;
+    color: var(--text-muted);
+  }
+
+  .overview li::before {
+    content: '>';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-weight: bold;
+    font-family: monospace;
+  }
+
+  /* -- Callout boxes -- */
+  .callout {
+    border-radius: 8px;
+    padding: 1rem 1.3rem;
+    margin: 1.2rem 0;
+    font-size: 0.95rem;
+    border-left: 4px solid;
+  }
+
+  .callout-warning {
+    background: rgba(229, 169, 64, 0.08);
+    border-color: var(--warning);
+  }
+
+  .callout-warning .callout-label { color: var(--warning); }
+
+  .callout-danger {
+    background: rgba(217, 79, 79, 0.08);
+    border-color: var(--danger);
+  }
+
+  .callout-danger .callout-label { color: var(--danger); }
+
+  .callout-info {
+    background: rgba(74, 154, 222, 0.08);
+    border-color: var(--info);
+  }
+
+  .callout-info .callout-label { color: var(--info); }
+
+  .callout-success {
+    background: rgba(58, 172, 89, 0.08);
+    border-color: var(--accent);
+  }
+
+  .callout-success .callout-label { color: var(--accent); }
+
+  .callout-label {
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.06em;
+    display: block;
+    margin-bottom: 0.3rem;
+  }
+
+  /* -- Section headings -- */
+  .section-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #fff;
+    margin: 2.5rem 0 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-title .section-num {
+    color: var(--accent);
+    margin-right: 0.4rem;
+  }
+
+  /* -- Steps -- */
+  .steps {
+    position: relative;
+    padding-left: 2.8rem;
+  }
+
+  .steps::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--step-line);
+  }
+
+  .step {
+    position: relative;
+    margin-bottom: 2rem;
+  }
+
+  .step-num {
+    position: absolute;
+    left: -2.8rem;
+    top: 0;
+    width: 32px;
+    height: 32px;
+    background: var(--accent);
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+    z-index: 1;
+  }
+
+  .step h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 0.5rem;
+    padding-top: 0.2rem;
+  }
+
+  .step p, .step ul {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+  }
+
+  .step ul {
+    margin: 0.5rem 0;
+    padding-left: 1.3rem;
+  }
+
+  .step li { margin: 0.3rem 0; }
+
+  /* -- Code blocks -- */
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1rem 1.2rem;
+    overflow-x: auto;
+    margin: 0.8rem 0;
+    font-size: 0.88rem;
+    line-height: 1.6;
+  }
+
+  code {
+    font-family: 'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+    color: var(--accent);
+  }
+
+  pre code { color: var(--text); }
+
+  .code-comment { color: #6a737d; }
+  .code-key { color: #79c0ff; }
+  .code-val { color: #a5d6ff; }
+  .code-flag { color: var(--warning); }
+
+  /* -- Tables -- */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+    font-size: 0.92rem;
+  }
+
+  th {
+    background: var(--surface-alt);
+    color: var(--accent);
+    text-align: left;
+    padding: 0.7rem 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.78rem;
+    letter-spacing: 0.04em;
+    border-bottom: 2px solid var(--border);
+  }
+
+  td {
+    padding: 0.6rem 1rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-muted);
+  }
+
+  tr:hover td { background: rgba(58, 172, 89, 0.03); }
+
+  /* -- Checklist -- */
+  .checklist {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.2rem 1.5rem;
+    margin: 1rem 0;
+  }
+
+  .checklist h4 {
+    color: var(--accent);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.7rem;
+  }
+
+  .checklist label {
+    display: block;
+    padding: 0.35rem 0;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 0.93rem;
+  }
+
+  .checklist input[type="checkbox"] {
+    margin-right: 0.6rem;
+    accent-color: var(--accent);
+    transform: scale(1.1);
+  }
+
+  /* -- Diagram -- */
+  .diagram {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin: 1rem 0;
+    font-family: 'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    overflow-x: auto;
+    white-space: pre;
+    color: var(--text-muted);
+  }
+
+  /* -- Footer -- */
+  footer {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    border-top: 1px solid var(--border);
+    margin-top: 3rem;
+  }
+
+  /* -- Responsive -- */
+  @media (max-width: 600px) {
+    .container { padding: 1rem; }
+    header { padding: 1.5rem 1rem; }
+    header h1 { font-size: 1.5rem; }
+    pre { font-size: 0.82rem; padding: 0.8rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1><span>Machinaris</span> &mdash; Unraid Docker Migration Guide</h1>
+  <p>Replace the original guydavis/machinaris container with your own forked image while preserving all farm data, plots, and configuration.</p>
+</header>
+
+<div class="container">
+
+  <!-- ============================================================ -->
+  <!-- OVERVIEW -->
+  <!-- ============================================================ -->
+
+  <div class="overview">
+    <h2>What this guide covers</h2>
+    <ul>
+      <li>Back up your current Machinaris configuration and database</li>
+      <li>Document your existing container settings (volumes, ports, env vars)</li>
+      <li>Stop and remove the original container</li>
+      <li>Build or pull your new forked image</li>
+      <li>Create a new container pointing to the same persistent data</li>
+      <li>Verify the migration was successful</li>
+    </ul>
+  </div>
+
+  <div class="callout callout-danger">
+    <span class="callout-label">Critical</span>
+    Your plots, wallet keys, and blockchain database live on <strong>persistent volumes</strong>, not inside the container.
+    As long as you map the same volume paths, no data is lost when you swap containers.
+    However, always back up your mnemonic key before making changes.
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- PREREQUISITES -->
+  <!-- ============================================================ -->
+
+  <h2 class="section-title"><span class="section-num">0.</span> Prerequisites</h2>
+
+  <div class="checklist">
+    <h4>Before you start</h4>
+    <label><input type="checkbox"> You have SSH or terminal access to your Unraid server</label>
+    <label><input type="checkbox"> You know your Unraid Docker page login</label>
+    <label><input type="checkbox"> You have a copy of your wallet mnemonic (24 words) stored safely offline</label>
+    <label><input type="checkbox"> You have your fork's Docker image ready (built locally or pushed to a registry)</label>
+    <label><input type="checkbox"> No active plotting jobs are running (check Machinaris WebUI first)</label>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 1: DOCUMENT CURRENT SETUP -->
+  <!-- ============================================================ -->
+
+  <h2 class="section-title"><span class="section-num">1.</span> Document Your Current Setup</h2>
+
+  <p>Before changing anything, record every setting from your running container. You will need these exact values when creating the replacement.</p>
+
+  <div class="steps">
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <h3>Open the Unraid Docker page</h3>
+      <p>Navigate to the <strong>Docker</strong> tab in your Unraid WebUI. Find your Machinaris container in the list.</p>
+    </div>
+
+    <div class="step">
+      <div class="step-num">2</div>
+      <h3>Export the container template (Unraid UI method)</h3>
+      <p>Click on the Machinaris container icon, then select <strong>Edit</strong>. This shows all configured settings. Take a screenshot or copy down every field. Alternatively, from the Unraid terminal:</p>
+      <pre><code><span class="code-comment"># Inspect the running container to capture all settings</span>
+docker inspect machinaris > /boot/config/machinaris-backup.json
+
+<span class="code-comment"># This saves: image name, volumes, ports, env vars, restart policy</span></code></pre>
+    </div>
+
+    <div class="step">
+      <div class="step-num">3</div>
+      <h3>Record critical settings</h3>
+      <p>At minimum, capture these values:</p>
+      <table>
+        <thead>
+          <tr><th>Setting</th><th>Where to find it</th><th>Example</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Container name</td><td>Docker tab</td><td><code>machinaris</code></td></tr>
+          <tr><td>Image</td><td>Edit &rarr; Repository</td><td><code>ghcr.io/guydavis/machinaris:latest</code></td></tr>
+          <tr><td>Network type</td><td>Edit &rarr; Network</td><td><code>bridge</code> or <code>br0</code></td></tr>
+          <tr><td>Port mappings</td><td>Edit &rarr; Ports</td><td><code>8926:8926</code>, <code>8927:8927</code>, <code>8444:8444</code></td></tr>
+          <tr><td>Volume mappings</td><td>Edit &rarr; Paths</td><td>See table below</td></tr>
+          <tr><td>Environment vars</td><td>Edit &rarr; Variables</td><td><code>blockchains=chia</code>, <code>mode=fullnode</code>, etc.</td></tr>
+          <tr><td>Extra params</td><td>Edit &rarr; Extra Parameters</td><td>GPU passthrough flags, etc.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="step">
+      <div class="step-num">4</div>
+      <h3>Record all volume mappings</h3>
+      <p>These are the most important settings &mdash; they point to your persistent data:</p>
+      <table>
+        <thead>
+          <tr><th>Container path</th><th>Typical Unraid host path</th><th>Purpose</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>/root/.chia</code></td><td><code>/mnt/user/appdata/machinaris/chia</code></td><td>Config, wallet keys, databases</td></tr>
+          <tr><td><code>/plots</code></td><td><code>/mnt/user/plots</code> (or multiple)</td><td>Plot files</td></tr>
+          <tr><td><code>/plotting</code></td><td><code>/mnt/cache/plotting</code> (SSD/NVMe)</td><td>Temp plotting space</td></tr>
+        </tbody>
+      </table>
+
+      <div class="callout callout-info">
+        <span class="callout-label">Tip</span>
+        You may have multiple <code>/plots</code> and <code>/plotting</code> paths (e.g., <code>/plots2</code>, <code>/plots3</code>).
+        Record every one. Run <code>docker inspect machinaris | grep -A2 "Mounts" </code> to see all mounts.
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">5</div>
+      <h3>Back up your appdata</h3>
+      <pre><code><span class="code-comment"># Back up the entire Machinaris appdata directory</span>
+cp -r /mnt/user/appdata/machinaris /mnt/user/appdata/machinaris-backup-$(date +%Y%m%d)
+
+<span class="code-comment"># Most critically, back up your mnemonic key</span>
+cp /mnt/user/appdata/machinaris/chia/mnemonic.txt /boot/config/mnemonic-backup.txt</code></pre>
+
+      <div class="callout callout-danger">
+        <span class="callout-label">Critical</span>
+        Your <code>mnemonic.txt</code> file contains your wallet recovery phrase. Guard this file.
+        Store a copy outside the server (USB drive, password manager). If you lose this, you lose access to your funds.
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 2: PREPARE YOUR NEW IMAGE -->
+  <!-- ============================================================ -->
+
+  <h2 class="section-title"><span class="section-num">2.</span> Prepare Your New Docker Image</h2>
+
+  <p>You need your forked image available to Unraid. There are two approaches:</p>
+
+  <div class="steps">
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <h3>Option A: Push to a container registry (recommended)</h3>
+      <p>Build and push from your development machine:</p>
+      <pre><code><span class="code-comment"># From your machinaris project directory</span>
+<span class="code-comment"># Build the image (this takes a while &mdash; installs all blockchain forks)</span>
+docker build <span class="code-flag">-t</span> your-dockerhub-user/machinaris:latest <span class="code-flag">-f</span> docker/dockerfile .
+
+<span class="code-comment"># Push to DockerHub (or GitHub Container Registry)</span>
+docker push your-dockerhub-user/machinaris:latest
+
+<span class="code-comment"># Or for GHCR:</span>
+docker tag your-dockerhub-user/machinaris:latest ghcr.io/your-github-user/machinaris:latest
+docker push ghcr.io/your-github-user/machinaris:latest</code></pre>
+    </div>
+
+    <div class="step">
+      <div class="step-num">2</div>
+      <h3>Option B: Build directly on Unraid</h3>
+      <p>If you prefer to build on the Unraid server itself:</p>
+      <pre><code><span class="code-comment"># SSH into your Unraid server</span>
+ssh root@your-unraid-ip
+
+<span class="code-comment"># Clone your fork</span>
+cd /mnt/user/appdata
+git clone https://github.com/SquareMesh/machinaris.git machinaris-src
+cd machinaris-src
+
+<span class="code-comment"># Build locally (no push needed)</span>
+docker build <span class="code-flag">-t</span> machinaris-custom:latest <span class="code-flag">-f</span> docker/dockerfile .</code></pre>
+
+      <div class="callout callout-warning">
+        <span class="callout-label">Warning</span>
+        Building on Unraid can take significant time and CPU. The build installs 34+ blockchain forks.
+        Consider building on a more powerful machine and pushing to a registry instead.
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 3: STOP AND REMOVE OLD CONTAINER -->
+  <!-- ============================================================ -->
+
+  <h2 class="section-title"><span class="section-num">3.</span> Stop and Remove the Old Container</h2>
+
+  <div class="callout callout-info">
+    <span class="callout-label">Important</span>
+    Stopping and removing a container does <strong>not</strong> delete your data.
+    Your plots, wallet, blockchain database, and configuration all live on the mapped host volumes
+    (e.g., <code>/mnt/user/appdata/machinaris/</code>), not inside the container.
+  </div>
+
+  <div class="steps">
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <h3>Stop any active plotting jobs</h3>
+      <p>Open the Machinaris WebUI (<code>http://your-unraid-ip:8926</code>) and navigate to <strong>Plotting &rarr; Jobs</strong>.
+        Stop or wait for any active plotting jobs to complete. Interrupting mid-plot wastes the temp space and time.</p>
+    </div>
+
+    <div class="step">
+      <div class="step-num">2</div>
+      <h3>Stop the container</h3>
+      <p><strong>Unraid UI method:</strong> Docker tab &rarr; click the Machinaris icon &rarr; <strong>Stop</strong></p>
+      <p><strong>Terminal method:</strong></p>
+      <pre><code>docker stop machinaris</code></pre>
+      <p>Wait for the container to fully stop. The Chia blockchain services need a moment to shut down cleanly.</p>
+    </div>
+
+    <div class="step">
+      <div class="step-num">3</div>
+      <h3>Remove the old container (keep the template)</h3>
+      <p><strong>Unraid UI method:</strong> Click the Machinaris icon &rarr; <strong>Remove</strong> &rarr; confirm.
+        When prompted, choose to <strong>remove the container only</strong> (do NOT remove the image or the template if you want a fallback).</p>
+      <p><strong>Terminal method:</strong></p>
+      <pre><code>docker rm machinaris</code></pre>
+
+      <div class="callout callout-info">
+        <span class="callout-label">Note</span>
+        Unraid stores container templates in <code>/boot/config/plugins/dockerMan/templates-user/</code>.
+        If you want to keep the original template as a backup (recommended), just leave it there.
+        You can always recreate the old container from it if something goes wrong.
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 4: CREATE NEW CONTAINER -->
+  <!-- ============================================================ -->
+
+  <h2 class="section-title"><span class="section-num">4.</span> Create the New Container</h2>
+
+  <p>Now create a new container pointing to your forked image, using the same volume mappings, ports, and environment variables as the original.</p>
+
+  <div class="steps">
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <h3>Method A: Unraid Docker UI (recommended)</h3>
+      <p>Go to the <strong>Docker</strong> tab &rarr; click <strong>Add Container</strong> (or edit the existing template if you kept it).</p>
+      <p>Fill in the settings using the values you recorded in Section 1:</p>
+
+      <table>
+        <thead><tr><th>Field</th><th>Value</th></tr></thead>
+        <tbody>
+          <tr><td>Name</td><td><code>machinaris</code></td></tr>
+          <tr><td>Repository</td><td><code>your-dockerhub-user/machinaris:latest</code><br>(or <code>machinaris-custom:latest</code> if built locally)</td></tr>
+          <tr><td>Network Type</td><td>Same as original (typically <code>bridge</code>)</td></tr>
+        </tbody>
+      </table>
+
+      <p>Then add all port mappings, volume paths, and environment variables <strong>exactly as they were</strong> on the original container. The key principle: <em>only the Repository field changes</em>.</p>
+    </div>
+
+    <div class="step">
+      <div class="step-num">2</div>
+      <h3>Method B: Docker command line</h3>
+      <p>If you prefer the terminal, use the values from your <code>docker inspect</code> backup:</p>
+      <pre><code>docker run <span class="code-flag">-d</span> \
+  <span class="code-flag">--name</span>=machinaris \
+  <span class="code-flag">--restart</span>=unless-stopped \
+  <span class="code-flag">-p</span> 8926:8926 \
+  <span class="code-flag">-p</span> 8927:8927 \
+  <span class="code-flag">-p</span> 8444:8444 \
+  <span class="code-flag">-e</span> <span class="code-key">TZ</span>=<span class="code-val">"Your/Timezone"</span> \
+  <span class="code-flag">-e</span> <span class="code-key">blockchains</span>=<span class="code-val">"chia"</span> \
+  <span class="code-flag">-e</span> <span class="code-key">mode</span>=<span class="code-val">"fullnode"</span> \
+  <span class="code-flag">-e</span> <span class="code-key">worker_address</span>=<span class="code-val">"YOUR_UNRAID_IP"</span> \
+  <span class="code-flag">-e</span> <span class="code-key">controller_host</span>=<span class="code-val">"YOUR_UNRAID_IP"</span> \
+  <span class="code-flag">-v</span> /mnt/user/appdata/machinaris/chia:<span class="code-val">/root/.chia</span> \
+  <span class="code-flag">-v</span> /mnt/user/plots:<span class="code-val">/plots</span> \
+  <span class="code-flag">-v</span> /mnt/cache/plotting:<span class="code-val">/plotting</span> \
+  your-dockerhub-user/machinaris:latest</code></pre>
+
+      <div class="callout callout-warning">
+        <span class="callout-label">Adapt this command</span>
+        <ul style="margin-top:0.3rem;">
+          <li>Replace <code>YOUR_UNRAID_IP</code> with your server's actual IP address</li>
+          <li>Replace <code>Your/Timezone</code> with your timezone (e.g., <code>America/New_York</code>)</li>
+          <li>Add all your plot volume paths (<code>-v /mnt/disk1/plots:/plots2</code>, etc.)</li>
+          <li>Add any GPU passthrough flags if you use GPU plotting</li>
+          <li>Match every environment variable from your original container</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">3</div>
+      <h3>Start the container</h3>
+      <p><strong>Unraid UI:</strong> Click <strong>Apply</strong> on the container config page. The container will pull/start automatically.</p>
+      <p><strong>Terminal:</strong> The <code>docker run</code> command above starts it immediately.</p>
+      <p>First startup takes a few minutes as the entrypoint script initializes blockchain services, runs database migrations, and starts the WebUI/API servers.</p>
+    </div>
+
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 5: VERIFY -->
+  <!-- ============================================================ -->
+
+  <h2 class="section-title"><span class="section-num">5.</span> Verify the Migration</h2>
+
+  <div class="steps">
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <h3>Check container is running</h3>
+      <pre><code>docker ps | grep machinaris
+
+<span class="code-comment"># Expected: container is "Up" with correct port mappings</span></code></pre>
+    </div>
+
+    <div class="step">
+      <div class="step-num">2</div>
+      <h3>Check container logs for errors</h3>
+      <pre><code><span class="code-comment"># Watch startup in real-time</span>
+docker logs <span class="code-flag">-f</span> machinaris
+
+<span class="code-comment"># Look for:</span>
+<span class="code-comment">#   - "Starting Machinaris..." messages</span>
+<span class="code-comment">#   - Gunicorn workers booting</span>
+<span class="code-comment">#   - No Python tracebacks or permission errors</span>
+<span class="code-comment"># Press Ctrl+C to stop following</span></code></pre>
+    </div>
+
+    <div class="step">
+      <div class="step-num">3</div>
+      <h3>Open the WebUI</h3>
+      <p>Navigate to <code>http://your-unraid-ip:8926</code> in your browser.</p>
+      <p>You should see the Machinaris dashboard with your existing farm data.</p>
+    </div>
+
+    <div class="step">
+      <div class="step-num">4</div>
+      <h3>Verify key data points</h3>
+
+      <div class="checklist">
+        <h4>Post-migration verification checklist</h4>
+        <label><input type="checkbox"> WebUI loads at port 8926</label>
+        <label><input type="checkbox"> Dashboard shows correct plot count</label>
+        <label><input type="checkbox"> Wallet balance is displayed and correct</label>
+        <label><input type="checkbox"> Blockchain is syncing or synced (check Blockchains page)</label>
+        <label><input type="checkbox"> All plot directories are visible (Farming &rarr; Plots)</label>
+        <label><input type="checkbox"> Farmer is running (check status on Summary page)</label>
+        <label><input type="checkbox"> Keys page shows your farmer/pool keys</label>
+        <label><input type="checkbox"> Drives page shows your disks</label>
+        <label><input type="checkbox"> No errors in container logs</label>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">5</div>
+      <h3>Check API health</h3>
+      <pre><code><span class="code-comment"># Ping the API</span>
+curl http://your-unraid-ip:8927/ping/
+
+<span class="code-comment"># Check farm status</span>
+curl http://your-unraid-ip:8927/farms/</code></pre>
+    </div>
+
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 6: WORKER CONTAINERS -->
+  <!-- ============================================================ -->
+
+  <h2 class="section-title"><span class="section-num">6.</span> Migrate Worker Containers (if applicable)</h2>
+
+  <p>If you run additional Machinaris containers as harvesters or plotters, repeat the same process for each one:</p>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <h3>Same process, per worker</h3>
+      <ul>
+        <li>Document the worker's settings (<code>docker inspect worker-name</code>)</li>
+        <li>Stop and remove the worker container</li>
+        <li>Create a new container with the same settings but your new image</li>
+        <li>Verify the worker appears on the controller's Workers page</li>
+      </ul>
+    </div>
+
+    <div class="step">
+      <div class="step-num">2</div>
+      <h3>Verify worker connectivity</h3>
+      <pre><code><span class="code-comment"># From the controller, check workers are reporting in</span>
+curl http://your-unraid-ip:8927/workers/
+
+<span class="code-comment"># Each worker should show status "Responding" within 2-4 minutes</span></code></pre>
+    </div>
+  </div>
+
+  <div class="callout callout-info">
+    <span class="callout-label">Note</span>
+    Workers fetch SSL certificates from the controller on startup. If the controller was replaced first,
+    the certificates will be regenerated and workers may need to re-fetch them. This happens automatically
+    on worker container restart &mdash; just ensure the controller is fully running before starting workers.
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 7: TROUBLESHOOTING -->
+  <!-- ============================================================ -->
+
+  <h2 class="section-title"><span class="section-num">7.</span> Troubleshooting</h2>
+
+  <table>
+    <thead>
+      <tr><th>Problem</th><th>Likely Cause</th><th>Fix</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>WebUI not loading</td>
+        <td>Port mapping missing or Gunicorn failed to start</td>
+        <td>Check <code>docker logs machinaris</code> for errors. Verify port 8926 is mapped.</td>
+      </tr>
+      <tr>
+        <td>Wallet shows 0 balance</td>
+        <td>Blockchain not synced yet or wallet not synced</td>
+        <td>Wait for blockchain sync (can take hours). Check Blockchains page for sync status.</td>
+      </tr>
+      <tr>
+        <td>Plots not showing</td>
+        <td>Volume paths not mapped correctly</td>
+        <td>Run <code>docker exec machinaris ls /plots</code> &mdash; if empty, volumes are wrong. Recreate container with correct <code>-v</code> mappings.</td>
+      </tr>
+      <tr>
+        <td>"Setup" page appears</td>
+        <td><code>/root/.chia</code> volume not mapped (no keys found)</td>
+        <td>Stop container, fix the volume mapping for <code>/root/.chia</code> to your appdata path, restart.</td>
+      </tr>
+      <tr>
+        <td>Permission denied errors</td>
+        <td>File ownership mismatch</td>
+        <td><code>docker exec machinaris chown -R root:root /root/.chia</code></td>
+      </tr>
+      <tr>
+        <td>Database migration errors</td>
+        <td>Schema version mismatch</td>
+        <td><code>docker exec machinaris bash /machinaris/scripts/setup_databases.sh reset</code> &mdash; this recreates databases (stats history lost, farm data re-collected).</td>
+      </tr>
+      <tr>
+        <td>Workers not connecting</td>
+        <td>Certificate mismatch or wrong controller_host</td>
+        <td>Restart worker containers after controller is fully running. Check <code>worker_address</code> and <code>controller_host</code> env vars.</td>
+      </tr>
+      <tr>
+        <td>Container keeps restarting</td>
+        <td>Entrypoint validation failure</td>
+        <td>Check <code>docker logs machinaris</code>. Common causes: missing <code>worker_address</code>, spaces in hostname, <code>mnemonic.txt</code> is a directory (Portainer race condition).</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 8: ROLLBACK -->
+  <!-- ============================================================ -->
+
+  <h2 class="section-title"><span class="section-num">8.</span> Rollback Plan</h2>
+
+  <p>If something goes wrong and you need to revert to the original image:</p>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <h3>Stop and remove the new container</h3>
+      <pre><code>docker stop machinaris && docker rm machinaris</code></pre>
+    </div>
+
+    <div class="step">
+      <div class="step-num">2</div>
+      <h3>Restore from backup (if needed)</h3>
+      <pre><code><span class="code-comment"># Only if the new container corrupted your appdata</span>
+rm -rf /mnt/user/appdata/machinaris
+cp -r /mnt/user/appdata/machinaris-backup-YYYYMMDD /mnt/user/appdata/machinaris</code></pre>
+    </div>
+
+    <div class="step">
+      <div class="step-num">3</div>
+      <h3>Recreate with original image</h3>
+      <p>Use the saved template in Unraid's Docker tab, or recreate manually with the original image name (<code>ghcr.io/guydavis/machinaris:latest</code>).</p>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- VISUAL OVERVIEW -->
+  <!-- ============================================================ -->
+
+  <h2 class="section-title"><span class="section-num">&bull;</span> Migration at a Glance</h2>
+
+  <div class="diagram">
+BEFORE                                  AFTER
+&#9484;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9488;          &#9484;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9488;
+&#9474; guydavis/machinaris:latest   &#9474;          &#9474; your-user/machinaris:latest &#9474;
+&#9474;                              &#9474;  &#9472;&#9472;&#9472;&#9658;  &#9474;                              &#9474;
+&#9474; Container (disposable)       &#9474;          &#9474; Container (disposable)       &#9474;
+&#9492;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9516;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9496;          &#9492;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9516;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9496;
+               &#9474;                                        &#9474;
+               &#9474;  same volume mappings                   &#9474;
+               &#9474;                                        &#9474;
+        &#9484;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9524;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9524;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9488;
+        &#9474;                                                     &#9474;
+        &#9474;  Unraid Host Volumes (persistent, never deleted)    &#9474;
+        &#9474;                                                     &#9474;
+        &#9474;  /mnt/user/appdata/machinaris/  &#9472; config, keys, DBs &#9474;
+        &#9474;  /mnt/user/plots/              &#9472; your plot files    &#9474;
+        &#9474;  /mnt/cache/plotting/          &#9472; temp plot space    &#9474;
+        &#9474;                                                     &#9474;
+        &#9492;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9496;
+  </div>
+
+  <div class="callout callout-success">
+    <span class="callout-label">Key takeaway</span>
+    The container is disposable. Your data lives on the Unraid host volumes.
+    Swapping the image is just: stop &rarr; remove &rarr; create with new image + same volumes &rarr; start.
+  </div>
+
+</div>
+
+<footer>
+  Machinaris Migration Guide &mdash; SquareMesh Fork &mdash; Generated 2026-03-21
+</footer>
+
+</body>
+</html>

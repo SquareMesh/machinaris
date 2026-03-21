@@ -18,12 +18,6 @@ jobs:
       -
         name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-      - 
-        name: Login to DockerHub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
       -
         name: Login to GitHub Container Registry
         uses: docker/login-action@v3
@@ -37,64 +31,14 @@ jobs:
         with:
           file: docker/dockerfile
           context: .
-          platforms: linux/amd64, linux/arm64
+          platforms: linux/amd64,linux/arm64
           provenance: false
           push: true
           build-args: |
             "UBUNTU_VER=noble"
             "MACHINARIS_STREAM=develop"
-            "CHIADOG_BRANCH=dev"
-            "CHIA_BRANCH=2.5.2"
+            "CHIA_BRANCH=2.6.1"
             "BLADEBIT_BRANCH=master"
-            "MADMAX_BRANCH=v2.5.5.giga36"
-            "PLOTMAN_BRANCH=compress"
+            "MADMAX_BRANCH=master"
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/machinaris:develop
-            ghcr.io/${{ secrets.DOCKERHUB_USERNAME }}/machinaris:develop
-
-  gigahorse:
-    runs-on: ubuntu-24.04
-    steps:
-      -
-        name: Checkout
-        uses: actions/checkout@v4
-      -
-        name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-      -
-        name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-      - 
-        name: Login to DockerHub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-      -
-        name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      -
-        name: Build and push
-        uses: docker/build-push-action@v6
-        with:
-          file: docker/dockerfile
-          context: .
-          platforms: linux/amd64, linux/arm64
-          provenance: false
-          push: true
-          build-args: |
-            "UBUNTU_VER=noble"
-            "MACHINARIS_STREAM=develop"
-            "CHIADOG_BRANCH=dev"
-            "GIGAHORSE_BRANCH=v2.5.5.giga36"
-            "CHIA_BRANCH=2.5.2"
-            "MADMAX_BRANCH=v2.5.5.giga36"
-            "PLOTMAN_BRANCH=compress"
-          tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/machinaris-gigahorse:develop
-            ghcr.io/${{ secrets.DOCKERHUB_USERNAME }}/machinaris-gigahorse:develop
-
+            ghcr.io/${{ github.repository_owner }}/machinaris:develop

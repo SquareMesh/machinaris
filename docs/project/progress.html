@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project Progress</title>
+<style>
+:root {
+  --bg: #0d1117;
+  --bg-card: #161b22;
+  --bg-hover: #1c2128;
+  --border: #30363d;
+  --text: #e6edf3;
+  --text-dim: #8b949e;
+  --text-bright: #f0f6fc;
+  --accent: #58a6ff;
+  --accent-dim: #1f6feb;
+  --green: #3fb950;
+  --green-dim: #238636;
+  --orange: #d29922;
+  --red: #f85149;
+  --purple: #bc8cff;
+  --pink: #f778ba;
+  --cyan: #39d2c0;
+  --yellow: #e3b341;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+/* Header */
+.header {
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header h1 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-bright);
+}
+
+.header h1 span { color: var(--accent); }
+
+.header .phase-badge {
+  background: var(--accent-dim);
+  color: var(--accent);
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* Navigation */
+.nav {
+  display: flex;
+  gap: 0;
+  margin-left: auto;
+}
+
+.nav button {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  padding: 6px 16px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.nav button:first-child { border-radius: 6px 0 0 6px; }
+.nav button:last-child { border-radius: 0 6px 6px 0; }
+.nav button:not(:first-child) { border-left: none; }
+
+.nav button:hover { color: var(--text); background: var(--bg-hover); }
+.nav button.active { background: var(--accent-dim); color: var(--accent); border-color: var(--accent-dim); }
+
+/* Layout */
+.container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+
+/* Dashboard Cards */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.card .label {
+  font-size: 12px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.card .value {
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--text-bright);
+}
+
+.card .sub {
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+
+/* Sections */
+.section {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.section-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-bright);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.section-body { padding: 16px; }
+
+/* Timeline */
+.timeline-day {
+  margin-bottom: 20px;
+}
+
+.timeline-day:last-child { margin-bottom: 0; }
+
+.day-header {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.day-header .day-stats {
+  font-weight: 400;
+  color: var(--text-dim);
+  font-size: 12px;
+}
+
+.session-row {
+  display: grid;
+  grid-template-columns: 60px 1fr auto;
+  gap: 12px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.1s;
+  align-items: start;
+}
+
+.session-row:hover { background: var(--bg-hover); }
+
+.session-num {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--purple);
+  font-family: monospace;
+}
+
+.session-summary {
+  font-size: 13px;
+  color: var(--text);
+}
+
+.session-tags {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.tag {
+  font-size: 11px;
+  padding: 1px 8px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+.tag.design { border-color: var(--accent-dim); color: var(--accent); }
+.tag.architecture { border-color: var(--purple); color: var(--purple); }
+.tag.tooling { border-color: var(--cyan); color: var(--cyan); }
+.tag.review { border-color: var(--orange); color: var(--orange); }
+.tag.bugfix { border-color: var(--red); color: var(--red); }
+.tag.research { border-color: var(--yellow); color: var(--yellow); }
+.tag.implementation { border-color: var(--green); color: var(--green); }
+
+/* Session Detail Panel */
+.detail-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 200;
+}
+
+.detail-overlay.open { display: flex; justify-content: center; align-items: start; padding-top: 60px; }
+
+.detail-panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  width: 90%;
+  max-width: 700px;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+.detail-panel h2 {
+  font-size: 16px;
+  margin-bottom: 16px;
+  color: var(--text-bright);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.detail-panel .close-btn {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+.detail-panel .close-btn:hover { color: var(--text); }
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.detail-item {
+  background: var(--bg);
+  border-radius: 6px;
+  padding: 10px 12px;
+}
+
+.detail-item .d-label {
+  font-size: 11px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.detail-item .d-value {
+  font-size: 14px;
+  color: var(--text);
+  margin-top: 2px;
+}
+
+.detail-item.full { grid-column: 1 / -1; }
+
+.area-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.area-pill {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: var(--bg-hover);
+  color: var(--text-dim);
+  border: 1px solid var(--border);
+}
+
+.area-pill.doc { color: var(--accent); border-color: var(--accent-dim); }
+.area-pill.sys { color: var(--green); border-color: var(--green-dim); }
+
+/* Charts */
+.chart-container {
+  padding: 16px;
+}
+
+.bar-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 120px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 4px;
+}
+
+.bar {
+  flex: 1;
+  min-width: 4px;
+  background: var(--accent-dim);
+  border-radius: 2px 2px 0 0;
+  transition: background 0.15s;
+  position: relative;
+}
+
+.bar:hover { background: var(--accent); }
+
+.bar .bar-tip {
+  display: none;
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-hover);
+  border: 1px solid var(--border);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  white-space: nowrap;
+  z-index: 10;
+}
+
+.bar:hover .bar-tip { display: block; }
+
+.chart-legend {
+  display: flex;
+  gap: 16px;
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.legend-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+
+/* Area breakdown */
+.area-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 0;
+}
+
+.area-row .area-name {
+  font-size: 13px;
+  color: var(--text);
+  width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.area-bar-bg {
+  flex: 1;
+  height: 8px;
+  background: var(--bg);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.area-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+}
+
+.area-count {
+  font-size: 12px;
+  color: var(--text-dim);
+  width: 30px;
+  text-align: right;
+}
+
+/* Metrics view */
+.metric-row {
+  display: grid;
+  grid-template-columns: 140px 1fr 60px;
+  gap: 12px;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.metric-row:last-child { border-bottom: none; }
+
+.metric-label { font-size: 13px; color: var(--text); }
+.metric-bar-bg { height: 8px; background: var(--bg); border-radius: 4px; overflow: hidden; }
+.metric-bar-fill { height: 100%; border-radius: 4px; }
+.metric-val { font-size: 13px; color: var(--text-dim); text-align: right; font-family: monospace; }
+
+/* Cumulative line chart (simple SVG) */
+.line-chart { width: 100%; height: 150px; }
+.line-chart polyline { fill: none; stroke-width: 2; }
+.line-chart .grid-line { stroke: var(--border); stroke-width: 1; }
+.line-chart text { font-size: 10px; fill: var(--text-dim); }
+
+/* Hidden view */
+.view { display: none; }
+.view.active { display: block; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .cards { grid-template-columns: repeat(2, 1fr); }
+  .detail-grid { grid-template-columns: 1fr; }
+  .session-row { grid-template-columns: 50px 1fr; }
+  .session-tags { display: none; }
+  .header { flex-wrap: wrap; }
+  .nav { margin-left: 0; width: 100%; }
+  .nav button { flex: 1; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <!-- CUSTOMIZE: Change project name and phase below -->
+  <h1><span>Machinaris</span> — Progress</h1>
+  <span class="phase-badge">Phase 1 — Fork Setup</span>
+  <div class="nav">
+    <button class="active" onclick="showView('dashboard')">Dashboard</button>
+    <button onclick="showView('timeline')">Timeline</button>
+    <button onclick="showView('areas')">Areas</button>
+    <button onclick="showView('metrics')">Metrics</button>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- DASHBOARD VIEW -->
+  <div id="view-dashboard" class="view active">
+    <div class="cards" id="summary-cards"></div>
+    <div class="section">
+      <div class="section-header">
+        Decisions Over Time
+        <span style="font-size:12px;color:var(--text-dim);font-weight:400">per session</span>
+      </div>
+      <div class="chart-container">
+        <div class="bar-chart" id="decisions-chart"></div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-header">Recent Sessions</div>
+      <div class="section-body" id="recent-sessions"></div>
+    </div>
+  </div>
+
+  <!-- TIMELINE VIEW -->
+  <div id="view-timeline" class="view">
+    <div class="section">
+      <div class="section-header">
+        All Sessions
+        <span style="font-size:12px;color:var(--text-dim);font-weight:400" id="timeline-count"></span>
+      </div>
+      <div class="section-body" id="timeline-body"></div>
+    </div>
+  </div>
+
+  <!-- AREAS VIEW -->
+  <div id="view-areas" class="view">
+    <div class="section">
+      <div class="section-header">Design Documents</div>
+      <div class="section-body" id="areas-docs"></div>
+    </div>
+    <div class="section">
+      <div class="section-header">Systems / Components</div>
+      <div class="section-body" id="areas-systems"></div>
+    </div>
+  </div>
+
+  <!-- METRICS VIEW -->
+  <div id="view-metrics" class="view">
+    <div id="metric-cards"></div>
+    <div class="section">
+      <div class="section-header">Cumulative Decisions</div>
+      <div class="chart-container" id="cum-decisions-chart"></div>
+    </div>
+    <div class="section">
+      <div class="section-header">Issues Opened vs Resolved</div>
+      <div class="chart-container" id="issues-chart"></div>
+    </div>
+    <div class="section">
+      <div class="section-header">TODO Trend</div>
+      <div class="chart-container" id="todo-chart"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Session Detail Overlay -->
+<div class="detail-overlay" id="detail-overlay" onclick="if(event.target===this)closeDetail()">
+  <div class="detail-panel" id="detail-panel"></div>
+</div>
+
+<!-- SESSION DATA -->
+<script>
+// ==== SESSION DATA — AUTO-UPDATED BY /session-end ====
+// Do not edit between the DATA markers manually.
+// SESSION_DATA_START
+const SESSIONS = [
+  {
+    "session": 1,
+    "date": "2026-03-21",
+    "summary": "Cloned SquareMesh/machinaris fork. Comprehensive codebase review (5 parallel agents). Created 9 design docs, 2 user guides (HTML). Pivoted to Chia-only: stripped 33 forks from Dockerfile, upgraded Chia to v2.6.1, updated all 6 CI/CD workflows to GHCR-only. Bumped to v2.7.0.",
+    "areas": {
+      "docs": ["ARCHITECTURE", "API", "WEB-FRONTEND", "DATA-LAYER", "BLOCKCHAIN-INTEGRATION", "DOCKER-DEPLOYMENT", "PLOTTING-FARMING", "MONITORING-ALERTS", "CONFIGURATION"],
+      "systems": ["docker", "ci-cd", "blockchain"]
+    },
+    "metrics": {
+      "decisions": 2,
+      "issues_opened": 0,
+      "issues_resolved": 0,
+      "todos_added": 9,
+      "todos_resolved": 2,
+      "scenarios_added": 0
+    },
+    "stack_depth": 1,
+    "commits": [],
+    "tags": ["architecture", "design", "tooling"]
+  }
+];
+// SESSION_DATA_END
+</script>
+
+<script>
+// ==== APP LOGIC ====
+
+function showView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+  document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+}
+
+function openDetail(session) {
+  const s = SESSIONS.find(x => x.session === session);
+  if (!s) return;
+  const panel = document.getElementById('detail-panel');
+  const docsHtml = (s.areas?.docs || []).map(d => `<span class="area-pill doc">${d}</span>`).join('');
+  const sysHtml = (s.areas?.systems || []).map(d => `<span class="area-pill sys">${d}</span>`).join('');
+  const tagsHtml = (s.tags || []).map(t => `<span class="tag ${t}">${t}</span>`).join(' ');
+  const commitsHtml = (s.commits || []).map(c => `<code>${c}</code>`).join(', ') || 'none';
+  const m = s.metrics || {};
+  panel.innerHTML = `
+    <h2>Session #${s.session} <button class="close-btn" onclick="closeDetail()">&times;</button></h2>
+    <div class="detail-grid">
+      <div class="detail-item"><div class="d-label">Date</div><div class="d-value">${s.date}</div></div>
+      <div class="detail-item"><div class="d-label">Tags</div><div class="d-value">${tagsHtml || 'none'}</div></div>
+      <div class="detail-item full"><div class="d-label">Summary</div><div class="d-value">${s.summary}</div></div>
+      <div class="detail-item full"><div class="d-label">Design Docs Touched</div><div class="d-value"><div class="area-pills">${docsHtml || 'none'}</div></div></div>
+      <div class="detail-item full"><div class="d-label">Systems Touched</div><div class="d-value"><div class="area-pills">${sysHtml || 'none'}</div></div></div>
+      <div class="detail-item"><div class="d-label">Decisions</div><div class="d-value">${m.decisions || 0}</div></div>
+      <div class="detail-item"><div class="d-label">Issues Opened</div><div class="d-value">${m.issues_opened || 0}</div></div>
+      <div class="detail-item"><div class="d-label">Issues Resolved</div><div class="d-value">${m.issues_resolved || 0}</div></div>
+      <div class="detail-item"><div class="d-label">TODOs Added</div><div class="d-value">${m.todos_added || 0}</div></div>
+      <div class="detail-item"><div class="d-label">Scenarios Added</div><div class="d-value">${m.scenarios_added || 0}</div></div>
+      <div class="detail-item"><div class="d-label">Stack Depth</div><div class="d-value">${s.stack_depth ?? '—'}</div></div>
+      <div class="detail-item"><div class="d-label">Commits</div><div class="d-value">${commitsHtml}</div></div>
+    </div>
+  `;
+  document.getElementById('detail-overlay').classList.add('open');
+}
+
+function closeDetail() {
+  document.getElementById('detail-overlay').classList.remove('open');
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetail(); });
+
+// ==== RENDERING ====
+
+function render() {
+  if (!SESSIONS.length) {
+    document.getElementById('summary-cards').innerHTML = '<div class="card" style="grid-column:1/-1;text-align:center;padding:40px"><div class="label">No session data yet</div><div class="sub">Run /session-end to record your first session</div></div>';
+    return;
+  }
+
+  renderDashboard();
+  renderTimeline();
+  renderAreas();
+  renderMetrics();
+}
+
+function renderDashboard() {
+  const totalSessions = SESSIONS.length;
+  const uniqueDays = new Set(SESSIONS.map(s => s.date)).size;
+  const totalDecisions = SESSIONS.reduce((a, s) => a + (s.metrics?.decisions || 0), 0);
+  const totalIssuesOpened = SESSIONS.reduce((a, s) => a + (s.metrics?.issues_opened || 0), 0);
+  const totalIssuesResolved = SESSIONS.reduce((a, s) => a + (s.metrics?.issues_resolved || 0), 0);
+  const totalTodos = SESSIONS.reduce((a, s) => a + (s.metrics?.todos_added || 0), 0);
+  const totalScenarios = SESSIONS.reduce((a, s) => a + (s.metrics?.scenarios_added || 0), 0);
+
+  document.getElementById('summary-cards').innerHTML = `
+    <div class="card"><div class="label">Sessions</div><div class="value">${totalSessions}</div><div class="sub">${uniqueDays} active days</div></div>
+    <div class="card"><div class="label">Decisions</div><div class="value">${totalDecisions}</div><div class="sub">design & architecture</div></div>
+    <div class="card"><div class="label">Issues</div><div class="value">${totalIssuesResolved}/${totalIssuesOpened}</div><div class="sub">resolved / opened</div></div>
+    <div class="card"><div class="label">TODOs</div><div class="value">${totalTodos}</div><div class="sub">logged</div></div>
+    <div class="card"><div class="label">Scenarios</div><div class="value">${totalScenarios}</div><div class="sub">captured</div></div>
+  `;
+
+  // Decisions bar chart
+  const chart = document.getElementById('decisions-chart');
+  const maxDec = Math.max(...SESSIONS.map(s => s.metrics?.decisions || 0), 1);
+  chart.innerHTML = SESSIONS.map(s => {
+    const d = s.metrics?.decisions || 0;
+    const h = Math.max((d / maxDec) * 100, 2);
+    return `<div class="bar" style="height:${h}%" onclick="openDetail(${s.session})"><div class="bar-tip">#${s.session}: ${d} decisions</div></div>`;
+  }).join('');
+
+  // Recent sessions (last 10)
+  const recent = [...SESSIONS].reverse().slice(0, 10);
+  document.getElementById('recent-sessions').innerHTML = recent.map(sessionRowHtml).join('');
+}
+
+function sessionRowHtml(s) {
+  const tags = (s.tags || []).map(t => `<span class="tag ${t}">${t}</span>`).join('');
+  return `<div class="session-row" onclick="openDetail(${s.session})">
+    <div class="session-num">#${String(s.session).padStart(3, '0')}</div>
+    <div class="session-summary">${s.summary}</div>
+    <div class="session-tags">${tags}</div>
+  </div>`;
+}
+
+function renderTimeline() {
+  const byDate = {};
+  SESSIONS.forEach(s => {
+    if (!byDate[s.date]) byDate[s.date] = [];
+    byDate[s.date].push(s);
+  });
+
+  const dates = Object.keys(byDate).sort().reverse();
+  document.getElementById('timeline-count').textContent = `${SESSIONS.length} sessions across ${dates.length} days`;
+
+  document.getElementById('timeline-body').innerHTML = dates.map(date => {
+    const sessions = byDate[date];
+    const dayDecisions = sessions.reduce((a, s) => a + (s.metrics?.decisions || 0), 0);
+    return `<div class="timeline-day">
+      <div class="day-header">${formatDate(date)} <span class="day-stats">${sessions.length} session${sessions.length > 1 ? 's' : ''} &middot; ${dayDecisions} decisions</span></div>
+      ${sessions.map(sessionRowHtml).join('')}
+    </div>`;
+  }).join('');
+}
+
+function renderAreas() {
+  const docCounts = {};
+  const sysCounts = {};
+  SESSIONS.forEach(s => {
+    (s.areas?.docs || []).forEach(d => { docCounts[d] = (docCounts[d] || 0) + 1; });
+    (s.areas?.systems || []).forEach(d => { sysCounts[d] = (sysCounts[d] || 0) + 1; });
+  });
+
+  const maxDoc = Math.max(...Object.values(docCounts), 1);
+  const maxSys = Math.max(...Object.values(sysCounts), 1);
+
+  const colors = ['var(--accent)', 'var(--purple)', 'var(--cyan)', 'var(--green)', 'var(--orange)', 'var(--pink)', 'var(--yellow)', 'var(--red)'];
+
+  document.getElementById('areas-docs').innerHTML = Object.entries(docCounts)
+    .sort((a, b) => b[1] - a[1])
+    .map(([name, count], i) => areaRowHtml(name, count, maxDoc, colors[i % colors.length]))
+    .join('');
+
+  document.getElementById('areas-systems').innerHTML = Object.entries(sysCounts)
+    .sort((a, b) => b[1] - a[1])
+    .map(([name, count], i) => areaRowHtml(name, count, maxSys, colors[i % colors.length]))
+    .join('');
+}
+
+function areaRowHtml(name, count, max, color) {
+  const pct = (count / max) * 100;
+  return `<div class="area-row">
+    <div class="area-name">${name}</div>
+    <div class="area-bar-bg"><div class="area-bar-fill" style="width:${pct}%;background:${color}"></div></div>
+    <div class="area-count">${count}</div>
+  </div>`;
+}
+
+function renderMetrics() {
+  const totalDecisions = SESSIONS.reduce((a, s) => a + (s.metrics?.decisions || 0), 0);
+  const totalIssuesOpened = SESSIONS.reduce((a, s) => a + (s.metrics?.issues_opened || 0), 0);
+  const totalIssuesResolved = SESSIONS.reduce((a, s) => a + (s.metrics?.issues_resolved || 0), 0);
+  const totalTodos = SESSIONS.reduce((a, s) => a + (s.metrics?.todos_added || 0), 0);
+
+  document.getElementById('metric-cards').innerHTML = `
+    <div class="cards">
+      <div class="card"><div class="label">Avg Decisions/Session</div><div class="value">${(totalDecisions / SESSIONS.length).toFixed(1)}</div></div>
+      <div class="card"><div class="label">Issue Resolution Rate</div><div class="value">${totalIssuesOpened ? Math.round(totalIssuesResolved / totalIssuesOpened * 100) : 0}%</div></div>
+      <div class="card"><div class="label">Total Commits</div><div class="value">${SESSIONS.reduce((a, s) => a + (s.commits?.length || 0), 0)}</div></div>
+    </div>
+  `;
+
+  // Cumulative charts
+  renderLineChart('cum-decisions-chart', SESSIONS, s => s.metrics?.decisions || 0, 'var(--accent)');
+  renderLineChart('todo-chart', SESSIONS, s => s.metrics?.todos_added || 0, 'var(--purple)');
+
+  // Issues: dual line
+  renderDualLineChart('issues-chart', SESSIONS,
+    s => s.metrics?.issues_opened || 0, 'var(--red)',
+    s => s.metrics?.issues_resolved || 0, 'var(--green)');
+}
+
+function renderLineChart(containerId, data, valueFn, color) {
+  const container = document.getElementById(containerId);
+  const values = [];
+  let cum = 0;
+  data.forEach(s => { cum += valueFn(s); values.push(cum); });
+
+  const max = Math.max(...values, 1);
+  const w = 400, h = 120, pad = 30;
+  const xStep = values.length > 1 ? (w - pad * 2) / (values.length - 1) : 0;
+
+  const points = values.map((v, i) => `${pad + i * xStep},${h - pad - (v / max) * (h - pad * 2)}`).join(' ');
+
+  container.innerHTML = `<svg class="line-chart" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
+    <line class="grid-line" x1="${pad}" y1="${h - pad}" x2="${w - pad}" y2="${h - pad}"/>
+    <line class="grid-line" x1="${pad}" y1="${pad}" x2="${w - pad}" y2="${pad}"/>
+    <text x="${pad - 4}" y="${h - pad + 4}" text-anchor="end">0</text>
+    <text x="${pad - 4}" y="${pad + 4}" text-anchor="end">${max}</text>
+    <polyline points="${points}" stroke="${color}"/>
+  </svg>`;
+}
+
+function renderDualLineChart(containerId, data, fn1, color1, fn2, color2) {
+  const container = document.getElementById(containerId);
+  const v1 = [], v2 = [];
+  let c1 = 0, c2 = 0;
+  data.forEach(s => { c1 += fn1(s); v1.push(c1); c2 += fn2(s); v2.push(c2); });
+
+  const max = Math.max(...v1, ...v2, 1);
+  const w = 400, h = 120, pad = 30;
+  const xStep = v1.length > 1 ? (w - pad * 2) / (v1.length - 1) : 0;
+
+  const p1 = v1.map((v, i) => `${pad + i * xStep},${h - pad - (v / max) * (h - pad * 2)}`).join(' ');
+  const p2 = v2.map((v, i) => `${pad + i * xStep},${h - pad - (v / max) * (h - pad * 2)}`).join(' ');
+
+  container.innerHTML = `<svg class="line-chart" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
+    <line class="grid-line" x1="${pad}" y1="${h - pad}" x2="${w - pad}" y2="${h - pad}"/>
+    <polyline points="${p1}" stroke="${color1}"/>
+    <polyline points="${p2}" stroke="${color2}"/>
+    <text x="${pad - 4}" y="${h - pad + 4}" text-anchor="end">0</text>
+    <text x="${pad - 4}" y="${pad + 4}" text-anchor="end">${max}</text>
+  </svg>
+  <div class="chart-legend">
+    <span><span class="legend-dot" style="background:${color1}"></span>Opened</span>
+    <span><span class="legend-dot" style="background:${color2}"></span>Resolved</span>
+  </div>`;
+}
+
+function formatDate(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00');
+  return d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+// Initial render
+render();
+</script>
+
+</body>
+</html>

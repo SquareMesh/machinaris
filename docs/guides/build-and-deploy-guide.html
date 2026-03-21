@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Machinaris — Build and Deploy Guide</title>
+<style>
+  :root {
+    --bg: #1a1d21;
+    --surface: #22262b;
+    --surface-alt: #2a2f35;
+    --border: #363b42;
+    --text: #d4d4d4;
+    --text-muted: #8b919a;
+    --accent: #3aac59;
+    --warning: #e5a940;
+    --danger: #d94f4f;
+    --info: #4a9ade;
+    --code-bg: #181b1f;
+    --step-line: #363b42;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.7; padding: 0;
+  }
+  header {
+    background: linear-gradient(135deg, #1e2329 0%, #2a3038 100%);
+    border-bottom: 2px solid var(--accent); padding: 2.5rem 2rem; text-align: center;
+  }
+  header h1 { font-size: 2rem; font-weight: 700; color: #fff; margin-bottom: 0.5rem; }
+  header h1 span { color: var(--accent); }
+  header p { color: var(--text-muted); font-size: 1.05rem; max-width: 700px; margin: 0 auto; }
+  .container { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+  /* TOC */
+  .toc {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 1.5rem 2rem; margin-bottom: 2.5rem;
+  }
+  .toc h2 { font-size: 1rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.8rem; }
+  .toc ol { padding-left: 1.3rem; }
+  .toc li { padding: 0.25rem 0; }
+  .toc a { color: var(--info); text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+
+  /* Callouts */
+  .callout { border-radius: 8px; padding: 1rem 1.3rem; margin: 1.2rem 0; font-size: 0.95rem; border-left: 4px solid; }
+  .callout-warning { background: rgba(229,169,64,0.08); border-color: var(--warning); }
+  .callout-warning .cl { color: var(--warning); }
+  .callout-danger { background: rgba(217,79,79,0.08); border-color: var(--danger); }
+  .callout-danger .cl { color: var(--danger); }
+  .callout-info { background: rgba(74,154,222,0.08); border-color: var(--info); }
+  .callout-info .cl { color: var(--info); }
+  .callout-success { background: rgba(58,172,89,0.08); border-color: var(--accent); }
+  .callout-success .cl { color: var(--accent); }
+  .cl { font-weight: 700; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.06em; display: block; margin-bottom: 0.3rem; }
+
+  /* Sections */
+  .section-title {
+    font-size: 1.4rem; font-weight: 700; color: #fff; margin: 2.5rem 0 1rem;
+    padding-bottom: 0.5rem; border-bottom: 1px solid var(--border);
+  }
+  .section-title .n { color: var(--accent); margin-right: 0.4rem; }
+
+  /* Steps */
+  .steps { position: relative; padding-left: 2.8rem; }
+  .steps::before { content:''; position:absolute; left:15px; top:0; bottom:0; width:2px; background:var(--step-line); }
+  .step { position: relative; margin-bottom: 2rem; }
+  .step-num {
+    position:absolute; left:-2.8rem; top:0; width:32px; height:32px; background:var(--accent);
+    color:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-weight:700; font-size:0.85rem; z-index:1;
+  }
+  .step h3 { font-size: 1.1rem; font-weight: 600; color: #fff; margin-bottom: 0.5rem; padding-top: 0.2rem; }
+  .step p, .step ul, .step ol { color: var(--text-muted); font-size: 0.95rem; }
+  .step ul, .step ol { margin: 0.5rem 0; padding-left: 1.3rem; }
+  .step li { margin: 0.3rem 0; }
+
+  /* Code */
+  pre {
+    background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px;
+    padding: 1rem 1.2rem; overflow-x: auto; margin: 0.8rem 0; font-size: 0.88rem; line-height: 1.6;
+  }
+  code { font-family: 'SF Mono','Cascadia Code','Fira Code','Consolas',monospace; color: var(--accent); }
+  pre code { color: var(--text); }
+  .cm { color: #6a737d; }
+  .fl { color: var(--warning); }
+  .ky { color: #79c0ff; }
+  .vl { color: #a5d6ff; }
+
+  /* Tables */
+  table { width:100%; border-collapse:collapse; margin:1rem 0; font-size:0.92rem; }
+  th {
+    background:var(--surface-alt); color:var(--accent); text-align:left; padding:0.7rem 1rem;
+    font-weight:600; text-transform:uppercase; font-size:0.78rem; letter-spacing:0.04em;
+    border-bottom:2px solid var(--border);
+  }
+  td { padding:0.6rem 1rem; border-bottom:1px solid var(--border); color:var(--text-muted); }
+
+  /* Comparison boxes */
+  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0; }
+  .compare-box {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+    padding: 1.2rem 1.4rem;
+  }
+  .compare-box h4 { color: var(--accent); font-size: 0.9rem; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  .compare-box ul { list-style: none; padding: 0; }
+  .compare-box li { padding: 0.25rem 0; font-size: 0.9rem; color: var(--text-muted); }
+  .compare-box li::before { content: '+ '; color: var(--accent); font-weight: bold; }
+  .compare-box.cons li::before { content: '- '; color: var(--danger); }
+
+  /* Diagram */
+  .diagram {
+    background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px;
+    padding: 1.5rem; margin: 1rem 0;
+    font-family: 'SF Mono','Cascadia Code','Fira Code','Consolas',monospace;
+    font-size: 0.82rem; line-height: 1.5; overflow-x: auto; white-space: pre; color: var(--text-muted);
+  }
+
+  /* Tabs */
+  .tab-group { margin: 1rem 0; }
+  .tab-buttons { display: flex; gap: 0; border-bottom: 2px solid var(--border); }
+  .tab-btn {
+    background: none; border: none; color: var(--text-muted); padding: 0.6rem 1.2rem;
+    font-size: 0.9rem; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px;
+    font-family: inherit;
+  }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab-content { display: none; padding: 1rem 0; }
+  .tab-content.active { display: block; }
+
+  footer {
+    text-align: center; padding: 2rem; color: var(--text-muted); font-size: 0.85rem;
+    border-top: 1px solid var(--border); margin-top: 3rem;
+  }
+  @media (max-width: 700px) {
+    .compare { grid-template-columns: 1fr; }
+    .container { padding: 1rem; }
+    header { padding: 1.5rem 1rem; }
+    header h1 { font-size: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1><span>Machinaris</span> &mdash; Build &amp; Deploy Guide</h1>
+  <p>Build the Docker image on your Windows dev machine (or via GitHub Actions) and deploy it to your Unraid server via a container registry.</p>
+</header>
+
+<div class="container">
+
+<!-- ===== TOC ===== -->
+<div class="toc">
+  <h2>Contents</h2>
+  <ol>
+    <li><a href="#how-it-works">How the Build Chain Works</a></li>
+    <li><a href="#choose-approach">Choose Your Approach</a></li>
+    <li><a href="#approach-a">Approach A &mdash; GitHub Actions CI/CD (Recommended)</a></li>
+    <li><a href="#approach-b">Approach B &mdash; Build Locally on Windows</a></li>
+    <li><a href="#approach-c">Approach C &mdash; Build on Unraid Directly</a></li>
+    <li><a href="#deploy">Deploy to Unraid</a></li>
+    <li><a href="#troubleshooting">Troubleshooting</a></li>
+  </ol>
+</div>
+
+<!-- ===== SECTION 1: HOW IT WORKS ===== -->
+<h2 class="section-title" id="how-it-works"><span class="n">1.</span> How the Build Chain Works</h2>
+
+<p>The original project uses a <strong>two-stage Docker build</strong>:</p>
+
+<div class="diagram">
+Stage 1: BASE IMAGE (Ubuntu + system packages)
+&#9484;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9488;
+&#9474;  docker/dockerfile-noble.base                                  &#9474;
+&#9474;  Ubuntu 24.04 + python3 + git + cmake + sqlite3 + smarttools   &#9474;
+&#9474;  &#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;  &#9474;
+&#9474;  Pushed to: ghcr.io/guydavis/machinaris-base-noble:latest      &#9474;
+&#9492;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9516;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9496;
+                               &#9474;
+                          FROM (pulls)
+                               &#9474;
+Stage 2: MAIN IMAGE (all blockchains + Machinaris app)
+&#9484;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9524;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9488;
+&#9474;  docker/dockerfile                                              &#9474;
+&#9474;  Installs 34 blockchain forks + Machinaris WebUI/API + tools    &#9474;
+&#9474;  &#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;  &#9474;
+&#9474;  Pushed to: ghcr.io/guydavis/machinaris:latest                  &#9474;
+&#9492;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9496;</div>
+
+<div class="callout callout-info">
+  <span class="cl">Key insight</span>
+  The base image is just Ubuntu + system packages &mdash; nothing blockchain-specific.
+  You can <strong>keep using Guy Davis's base image</strong> and only build + push the main image under your own registry.
+  This saves significant build time and is the recommended starting approach.
+</div>
+
+<p>The main Dockerfile line 4 contains:</p>
+<pre><code>FROM ghcr.io/guydavis/machinaris-base-${UBUNTU_VER}:${MACHINARIS_STREAM}</code></pre>
+<p>With defaults <code>UBUNTU_VER=noble</code> and <code>MACHINARIS_STREAM=main</code>, this pulls <code>ghcr.io/guydavis/machinaris-base-noble:main</code>.</p>
+
+<!-- ===== SECTION 2: CHOOSE APPROACH ===== -->
+<h2 class="section-title" id="choose-approach"><span class="n">2.</span> Choose Your Approach</h2>
+
+<div class="compare">
+  <div class="compare-box">
+    <h4>A. GitHub Actions (Recommended)</h4>
+    <ul>
+      <li>Builds on GitHub's Linux runners</li>
+      <li>Supports multi-arch (amd64 + arm64)</li>
+      <li>Pushes directly to GHCR</li>
+      <li>No local Docker needed</li>
+      <li>Free for public repos</li>
+      <li>Automated on push/dispatch</li>
+    </ul>
+  </div>
+  <div class="compare-box">
+    <h4>B. Local Windows Build</h4>
+    <ul>
+      <li>Docker Desktop required</li>
+      <li>Linux containers mode</li>
+      <li>Builds amd64 natively</li>
+      <li>Push to any registry</li>
+      <li>Full control over build</li>
+      <li>Slow (installs 34 forks)</li>
+    </ul>
+  </div>
+</div>
+
+<div class="compare">
+  <div class="compare-box">
+    <h4>C. Build on Unraid</h4>
+    <ul>
+      <li>No registry needed</li>
+      <li>Image stays local</li>
+      <li>Native Linux build</li>
+      <li>Simple workflow</li>
+    </ul>
+  </div>
+  <div class="compare-box cons">
+    <h4>C. Drawbacks</h4>
+    <ul>
+      <li>Ties up Unraid CPU for hours</li>
+      <li>Needs git + build tools</li>
+      <li>Image not portable</li>
+      <li>Must rebuild on-box each time</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ===== APPROACH A: GITHUB ACTIONS ===== -->
+<h2 class="section-title" id="approach-a"><span class="n">3.</span> Approach A &mdash; GitHub Actions CI/CD (Recommended)</h2>
+
+<p>This is how the original project built and published its images. You fork the repo, update the workflow files to use your registry, and GitHub builds and pushes the image for you.</p>
+
+<div class="steps">
+
+  <div class="step">
+    <div class="step-num">1</div>
+    <h3>Fork the repo to your GitHub account</h3>
+    <p>If you haven't already, fork <code>SquareMesh/machinaris</code> to your own GitHub account (e.g., <code>yourusername/machinaris</code>). This gives you GitHub Actions runners and a GHCR namespace automatically.</p>
+  </div>
+
+  <div class="step">
+    <div class="step-num">2</div>
+    <h3>Configure repository secrets</h3>
+    <p>Go to your forked repo &rarr; <strong>Settings</strong> &rarr; <strong>Secrets and variables</strong> &rarr; <strong>Actions</strong> &rarr; <strong>New repository secret</strong>:</p>
+    <table>
+      <thead><tr><th>Secret Name</th><th>Value</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td><code>DOCKERHUB_USERNAME</code></td><td>Your DockerHub username</td><td>Used in image tags (if pushing to DockerHub too)</td></tr>
+        <tr><td><code>DOCKERHUB_TOKEN</code></td><td>DockerHub access token</td><td>Authentication for DockerHub push</td></tr>
+      </tbody>
+    </table>
+    <div class="callout callout-info">
+      <span class="cl">GHCR is free</span>
+      <code>GITHUB_TOKEN</code> is provided automatically &mdash; no secret needed for GHCR.
+      If you only want to use GHCR (not DockerHub), you can simplify the workflows to remove the DockerHub steps entirely.
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">3</div>
+    <h3>Update the workflow files</h3>
+    <p>Edit <code>.github/workflows/main-blockchains.yaml</code> to use your image names.</p>
+    <p>The key change is the <code>tags:</code> section. Replace <code>guydavis</code> with your username:</p>
+<pre><code><span class="cm"># .github/workflows/main-blockchains.yaml</span>
+<span class="cm"># In the "Build and push" step, change tags to:</span>
+tags: |
+  ghcr.io/<span class="vl">yourusername</span>/machinaris:latest
+  ghcr.io/<span class="vl">yourusername</span>/machinaris:v${{ github.event.inputs.version }}</code></pre>
+
+    <p>Also update the <code>build-args</code> to set the Chia version you want:</p>
+<pre><code>build-args: |
+  "UBUNTU_VER=noble"
+  "MACHINARIS_STREAM=<span class="vl">latest</span>"
+  "CHIA_BRANCH=<span class="vl">2.6.0</span>"
+  "BLADEBIT_BRANCH=master"
+  "MADMAX_BRANCH=v2.5.5.giga36"</code></pre>
+  </div>
+
+  <div class="step">
+    <div class="step-num">4</div>
+    <h3>Ensure GHCR package visibility</h3>
+    <p>By default, GHCR packages from public repos are public. If your repo is private, you'll need to make the package public or configure Unraid to authenticate with GHCR.</p>
+    <p>Go to your GitHub profile &rarr; <strong>Packages</strong> &rarr; find <code>machinaris</code> &rarr; <strong>Package settings</strong> &rarr; set visibility to <strong>Public</strong>.</p>
+  </div>
+
+  <div class="step">
+    <div class="step-num">5</div>
+    <h3>Trigger the build</h3>
+    <p>The release workflow uses <code>workflow_dispatch</code> (manual trigger):</p>
+    <ol>
+      <li>Go to your repo &rarr; <strong>Actions</strong> tab</li>
+      <li>Select <strong>release-blockchains</strong> workflow</li>
+      <li>Click <strong>Run workflow</strong></li>
+      <li>Enter the version number (e.g., <code>2.6.1</code>)</li>
+      <li>Click <strong>Run workflow</strong></li>
+    </ol>
+    <p>GitHub will build the image on their Linux runner and push it to GHCR. This takes 30&ndash;60+ minutes due to installing all blockchain forks.</p>
+  </div>
+
+  <div class="step">
+    <div class="step-num">6</div>
+    <h3>Verify the image is published</h3>
+<pre><code><span class="cm"># From any machine with Docker:</span>
+docker manifest inspect ghcr.io/<span class="vl">yourusername</span>/machinaris:latest
+
+<span class="cm"># Or check on GitHub: Packages tab on your profile</span></code></pre>
+  </div>
+
+</div>
+
+<div class="callout callout-success">
+  <span class="cl">Result</span>
+  Your image is now at <code>ghcr.io/yourusername/machinaris:latest</code> and can be pulled by your Unraid server.
+</div>
+
+<!-- ===== APPROACH B: LOCAL WINDOWS BUILD ===== -->
+<h2 class="section-title" id="approach-b"><span class="n">4.</span> Approach B &mdash; Build Locally on Windows</h2>
+
+<div class="callout callout-warning">
+  <span class="cl">Prerequisites</span>
+  <ul style="margin-top:0.3rem;">
+    <li><strong>Docker Desktop for Windows</strong> installed and running in <strong>Linux containers</strong> mode (not Windows containers)</li>
+    <li>WSL 2 backend enabled (Docker Desktop settings)</li>
+    <li>At least <strong>30 GB</strong> free disk space for the image build</li>
+    <li>Expect the build to take <strong>1&ndash;3 hours</strong> depending on your machine</li>
+  </ul>
+</div>
+
+<div class="steps">
+
+  <div class="step">
+    <div class="step-num">1</div>
+    <h3>Verify Docker is in Linux mode</h3>
+<pre><code><span class="cm"># Check Docker is running with Linux containers</span>
+docker info | grep "OSType"
+<span class="cm"># Should output: OSType: linux</span>
+
+<span class="cm"># If it says "windows", right-click Docker Desktop tray icon</span>
+<span class="cm"># and select "Switch to Linux containers"</span></code></pre>
+  </div>
+
+  <div class="step">
+    <div class="step-num">2</div>
+    <h3>Log in to your container registry</h3>
+<pre><code><span class="cm"># For GitHub Container Registry (GHCR):</span>
+<span class="cm"># First, create a Personal Access Token at:</span>
+<span class="cm"># GitHub &rarr; Settings &rarr; Developer settings &rarr; Personal access tokens &rarr; Tokens (classic)</span>
+<span class="cm"># Scopes needed: write:packages, read:packages, delete:packages</span>
+
+echo <span class="vl">YOUR_GITHUB_PAT</span> | docker login ghcr.io <span class="fl">-u</span> <span class="vl">yourusername</span> <span class="fl">--password-stdin</span>
+
+<span class="cm"># For DockerHub:</span>
+docker login <span class="fl">-u</span> <span class="vl">yourusername</span></code></pre>
+  </div>
+
+  <div class="step">
+    <div class="step-num">3</div>
+    <h3>Build the image</h3>
+    <p>From your project directory (<code>C:\0dev\ClaudeCodeProjects\machinaris-1</code>):</p>
+<pre><code><span class="cm"># Option 1: Use the existing base image (recommended, much faster)</span>
+docker build ^
+  <span class="fl">-f</span> docker/dockerfile ^
+  <span class="fl">-t</span> ghcr.io/<span class="vl">yourusername</span>/machinaris:latest ^
+  <span class="fl">--build-arg</span> <span class="ky">UBUNTU_VER</span>=noble ^
+  <span class="fl">--build-arg</span> <span class="ky">MACHINARIS_STREAM</span>=latest ^
+  <span class="fl">--build-arg</span> <span class="ky">CHIA_BRANCH</span>=<span class="vl">2.6.0</span> ^
+  .
+
+<span class="cm"># Option 2: Build your own base image first (full independence)</span>
+docker build ^
+  <span class="fl">-f</span> docker/dockerfile-noble.base ^
+  <span class="fl">-t</span> ghcr.io/<span class="vl">yourusername</span>/machinaris-base-noble:latest ^
+  .
+
+<span class="cm"># Then build the main image FROM your base:</span>
+<span class="cm"># (edit docker/dockerfile line 4 to point to your base image first)</span>
+docker build ^
+  <span class="fl">-f</span> docker/dockerfile ^
+  <span class="fl">-t</span> ghcr.io/<span class="vl">yourusername</span>/machinaris:latest ^
+  <span class="fl">--build-arg</span> <span class="ky">UBUNTU_VER</span>=noble ^
+  <span class="fl">--build-arg</span> <span class="ky">MACHINARIS_STREAM</span>=latest ^
+  <span class="fl">--build-arg</span> <span class="ky">CHIA_BRANCH</span>=<span class="vl">2.6.0</span> ^
+  .</code></pre>
+
+    <div class="callout callout-info">
+      <span class="cl">Build Args</span>
+      Only blockchain forks with a <code>_BRANCH</code> value will be installed. If you only care about Chia,
+      you can set only <code>CHIA_BRANCH=2.6.0</code> and leave the rest empty &mdash; the install scripts
+      skip forks with no branch specified, making the build much faster.
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">4</div>
+    <h3>Push to the registry</h3>
+<pre><code><span class="cm"># Push to GHCR</span>
+docker push ghcr.io/<span class="vl">yourusername</span>/machinaris:latest
+
+<span class="cm"># Optionally tag with a version too</span>
+docker tag ghcr.io/<span class="vl">yourusername</span>/machinaris:latest ^
+           ghcr.io/<span class="vl">yourusername</span>/machinaris:v2.6.1
+docker push ghcr.io/<span class="vl">yourusername</span>/machinaris:v2.6.1</code></pre>
+  </div>
+
+  <div class="step">
+    <div class="step-num">5</div>
+    <h3>Verify the push</h3>
+<pre><code><span class="cm"># Check it exists on the registry</span>
+docker manifest inspect ghcr.io/<span class="vl">yourusername</span>/machinaris:latest</code></pre>
+  </div>
+
+</div>
+
+<div class="callout callout-warning">
+  <span class="cl">Architecture note</span>
+  Building on Windows (Docker Desktop) produces a <strong>linux/amd64</strong> image only.
+  This works fine for Unraid (which runs x86_64). If you also need <strong>linux/arm64</strong>,
+  use GitHub Actions (Approach A) which uses QEMU for cross-architecture builds.
+</div>
+
+<!-- ===== APPROACH C: BUILD ON UNRAID ===== -->
+<h2 class="section-title" id="approach-c"><span class="n">5.</span> Approach C &mdash; Build on Unraid Directly</h2>
+
+<p>Simplest workflow, but ties up Unraid resources. No registry needed &mdash; the image stays local.</p>
+
+<div class="steps">
+
+  <div class="step">
+    <div class="step-num">1</div>
+    <h3>SSH into Unraid and clone</h3>
+<pre><code>ssh root@your-unraid-ip
+
+<span class="cm"># Clone to a persistent location</span>
+cd /mnt/user/appdata
+git clone https://github.com/<span class="vl">yourusername</span>/machinaris.git machinaris-src
+cd machinaris-src</code></pre>
+  </div>
+
+  <div class="step">
+    <div class="step-num">2</div>
+    <h3>Build the image locally</h3>
+<pre><code>docker build \
+  <span class="fl">-f</span> docker/dockerfile \
+  <span class="fl">-t</span> machinaris-custom:latest \
+  <span class="fl">--build-arg</span> <span class="ky">UBUNTU_VER</span>=noble \
+  <span class="fl">--build-arg</span> <span class="ky">MACHINARIS_STREAM</span>=latest \
+  <span class="fl">--build-arg</span> <span class="ky">CHIA_BRANCH</span>=<span class="vl">2.6.0</span> \
+  .</code></pre>
+    <p>The image <code>machinaris-custom:latest</code> is now available locally on Unraid.</p>
+  </div>
+
+  <div class="step">
+    <div class="step-num">3</div>
+    <h3>Use the local image name when creating the container</h3>
+    <p>In the Unraid Docker UI, set Repository to <code>machinaris-custom:latest</code> (no registry prefix means local).</p>
+  </div>
+
+</div>
+
+<!-- ===== SECTION 6: DEPLOY ===== -->
+<h2 class="section-title" id="deploy"><span class="n">6.</span> Deploy to Unraid</h2>
+
+<p>Once your image is available (either on a registry or built locally on Unraid), follow the steps in the
+<a href="unraid-migration-guide.html" style="color:var(--info);">Unraid Migration Guide</a> to swap the container.
+The key step is simply changing the <strong>Repository</strong> field:</p>
+
+<table>
+  <thead><tr><th>Field</th><th>Original Value</th><th>New Value</th></tr></thead>
+  <tbody>
+    <tr><td>Repository</td><td><code>ghcr.io/guydavis/machinaris:latest</code></td><td><code>ghcr.io/yourusername/machinaris:latest</code></td></tr>
+  </tbody>
+</table>
+
+<p>Everything else (volumes, ports, environment variables) stays the same.</p>
+
+<div class="steps">
+  <div class="step">
+    <div class="step-num">1</div>
+    <h3>If using GHCR with a private repo</h3>
+    <p>Unraid needs to authenticate to pull from private GHCR packages. SSH into Unraid and log in:</p>
+<pre><code><span class="cm"># On Unraid terminal:</span>
+docker login ghcr.io <span class="fl">-u</span> <span class="vl">yourusername</span> <span class="fl">-p</span> <span class="vl">YOUR_GITHUB_PAT</span>
+
+<span class="cm"># This saves credentials to /root/.docker/config.json</span>
+<span class="cm"># Persists across reboots if on the flash drive</span></code></pre>
+  </div>
+
+  <div class="step">
+    <div class="step-num">2</div>
+    <h3>Pull and verify</h3>
+<pre><code><span class="cm"># Pre-pull the image to verify it works before swapping</span>
+docker pull ghcr.io/<span class="vl">yourusername</span>/machinaris:latest
+
+<span class="cm"># Check it's there</span>
+docker images | grep machinaris</code></pre>
+  </div>
+
+  <div class="step">
+    <div class="step-num">3</div>
+    <h3>Swap the container</h3>
+    <p>Follow the <a href="unraid-migration-guide.html" style="color:var(--info);">Unraid Migration Guide</a> sections 3&ndash;5:
+    stop old container &rarr; remove &rarr; create new with your image &rarr; verify.</p>
+  </div>
+</div>
+
+<!-- ===== SECTION 7: QUICK REFERENCE ===== -->
+<h2 class="section-title"><span class="n">&bull;</span> Quick Reference: Full Pipeline</h2>
+
+<div class="diagram">
+YOUR WINDOWS DEV MACHINE                    GITHUB                          UNRAID SERVER
+&#9484;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9488;     &#9484;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9488;     &#9484;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9488;
+&#9474;                         &#9474;     &#9474;                       &#9474;     &#9474;                          &#9474;
+&#9474;  1. Edit code           &#9474;     &#9474;  3. Actions builds   &#9474;     &#9474;  5. Pull new image       &#9474;
+&#9474;  2. git push       &#9472;&#9472;&#9472;&#9472;&#9472;&#9508;&#9472;&#9472;&#9472;&#9472;&#9658;&#9474;     linux/amd64 image &#9474;     &#9474;  6. Stop old container   &#9474;
+&#9474;                         &#9474;     &#9474;  4. Push to GHCR  &#9472;&#9472;&#9472;&#9472;&#9508;&#9472;&#9472;&#9472;&#9472;&#9658;&#9474;  7. Start new container  &#9474;
+&#9474;  OR: docker build       &#9474;     &#9474;                       &#9474;     &#9474;  8. Verify dashboard     &#9474;
+&#9474;      docker push    &#9472;&#9472;&#9472;&#9472;&#9472;&#9508;&#9472;&#9472;&#9472;&#9472;&#9658;&#9474;  ghcr.io/you/mach:lat  &#9474;     &#9474;                          &#9474;
+&#9474;                         &#9474;     &#9474;                       &#9474;     &#9474;  Same volumes = same     &#9474;
+&#9492;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9496;     &#9492;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9496;     &#9474;  data, plots, wallet    &#9474;
+                                                                &#9492;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9496;</div>
+
+<!-- ===== TROUBLESHOOTING ===== -->
+<h2 class="section-title" id="troubleshooting"><span class="n">7.</span> Troubleshooting</h2>
+
+<table>
+  <thead><tr><th>Problem</th><th>Cause</th><th>Fix</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>Build fails: <code>FROM ghcr.io/guydavis/machinaris-base-noble:main</code> not found</td>
+      <td>Base image tag mismatch</td>
+      <td>Use <code>--build-arg MACHINARIS_STREAM=latest</code> (the tag that exists on GHCR), or build your own base image first.</td>
+    </tr>
+    <tr>
+      <td><code>docker build</code> fails on Windows with permission errors</td>
+      <td>Docker Desktop not in Linux containers mode</td>
+      <td>Right-click Docker Desktop tray &rarr; "Switch to Linux containers". Ensure WSL 2 backend is enabled.</td>
+    </tr>
+    <tr>
+      <td>Build takes hours</td>
+      <td>34 blockchain forks are being installed</td>
+      <td>Only set the <code>_BRANCH</code> args for forks you actually need. Unset branches are skipped. E.g., only <code>CHIA_BRANCH=2.6.0</code> for Chia-only.</td>
+    </tr>
+    <tr>
+      <td><code>denied: permission_denied</code> when pushing to GHCR</td>
+      <td>PAT missing <code>write:packages</code> scope</td>
+      <td>Create a new PAT with scopes: <code>write:packages</code>, <code>read:packages</code>. Re-login with <code>docker login ghcr.io</code>.</td>
+    </tr>
+    <tr>
+      <td>Unraid can't pull from GHCR</td>
+      <td>Package is private</td>
+      <td>Make the GHCR package public, or run <code>docker login ghcr.io</code> on Unraid first.</td>
+    </tr>
+    <tr>
+      <td><code>no matching manifest for linux/amd64</code></td>
+      <td>Image was built for wrong architecture</td>
+      <td>Ensure you're building for <code>linux/amd64</code>. On Windows Docker Desktop this is the default.</td>
+    </tr>
+    <tr>
+      <td>GitHub Actions workflow not visible</td>
+      <td>Workflows not on default branch</td>
+      <td>Push workflow files to <code>main</code> branch. GitHub only shows workflows from the default branch in the Actions tab.</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="callout callout-success">
+  <span class="cl">Summary</span>
+  <strong>Fastest path:</strong> Use GitHub Actions &mdash; push your code, trigger the workflow, it builds a linux/amd64 image and pushes to GHCR. Then on Unraid, just change the Repository field to <code>ghcr.io/yourusername/machinaris:latest</code>.<br><br>
+  <strong>Local build path:</strong> Docker Desktop (Linux mode) on Windows can build it too. Build, push to GHCR, pull on Unraid. Takes longer but gives you full control.
+</div>
+
+</div>
+
+<footer>
+  Machinaris Build &amp; Deploy Guide &mdash; SquareMesh Fork &mdash; Generated 2026-03-21
+</footer>
+
+</body>
+</html>

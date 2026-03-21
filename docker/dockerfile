@@ -6,46 +6,10 @@ FROM ghcr.io/guydavis/machinaris-base-${UBUNTU_VER}:${MACHINARIS_STREAM}
 ARG DEBIAN_FRONTEND=noninteractive
 ARG PLOTMAN_BRANCH=main
 ARG CHIADOG_BRANCH=main
-ARG FDCLI_BRANCH=master
-ARG FORKTOOLS_BRANCH=main
 ARG BLADEBIT_BRANCH=master
 ARG MADMAX_BRANCH=master
 
-ARG ACHI_BRANCH
-ARG APPLE_BRANCH
-ARG BALLCOIN_BRANCH
-ARG BPX_BRANCH
-ARG BTCGREEN_BRANCH
-ARG CACTUS_BRANCH
-ARG CHIA_BRANCH
-ARG CHINILLA_BRANCH
-ARG CHIVES_REPO
-ARG CHIVES_BRANCH
-ARG COFFEE_BRANCH
-ARG CRYPTODOGE_BRANCH
-ARG ECOSTAKE_BRANCH
-ARG FLAX_BRANCH
-ARG FLORA_BRANCH
-ARG GREENBTC_BRANCH
-ARG GIGAHORSE_BRANCH
-ARG GOLD_BRANCH
-ARG HDDCOIN_BRANCH
-ARG LITTLELAMBOCOIN_BRANCH
-ARG MAIZE_BRANCH
-ARG MINT_BRANCH
-ARG MMX_BRANCH
-ARG MOON_BRANCH
-ARG NCHAIN_BRANCH
-ARG ONE_BRANCH
-ARG PETROLEUM_BRANCH
-ARG PIPSCOIN_BRANCH
-ARG PROFIT_BRANCH
-ARG SHIBGREEN_BRANCH
-ARG SILICOIN_BRANCH
-ARG STAICOIN_BRANCH
-ARG STOR_BRANCH
-ARG TAD_BRANCH
-ARG WHEAT_BRANCH
+ARG CHIA_BRANCH=2.6.1
 
 # copy local files
 COPY . /machinaris/
@@ -53,42 +17,9 @@ COPY . /machinaris/
 # set workdir
 WORKDIR /chia-blockchain
 
-# Install specific blockchain fork (based on branch enabled) + tools that depend on the fork
+# Install Chia blockchain + tools
 RUN \
-    /usr/bin/bash /machinaris/scripts/forks/achi_install.sh ${ACHI_BRANCH} \
-	&& /usr/bin/bash /machinaris/scripts/forks/apple_install.sh ${APPLE_BRANCH} \
-	&& /usr/bin/bash /machinaris/scripts/forks/ballcoin_install.sh ${BALLCOIN_BRANCH} \
-	&& /usr/bin/bash /machinaris/scripts/forks/bpx_install.sh ${BPX_BRANCH} \
-	&& /usr/bin/bash /machinaris/scripts/forks/btcgreen_install.sh ${BTCGREEN_BRANCH} \
-	&& /usr/bin/bash /machinaris/scripts/forks/cactus_install.sh ${CACTUS_BRANCH} \
-	&& /usr/bin/bash /machinaris/scripts/forks/chia_install.sh ${CHIA_BRANCH} \
-	&& /usr/bin/bash /machinaris/scripts/forks/chives_install.sh ${CHIVES_REPO} ${CHIVES_BRANCH} \
-	&& /usr/bin/bash /machinaris/scripts/forks/chinilla_install.sh ${CHINILLA_BRANCH} \
-	&& /usr/bin/bash /machinaris/scripts/forks/coffee_install.sh ${COFFEE_BRANCH} \
-	&& /usr/bin/bash /machinaris/scripts/forks/cryptodoge_install.sh ${CRYPTODOGE_BRANCH} \
-	&& /usr/bin/bash /machinaris/scripts/forks/ecostake_install.sh ${ECOSTAKE_BRANCH} \
-	&& /usr/bin/bash /machinaris/scripts/forks/flax_install.sh ${FLAX_BRANCH} \
-	&& /usr/bin/bash /machinaris/scripts/forks/flora_install.sh ${FLORA_BRANCH} \
-	&& /usr/bin/bash /machinaris/scripts/forks/greenbtc_install.sh ${GREENBTC_BRANCH} \
-	&& /usr/bin/bash /machinaris/scripts/forks/gigahorse_install.sh ${GIGAHORSE_BRANCH} \
-	&& /usr/bin/bash /machinaris/scripts/forks/gold_install.sh ${GOLD_BRANCH} \
-	&& /usr/bin/bash /machinaris/scripts/forks/hddcoin_install.sh ${HDDCOIN_BRANCH} \
-	&& /usr/bin/bash /machinaris/scripts/forks/littlelambocoin_install.sh ${LITTLELAMBOCOIN_BRANCH} \
-	&& /usr/bin/bash /machinaris/scripts/forks/maize_install.sh ${MAIZE_BRANCH} \
-	&& /usr/bin/bash /machinaris/scripts/forks/mint_install.sh ${MINT_BRANCH} \
-	&& /usr/bin/bash /machinaris/scripts/forks/mmx_install.sh ${MMX_BRANCH} \
-	&& /usr/bin/bash /machinaris/scripts/forks/moon_install.sh ${MOON_BRANCH} \
-	&& /usr/bin/bash /machinaris/scripts/forks/nchain_install.sh ${NCHAIN_BRANCH} \
-	&& /usr/bin/bash /machinaris/scripts/forks/one_install.sh ${ONE_BRANCH} \
-	&& /usr/bin/bash /machinaris/scripts/forks/petroleum_install.sh ${PETROLEUM_BRANCH} \
-	&& /usr/bin/bash /machinaris/scripts/forks/pipscoin_install.sh ${PIPSCOIN_BRANCH} \
-	&& /usr/bin/bash /machinaris/scripts/forks/profit_install.sh ${PROFIT_BRANCH} \
-	&& /usr/bin/bash /machinaris/scripts/forks/shibgreen_install.sh ${SHIBGREEN_BRANCH} \
-	&& /usr/bin/bash /machinaris/scripts/forks/silicoin_install.sh ${SILICOIN_BRANCH} \
-	&& /usr/bin/bash /machinaris/scripts/forks/staicoin_install.sh ${STAICOIN_BRANCH} \
-	&& /usr/bin/bash /machinaris/scripts/forks/stor_install.sh ${STOR_BRANCH} \
-	&& /usr/bin/bash /machinaris/scripts/forks/tad_install.sh ${TAD_BRANCH} \
-	&& /usr/bin/bash /machinaris/scripts/forks/wheat_install.sh ${WHEAT_BRANCH} \
+    /usr/bin/bash /machinaris/scripts/forks/chia_install.sh ${CHIA_BRANCH} \
     && /usr/bin/bash /machinaris/scripts/pull_3rd_party_libs.sh \
 	&& /usr/bin/bash /machinaris/scripts/machinaris_install.sh \
 	&& /usr/bin/bash /machinaris/scripts/i18n/compile.sh \
@@ -106,9 +37,7 @@ ENV plots_dir="/plots"
 ENV mode="fullnode"
 ENV chia_data="false"
 ENV chia_exporter="false"
-ENV chives_masternode="false"
-ENV gigahorse_recompute_server="false"
-# The single blockchain to run: chia, flax, nchain, hddcoin, chives, etc
+# The blockchain to run (chia only in this fork)
 ENV blockchains="chia"
 # If provided then these optional 3 public keys will be set in your plotman.yaml
 ENV farmer_pk="null"
@@ -127,16 +56,11 @@ ENV controller_api_port=8927
 ENV worker_address="null"
 ENV worker_api_port=8927
 
-# Nvidia GPU support in Chia, Gigahorse, and MMX containers
+# Nvidia GPU support
 ENV NVIDIA_VISIBLE_DEVICES all
 ENV NVIDIA_DRIVER_CAPABILITIES compute,utility
 
-# Set env vars requried by forktools
-ENV FORKTOOLSDIR=/forktools
-ENV FORKTOOLSBLOCKCHAINDIRS=/
-ENV FORKTOOLSHIDDENDIRS=/root
-
-ENV PATH="${PATH}:/chia-blockchain/venv/bin:/forktools:/mmx-node/bin"
+ENV PATH="${PATH}:/chia-blockchain/venv/bin"
 ENV TZ=Etc/UTC
 ENV LC_ALL en_US.UTF-8
 ENV LANG en_US.UTF-8
@@ -146,12 +70,8 @@ ENV AUTO_PLOT=false
 ENV AUTO_ARCHIVE=false
 ENV PLOTMAN_BRANCH=${PLOTMAN_BRANCH}
 ENV CHIADOG_BRANCH=${CHIADOG_BRANCH}
-ENV FDCLI_BRANCH=${FDCLI_BRANCH}
-ENV FORKTOOLS_BRANCH=${FORKTOOLS_BRANCH}
 ENV BLADEBIT_BRANCH=${BLADEBIT_BRANCH}
-ENV GIGAHORSE_BRANCH=${GIGAHORSE_BRANCH}
 ENV MADMAX_BRANCH=${MADMAX_BRANCH}
-ENV MMX_HOME=/root/.mmx/
 
 VOLUME [ "/id_rsa" ]
 
