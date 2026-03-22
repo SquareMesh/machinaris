@@ -243,13 +243,13 @@ def load_blockchain_version(blockchain):
         return last_blockchain_version
     last_blockchain_version = ""
     try:
-        proc = Popen("{0} version".format(chia_binary),
-                stdout=PIPE, stderr=PIPE, shell=True)
+        proc = Popen([chia_binary, "version"],
+                stdout=PIPE, stderr=PIPE)
         outs, errs = proc.communicate(timeout=90)
         last_blockchain_version = strip_data_layer_msg(outs.decode('utf-8').strip().splitlines())[0]
         if "@@@@" in last_blockchain_version:  # SSL warning 
             try:
-                os.system("chia init --fix-ssl-permissions")
+                Popen(["chia", "init", "--fix-ssl-permissions"], stdout=PIPE, stderr=PIPE).communicate(timeout=30)
             except:
                 pass
             last_blockchain_version = ""
@@ -297,8 +297,8 @@ def load_plotman_version():
             pass
     last_plotman_version = ""
     try:
-        proc = Popen("{0} version".format(PLOTMAN_SCRIPT),
-                stdout=PIPE, stderr=PIPE, shell=True,
+        proc = Popen([PLOTMAN_SCRIPT, "version"],
+                stdout=PIPE, stderr=PIPE,
                 start_new_session=True, creationflags=0)
         outs, errs = proc.communicate(timeout=90)
         last_plotman_version = outs.decode('utf-8').strip()
@@ -327,8 +327,8 @@ def load_chiadog_version():
         return last_chiadog_version
     last_chiadog_version = ""
     try:
-        proc = Popen("/chia-blockchain/venv/bin/python3 -u main.py --version",
-                stdout=PIPE, stderr=PIPE, shell=True, cwd=CHIADOG_PATH)
+        proc = Popen(["/chia-blockchain/venv/bin/python3", "-u", "main.py", "--version"],
+                stdout=PIPE, stderr=PIPE, cwd=CHIADOG_PATH)
         outs, errs = proc.communicate(timeout=90)
         last_chiadog_version = outs.decode('utf-8').strip()
         if last_chiadog_version.startswith('v'):
@@ -355,8 +355,8 @@ def load_madmax_version():
         return last_madmax_version
     last_madmax_version = ""
     try:
-        proc = Popen("{0} --version".format(MADMAX_BINARY),
-            stdout=PIPE, stderr=PIPE, shell=True)
+        proc = Popen([MADMAX_BINARY, "--version"],
+            stdout=PIPE, stderr=PIPE)
         outs, errs = proc.communicate(timeout=90)  # Example: 1.1.8-d1a9e88
         last_madmax_version = outs.decode('utf-8').strip().split('-')[0]
     except TimeoutExpired:
@@ -379,8 +379,8 @@ def load_bladebit_version():
         return last_bladebit_version
     last_bladebit_version = ""
     try:
-        proc = Popen("{0} --version".format(BLADEBIT_BINARY),
-                stdout=PIPE, stderr=PIPE, shell=True)
+        proc = Popen([BLADEBIT_BINARY, "--version"],
+                stdout=PIPE, stderr=PIPE)
         outs, errs = proc.communicate(timeout=90)
         last_bladebit_version = outs.decode('utf-8').strip()
         if last_bladebit_version.startswith('v'):
@@ -497,8 +497,7 @@ def wallet_running():
     else:
         chia_binary_short = get_blockchain_binary(blockchain).split('/')[-1]
     try:
-        cmd = "pidof {0}_wallet".format(chia_binary_short)
-        proc = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
+        proc = Popen(["pidof", "{0}_wallet".format(chia_binary_short)], stdout=PIPE, stderr=PIPE)
         outs, errs = proc.communicate(timeout=90)
         pid = outs.decode('utf-8').strip()
         #print("{0} --> {1}".format(cmd, pid))

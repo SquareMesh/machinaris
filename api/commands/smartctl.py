@@ -37,7 +37,7 @@ def load_smartctl_overrides():
 
 def load_drives_status():
     with app.app_context():
-        proc = Popen("smartctl --scan", stdout=PIPE, stderr=PIPE, shell=True)
+        proc = Popen(["smartctl", "--scan"], stdout=PIPE, stderr=PIPE)
         try:
             outs, errs = proc.communicate(timeout=30)
             if errs:
@@ -75,11 +75,11 @@ def load_drives_status():
 def load_drive_info(device_name, device_settings):
     #app.logger.info("{0} -> {1}".format(device_name, device_settings))
     if 'type_overridden' in device_settings:
-        cmd = "smartctl -a -n standby -d {0} {1}".format(device_settings['device_type'], device_name)
+        cmd = ["smartctl", "-a", "-n", "standby", "-d", device_settings['device_type'], device_name]
     else: # No override, use the default auto mode
-        cmd = "smartctl -a -n standby {0}".format(device_name)
+        cmd = ["smartctl", "-a", "-n", "standby", device_name]
     app.logger.info("Executing: {0}".format(cmd))
-    proc = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
+    proc = Popen(cmd, stdout=PIPE, stderr=PIPE)
     try:
         outs, errs = proc.communicate(timeout=10)
         if errs:

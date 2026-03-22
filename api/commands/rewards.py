@@ -37,14 +37,14 @@ def reward_recovery(wallet_id, launcher_id, pool_contract_address):
 def execute_plotnft_claim_recovery(wallet_num):
     blockchain = globals.enabled_blockchains()[0]
     blockchain_binary = globals.get_blockchain_binary(blockchain)
-    cmd = "{0} plotnft claim -i {1}".format(blockchain_binary, wallet_num)
-    app.logger.info(f"Claiming NFT reward recovery for {blockchain}: {cmd}")
+    cmd_args = [blockchain_binary, "plotnft", "claim", "-i", str(wallet_num)]
+    app.logger.info(f"Claiming NFT reward recovery for {blockchain}: {cmd_args}")
     logfile = "/root/.chia/machinaris/logs/rewards.log"
     log_fd = os.open(logfile, os.O_RDWR | os.O_CREAT)
     log_fo = os.fdopen(log_fd, "a+")
-    log_fo.write("\n\nExecuted at: {0}\n{1}\n".format(time.strftime("%Y-%m-%d-%H:%M:%S"), cmd))
+    log_fo.write("\n\nExecuted at: {0}\n{1}\n".format(time.strftime("%Y-%m-%d-%H:%M:%S"), " ".join(cmd_args)))
     log_fo.flush()
-    proc = Popen(cmd, cwd="/", shell=True, universal_newlines=True, stdout=log_fo, stderr=log_fo)
+    proc = Popen(cmd_args, cwd="/", universal_newlines=True, stdout=log_fo, stderr=log_fo)
     try:
         outs, errs = proc.communicate(timeout=1800)
         if errs:
@@ -90,12 +90,16 @@ def execute_fd_cli_recovery(wallet_id, launcher_id, pool_contract_address):
             app.logger.error("Reward Recovery found neither v1 or v2 blockchain database at: {0}/db".format(network_path))
     fd_env = os.environ.copy()
     fd_env.update(vars)
-    cmd = f"/usr/local/bin/fd-cli nft-recover -l {launcher_id} -p {pool_contract_address} -nh 127.0.0.1 -np {rpc_port} -ct {network_path}/config/ssl/full_node/private_full_node.crt -ck {network_path}/config/ssl/full_node/private_full_node.key"
-    app.logger.info(f"Executing NFT 7/8 win recovery for {blockchain}: {cmd}")
+    cmd_args = ["/usr/local/bin/fd-cli", "nft-recover",
+        "-l", launcher_id, "-p", pool_contract_address,
+        "-nh", "127.0.0.1", "-np", str(rpc_port),
+        "-ct", f"{network_path}/config/ssl/full_node/private_full_node.crt",
+        "-ck", f"{network_path}/config/ssl/full_node/private_full_node.key"]
+    app.logger.info(f"Executing NFT 7/8 win recovery for {blockchain}: {cmd_args}")
     log_fo.write("\n\nExecuted at: {0}\nFD_CLI_BC_DB_PATH={1} FD_CLI_WT_DB_PATH={2} {3}\n".format(
-        time.strftime("%Y-%m-%d-%H:%M:%S"), vars['FD_CLI_BC_DB_PATH'], vars['FD_CLI_WT_DB_PATH'], cmd))
+        time.strftime("%Y-%m-%d-%H:%M:%S"), vars['FD_CLI_BC_DB_PATH'], vars['FD_CLI_WT_DB_PATH'], " ".join(cmd_args)))
     log_fo.flush()
-    proc = Popen(cmd,cwd="/flora-dev-cli", env=fd_env, shell=True, universal_newlines=True, stdout=log_fo, stderr=log_fo)
+    proc = Popen(cmd_args, cwd="/flora-dev-cli", env=fd_env, universal_newlines=True, stdout=log_fo, stderr=log_fo)
     try:
         outs, errs = proc.communicate(timeout=1800)
         if errs:

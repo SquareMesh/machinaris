@@ -189,7 +189,7 @@ def generate_key(key_path, blockchain):
         flash(_('Skipping key generation as file exists and is NOT empty!'), 'danger')
         flash(_('In-container path:') +  ' {0}'.format(key_path), 'warning')
         return False
-    proc = Popen("{0} keys generate --label key_0".format(chia_binary), stdout=PIPE, stderr=PIPE, shell=True)
+    proc = Popen([chia_binary, "keys", "generate", "--label", "key_0"], stdout=PIPE, stderr=PIPE)
     try:
         outs, errs = proc.communicate(timeout=90)
         if errs:
@@ -203,7 +203,7 @@ def generate_key(key_path, blockchain):
         flash(_('Timed out while generating keys!'), 'danger')
         flash(str(ex), 'warning')
         return False
-    proc = Popen("{0} keys show --show-mnemonic-seed | tail -n 1 > {1}".format(chia_binary, key_path), stdout=PIPE, stderr=PIPE, shell=True)
+    proc = Popen([chia_binary, "keys", "show", "--show-mnemonic-seed"], stdout=PIPE, stderr=PIPE)
     try:
         outs, errs = proc.communicate(timeout=90)
         if errs:
@@ -218,7 +218,11 @@ def generate_key(key_path, blockchain):
         flash(str(ex), 'warning')
         return False
     else:
-        app.logger.info("Store mnemonic output: {0}".format(outs.decode('utf-8')))
+        # Extract last line (mnemonic) and write to key file — no longer using shell pipe
+        mnemonic_line = outs.decode('utf-8').strip().splitlines()[-1] if outs else ""
+        with open(key_path, 'w') as f:
+            f.write(mnemonic_line + '\n')
+        app.logger.info("Mnemonic stored to key file.")
         try:
             mnemonic_words = open(key_path,'r').read().split()
             if len(mnemonic_words) != 24:
@@ -234,7 +238,7 @@ def generate_key(key_path, blockchain):
         cmd = 'farmer-only'
     else:
         cmd = 'farmer'
-    proc = Popen("{0} start {1}".format(chia_binary, cmd), stdout=PIPE, stderr=PIPE, shell=True)
+    proc = Popen([chia_binary, "start", cmd], stdout=PIPE, stderr=PIPE)
     try:
         outs, errs = proc.communicate(timeout=90)
         if errs:
@@ -263,7 +267,7 @@ def import_key(key_path, mnemonic, blockchain):
     with open(key_path, 'w') as keyfile:
         keyfile.write('{0}\n'.format(mnemonic))
     time.sleep(3)
-    proc = Popen("{0} keys add --label key_0 -f {1}".format(chia_binary, key_path), stdout=PIPE, stderr=PIPE, shell=True)
+    proc = Popen([chia_binary, "keys", "add", "--label", "key_0", "-f", key_path], stdout=PIPE, stderr=PIPE)
     try:
         outs, errs = proc.communicate(timeout=90)
         if errs:
@@ -284,7 +288,7 @@ def import_key(key_path, mnemonic, blockchain):
         cmd = 'farmer-only'
     else:
         cmd = 'farmer'
-    proc = Popen("{0} start {1} -r".format(chia_binary, cmd), stdout=PIPE, stderr=PIPE, shell=True)
+    proc = Popen([chia_binary, "start", cmd, "-r"], stdout=PIPE, stderr=PIPE)
     try:
         outs, errs = proc.communicate(timeout=90)
         if errs:

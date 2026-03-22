@@ -61,8 +61,7 @@ def load_plotting_summary():
         raise Exception("No plotman script found yet at {0}. Container probably just launched. Please allow 15 minutes for startup." \
                 .format(PLOTMAN_SCRIPT))
     check_config()
-    proc = Popen("{0} {1}".format(PLOTMAN_SCRIPT,
-                 'status'), stdout=PIPE, stderr=PIPE, shell=True)
+    proc = Popen([PLOTMAN_SCRIPT, "status"], stdout=PIPE, stderr=PIPE)
     try:
         outs, errs = proc.communicate(timeout=90)
         if errs:
@@ -127,8 +126,11 @@ def action_plots(job):
             logfile = "/root/.chia/plotman/logs/plotman.log"
             log_fd = os.open(logfile, os.O_RDWR | os.O_CREAT)
             log_fo = os.fdopen(log_fd, "a+")
-            proc = Popen("{0} {1} {2} {3}".format(PLOTMAN_SCRIPT, action, param, plot_id),
-                         shell=True, universal_newlines=True, stdout=log_fo, stderr=log_fo)
+            cmd_args = [PLOTMAN_SCRIPT, action]
+            if param:
+                cmd_args.append(param)
+            cmd_args.append(plot_id)
+            proc = Popen(cmd_args, universal_newlines=True, stdout=log_fo, stderr=log_fo)
             # Plotman regressed on cleaning temp after kill so do it here:
             clean_tmp_dirs_after_kill(plot_id)
         except:
@@ -272,8 +274,7 @@ def analyze(plot_file):
         return "Invalid plot file name provided: {0}".format(plot_file)
     plot_log_file = find_plotting_job_log(groups[7])
     if plot_log_file:
-        proc = Popen("{0} {1} {2}".format(
-            PLOTMAN_SCRIPT,'analyze', plot_log_file), stdout=PIPE, stderr=PIPE, shell=True)
+        proc = Popen([PLOTMAN_SCRIPT, "analyze", plot_log_file], stdout=PIPE, stderr=PIPE)
         try:
             outs, errs = proc.communicate(timeout=90)
             if errs:
@@ -288,8 +289,7 @@ def analyze(plot_file):
 
 def get_prometheus_metrics():
     check_config()
-    proc = Popen("{0} {1}".format(PLOTMAN_SCRIPT,
-                 'prometheus'), stdout=PIPE, stderr=PIPE, shell=True)
+    proc = Popen([PLOTMAN_SCRIPT, "prometheus"], stdout=PIPE, stderr=PIPE)
     try:
         outs, errs = proc.communicate(timeout=90)
         if errs:
@@ -306,7 +306,7 @@ def load_dirs(blockchain):
         raise Exception("No plotman script found yet at {0}. Container probably just launched. Please allow 15 minutes for startup." \
                 .format(PLOTMAN_SCRIPT))
     check_config()
-    proc = Popen("{0} {1} {2}".format(PLOTMAN_SCRIPT, 'dirs', '--json'), stdout=PIPE, stderr=PIPE, shell=True)
+    proc = Popen([PLOTMAN_SCRIPT, "dirs", "--json"], stdout=PIPE, stderr=PIPE)
     try:
         outs, errs = proc.communicate(timeout=90)
     except TimeoutExpired:

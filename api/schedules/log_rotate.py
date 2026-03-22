@@ -20,4 +20,5 @@ def execute():
     for config in LOG_ROTATE_CONFIGS:
         if os.path.exists(LOG_ROTATE_CONFIG_DIR + config):
             app.logger.info("Rotating config: " + LOG_ROTATE_CONFIG_DIR + config)
-            subprocess.call("/usr/sbin/logrotate " + LOG_ROTATE_CONFIG_DIR + config + " >/dev/null 2>&1", shell=True)
+            subprocess.call(["/usr/sbin/logrotate", LOG_ROTATE_CONFIG_DIR + config],
+                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
