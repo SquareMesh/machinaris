@@ -253,7 +253,7 @@
             {% for wallet in wallets.rows %}
             <div class="tab-pane {% if wallet.blockchain == selected_blockchain %}active{% endif %}" id="{{wallet.blockchain}}" role="tabpanel" aria-labelledby="{{wallet.blockchain}}-tab">
                 <br/>
-                <pre>{{ wallet.details|safe}}</pre>
+                <pre>{{ wallet.details }}</pre>
             </div>
             {% endfor %}
         </div>
