@@ -56,7 +56,7 @@ class Plotnfts(MethodView):
         if len(plotnfts) > 0 and plotnfts[0]['blockchain'] == 'chia':
             from chia.util.byte_types import hexstr_to_bytes
             from chia.util.bech32m import decode_puzzle_hash
-            from chia.types.blockchain_format.sized_bytes import bytes32
+            from chia_rs.sized_bytes import bytes32
             for plotnft in plotnfts:
                 puzzle_bytes = decode_puzzle_hash(plotnft['pool_contract_address'])
                 plotnft['puzzle_hash'] = puzzle_bytes.hex()

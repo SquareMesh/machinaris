@@ -1,7 +1,7 @@
 ARG UBUNTU_VER=noble
 ARG MACHINARIS_STREAM=main
 
-FROM ghcr.io/guydavis/machinaris-base-${UBUNTU_VER}:${MACHINARIS_STREAM}
+FROM ghcr.io/squaremesh/machinaris-base-${UBUNTU_VER}:${MACHINARIS_STREAM}
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG PLOTMAN_BRANCH=main

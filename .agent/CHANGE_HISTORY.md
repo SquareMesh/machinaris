@@ -64,7 +64,94 @@ Most forks are abandoned or have negligible user bases. The original author list
 - Removed: forktools, fd-cli build args (Chia-only, not needed)
 
 ### Follow-up Required
-- [ ] Verify entrypoint.sh handles Chia-only gracefully (no fork-specific code paths break)
-- [ ] Test Docker build end-to-end
+- [x] Verify entrypoint.sh handles Chia-only gracefully (no fork-specific code paths break)
+- [x] Test Docker build end-to-end
 - [ ] Clean up blockchains.json to remove non-Chia entries (optional, app-level)
 - [ ] Review common/config/globals.py for dead fork references
+
+---
+## [2026-03-22] — Entrypoint Chia-Only Cleanup
+
+**Type:** Implementation
+**Affects:** docker/entrypoint.sh, scripts/worker_port_warning.sh, scripts/start_machinaris.sh
+**Design doc ref:** DOCKER-DEPLOYMENT.md, BLOCKCHAIN-INTEGRATION.md
+
+### Context
+After removing all 33 non-Chia forks from the Dockerfile, the entrypoint and supporting scripts still contained dead code paths for other forks — port warnings, plotman configs, forktools/fd-cli installs, and a multi-container stagger sleep.
+
+### Options Considered
+- **Option A:** Leave dead code — Pro: No risk of regression Con: Up to 3 min wasted on startup sleep, forktools clone attempt, confusing dead code
+- **Option B:** Strip fork-specific code paths — Pro: Faster startup, cleaner code, no wasted network calls Con: Harder to re-enable forks (mitigated by git history)
+
+### Decision
+Strip all dead fork code paths from the entrypoint flow.
+
+### Technical Rationale
+With `blockchains=chia` hardcoded in the Dockerfile, these code paths were either no-ops (fd-cli skips Chia explicitly) or wasteful (forktools clone, random sleep). The random 1-180s sleep was designed to stagger multiple fork containers — irrelevant with a single blockchain.
+
+### Impact
+- Startup is up to 3 minutes faster (removed random sleep)
+- No more runtime git clone of forktools
+- worker_port_warning.sh reduced from 103 lines to 4 lines
+- start_machinaris.sh plotman config simplified to Chia-only path
+
+### Follow-up Required
+- [x] Test Docker build and container startup end-to-end
+
+---
+## [2026-03-22] — Chia 2.6.x RPC Import Migration
+
+**Type:** Bugfix
+**Affects:** api/commands/rpc.py, api/views/plotnfts/resources.py
+**Design doc ref:** BLOCKCHAIN-INTEGRATION.md
+
+### Context
+Chia 2.6.1 reorganized its Python module structure. RPC clients moved from `chia.rpc.*` to service-specific directories. `chia.util.ints` moved to `chia_rs.sized_ints`. The Machinaris API server failed to start due to `ModuleNotFoundError`.
+
+### Options Considered
+- **Option A:** Pin Chia to older version — Pro: No code changes Con: Miss security fixes, falling behind
+- **Option B:** Update imports to match Chia 2.6.x module paths — Pro: Current, correct Con: Breaking change if reverting Chia version
+
+### Decision
+Update all Chia imports to the new 2.6.x paths. Also replaced the 230-line fork if/elif import chain in rpc.py with 7 lines of Chia-only imports.
+
+### Technical Rationale
+Chia 2.6.x moved RPC clients to service directories (e.g., `chia.rpc.farmer_rpc_client` → `chia.farmer.farmer_rpc_client`) and moved sized ints to `chia_rs`. The `bech32m` and `byte_types` util modules were unchanged.
+
+### Impact
+- API server starts successfully on Chia 2.6.1
+- rpc.py reduced from ~250 lines of imports to ~25 lines
+- `bytes32` import in plotnfts/resources.py updated to `chia_rs.sized_bytes`
+
+### Follow-up Required
+- [ ] Monitor for additional Chia API changes in future versions
+
+---
+## [2026-03-22] — Docker Build Chain: Base Image + GHCR Publishing
+
+**Type:** Implementation
+**Affects:** docker/dockerfile, .gitattributes
+**Design doc ref:** DOCKER-DEPLOYMENT.md
+
+### Context
+The Dockerfile referenced `ghcr.io/guydavis/machinaris-base-noble` (original author's registry) which no longer exists. Building on Windows introduced CRLF line endings that broke shell scripts inside the Linux container.
+
+### Options Considered
+- **Option A:** Use guydavis base image — Pro: No build needed Con: Image doesn't exist
+- **Option B:** Build own base image under squaremesh namespace — Pro: Self-contained, independent Con: Need to maintain base image
+
+### Decision
+Build and publish base image as `ghcr.io/squaremesh/machinaris-base-noble`. Updated Dockerfile FROM to reference `squaremesh` instead of `guydavis`. Added `.gitattributes` forcing LF line endings for all text files.
+
+### Technical Rationale
+The base image Dockerfile (`docker/dockerfile-noble.base`) was already in the repo. Publishing under `squaremesh` makes the project fully independent from the original author's infrastructure. The `.gitattributes` fix is essential for Windows development targeting Linux containers.
+
+### Impact
+- Published to GHCR: `ghcr.io/squaremesh/machinaris-base-noble:{latest,main}`
+- Published to GHCR: `ghcr.io/squaremesh/machinaris:{2.7.0,latest}`
+- `.gitattributes` ensures LF endings for sh, py, yaml, json, conf, dockerfile
+- Verified working on Unraid deployment
+
+### Follow-up Required
+- [ ] Make GHCR packages public (if not already)
+- [ ] Link packages to repository on GitHub

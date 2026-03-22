@@ -31,9 +31,9 @@ Dismissed: 2026-03-21 — All 6 workflows updated to GHCR-only with github.repos
 Discovered during: Initial codebase review (2026-03-21)
 pyproject.toml targets Python 3.10, CI runs 3.9, Chia 2.6.0 supports Python 3.13. Assess upgrade path.
 
-## TODO-007 — Review entrypoint.sh for dead fork code paths
-Discovered during: Chia-only lockdown (2026-03-21)
-docker/entrypoint.sh likely has conditional blocks for non-Chia forks (blockchains_launch.sh, fork-specific port warnings, etc.). Review and clean up.
+## TODO-007 — DISMISSED
+~~Review entrypoint.sh for dead fork code paths~~
+Dismissed: 2026-03-22 — Reviewed and cleaned up. Removed: random sleep, forktools, fd-cli calls. Simplified worker_port_warning.sh and start_machinaris.sh.
 
 ## TODO-008 — Clean up blockchains.json for Chia-only
 Discovered during: Chia-only lockdown (2026-03-21)

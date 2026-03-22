@@ -94,13 +94,7 @@ if /usr/bin/bash /machinaris/scripts/forks/${blockchains}_launch.sh; then
   # Conditionally install chiadog on harvesters and fullnodes
   /usr/bin/bash /machinaris/scripts/chiadog_setup.sh ${CHIADOG_BRANCH} > /tmp/chiadog_setup.log 2>&1
 
-  # During concurrent startup of multiple fork containers, stagger less important setups
-  sleep $[ ( $RANDOM % 180 )  + 1 ]s
-
-  # Conditionally install fd-cli on fullnodes, excluding Chia and Chives
-  /usr/bin/bash /machinaris/scripts/fd-cli_setup.sh ${FDCLI_BRANCH} > /tmp/fd-cli_setup.log 2>&1
-
-  # Conditionally build bladebit on plotters and fullnodes, sleep a bit first
+  # Conditionally build bladebit on plotters and fullnodes
   /usr/bin/bash /machinaris/scripts/bladebit_setup.sh ${BLADEBIT_BRANCH} > /tmp/bladebit_setup.log 2>&1
 
   # Conditionally madmax on plotters and fullnodes, sleep a bit first
@@ -108,9 +102,6 @@ if /usr/bin/bash /machinaris/scripts/forks/${blockchains}_launch.sh; then
 
   # Conditionally install plotman on plotters and fullnodes, after the plotters setup
   /usr/bin/bash /machinaris/scripts/plotman_autoplot.sh > /tmp/plotman_autoplot.log 2>&1
-
-  # Conditionally install forktools on fullnodes
-  /usr/bin/bash /machinaris/scripts/forktools_setup.sh ${FORKTOOLS_BRANCH} > /tmp/forktools_setup.log 2>&1
 
 fi
 

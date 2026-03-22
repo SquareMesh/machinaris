@@ -17,9 +17,9 @@
 | DATA-LAYER.md — Multi-Database Architecture | IMPLEMENTED | common/models/, api/default_settings.py | 2026-03-21 | 21 SQLite databases |
 | DATA-LAYER.md — ORM Models | IMPLEMENTED | common/models/ | 2026-03-21 | 18 model classes + 17 stat classes |
 | BLOCKCHAIN-INTEGRATION.md — Fork Support | DRIFT | common/config/blockchains.json | 2026-03-21 | Design doc describes 50+ forks but Dockerfile now Chia-only. blockchains.json not yet cleaned up. |
-| BLOCKCHAIN-INTEGRATION.md — RPC Client | IMPLEMENTED | api/commands/rpc.py | 2026-03-21 | Async RPC via Chia libraries |
-| DOCKER-DEPLOYMENT.md — Container Build | DRIFT | docker/dockerfile | 2026-03-21 | Dockerfile now Chia-only; design doc still describes 34-fork build. Needs design doc update. |
-| DOCKER-DEPLOYMENT.md — Entrypoint | DRIFT | docker/entrypoint.sh | 2026-03-21 | Entrypoint still has multi-fork code paths; not yet cleaned up |
+| BLOCKCHAIN-INTEGRATION.md — RPC Client | IMPLEMENTED | api/commands/rpc.py | 2026-03-22 | Updated for Chia 2.6.x module restructure. Chia-only imports. |
+| DOCKER-DEPLOYMENT.md — Container Build | DRIFT | docker/dockerfile | 2026-03-22 | Dockerfile Chia-only, FROM updated to squaremesh. Design doc still needs update. |
+| DOCKER-DEPLOYMENT.md — Entrypoint | IN_PROGRESS | docker/entrypoint.sh | 2026-03-22 | Cleaned up: removed forktools, fd-cli, random sleep. Design doc needs update. |
 | PLOTTING-FARMING.md — Plotter Support | DRIFT | scripts/forks/ | 2026-03-21 | Design doc mentions Gigahorse; removed from build. Bladebit + Madmax remain. |
 | MONITORING-ALERTS.md — Chiadog | IMPLEMENTED | scripts/chiadog_setup.sh, config/chiadog/ | 2026-03-21 | Log-based monitoring |
 | CONFIGURATION.md — Environment Variables | DRIFT | docker/dockerfile | 2026-03-21 | Dockerfile env vars simplified; design doc still lists fork-specific vars |
