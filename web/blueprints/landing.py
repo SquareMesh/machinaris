@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, redirect, url_for, request, current_app
+from markupsafe import Markup
 from common.config import globals
 from web.utils import get_lang
 import random
@@ -33,5 +34,5 @@ def landing():
         msg = "Welcome to Machinaris!"
 
     if msg.endswith(".png"):
-        msg = "<img style='height: 150px' src='{0}' />".format(url_for('static', filename='/landings/' + msg))
+        msg = Markup("<img style='height: 150px' src='{0}' />").format(url_for('static', filename='/landings/' + msg))
     return render_template('landing.html', random_message=msg)

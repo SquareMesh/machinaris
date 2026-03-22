@@ -2,6 +2,9 @@ import logging
 import os
 import pytz
 import re
+from datetime import timedelta
+
+from markupsafe import Markup
 
 from flask import Flask, request
 from flask_babel import Babel
@@ -15,10 +18,25 @@ from web.default_settings import DefaultConfig
 from common.config import globals
 
 app = Flask(__name__)
-app.secret_key = b'$}#P)eu0A.O,s0Mz'
+
+def _load_or_create_secret_key():
+    """Load secret key from persistent config, or generate one on first boot."""
+    key_path = '/root/.chia/machinaris/config/secret_key'
+    try:
+        with open(key_path, 'rb') as f:
+            return f.read()
+    except FileNotFoundError:
+        key = os.urandom(32)
+        os.makedirs(os.path.dirname(key_path), exist_ok=True)
+        with open(key_path, 'wb') as f:
+            f.write(key)
+        return key
+
+app.secret_key = _load_or_create_secret_key()
 app.config.from_object(DefaultConfig)
 # Override config with optional settings file
 app.config.from_envvar('WEB_SETTINGS_FILE', silent=True)
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
 
 csrf = CSRFProtect(app)
 
@@ -54,7 +72,13 @@ if __name__ != '__main__':
 
 app.logger.debug("CONTROLLER_HOST={0}".format(app.config['CONTROLLER_HOST']))
 
-# Blueprints
+@app.context_processor
+def inject_totp_status():
+    from common.utils import totp
+    return dict(totp_configured=totp.is_configured())
+
+# Blueprints — auth must be first so before_app_request fires before other blueprints
+from web.blueprints.auth import auth_bp
 from web.blueprints.landing import landing_bp
 from web.blueprints.setup import setup_bp
 from web.blueprints.index import index_bp
@@ -73,6 +97,7 @@ from web.blueprints.settings import settings_bp
 from web.blueprints.logs import logs_bp
 from web.blueprints.transactions import transactions_bp
 
+app.register_blueprint(auth_bp)
 app.register_blueprint(landing_bp)
 app.register_blueprint(setup_bp)
 app.register_blueprint(index_bp)
@@ -142,7 +167,7 @@ def alltheblocks_blocklink(block, blockchain):
     if blockchain == 'mmx':
         return block # No support at ATB for MMX, so don't link it
     alltheblocks_blockchain = globals.get_alltheblocks_name(blockchain)
-    return '<a href="https://alltheblocks.net/{0}/block/0x{1}" class="text-white" target="_blank">{1}</a>'.format(alltheblocks_blockchain, block)
+    return Markup('<a href="https://alltheblocks.net/{0}/block/0x{1}" class="text-white" target="_blank">{1}</a>').format(alltheblocks_blockchain, block)
 
 app.jinja_env.filters['alltheblocks_blocklink'] = alltheblocks_blocklink
 

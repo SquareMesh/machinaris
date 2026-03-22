@@ -154,6 +154,6 @@ def request_unclaimed_plotnft_reward_recovery():
 def delete_unconfirmed_transactions(walletid):
     try:
         stream = os.popen("chia wallet delete_unconfirmed_transactions -i {0}".format(walletid))
-        flash(_("Unconfirmed transaction cleanup has been initiated. Please wait...") + " <pre>" + stream.read() + "</pre>")
+        flash(_("Unconfirmed transaction cleanup has been initiated. Please wait...") + " " + stream.read(), 'message_pre')
     except Exception as ex:
         app.logger.info("Failed to delete unconfirmed transactions: {0}".format(str(ex)))

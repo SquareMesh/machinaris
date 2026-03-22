@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="{{ url_for('static', filename='3rd_party/bootstrap.min.css') }}" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='3rd_party/icons/bootstrap-icons.css') }}">
+    <title>Machinaris — Login</title>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <style>
+        body { background-color: #212529; }
+        .login-card { max-width: 400px; margin: 120px auto; }
+        .form-control:focus { border-color: #198754; box-shadow: 0 0 0 0.25rem rgba(25,135,84,.25); }
+    </style>
+</head>
+
+<body>
+    <main>
+        <div class="login-card">
+            <div class="card bg-light">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <img src="{{ url_for('static', filename='machinaris.png') }}" style="height:64px; width:64px;" />
+                        <h4 class="mt-2">{{_('Machinaris')}}</h4>
+                        <p class="text-muted">{{_('Enter your authenticator code')}}</p>
+                    </div>
+
+                    {% from '_flash_messages.html' import render_flash_messages %}
+                    {{ render_flash_messages() }}
+
+                    <form method="POST">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="next" value="{{ next }}">
+                        <div class="mb-3">
+                            <input type="text" class="form-control form-control-lg text-center"
+                                name="code" id="code"
+                                placeholder="000000"
+                                maxlength="6" pattern="[0-9]{6}"
+                                inputmode="numeric" autocomplete="one-time-code"
+                                autofocus required>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="bi-unlock"></i> {{_('Login')}}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="{{ url_for('static', filename='3rd_party/bootstrap.bundle.min.js') }}"></script>
+</body>
+
+</html>

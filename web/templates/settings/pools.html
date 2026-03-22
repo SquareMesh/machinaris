@@ -76,19 +76,8 @@
 </div>
 
 <div>
-    {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-    {% for category, message in messages %}
-    {% if category == 'message' %}
-    <div class="alert alert-warning" role="alert">
-        {% else %}
-        <div class="alert alert-{{ category }}" role="alert">
-            {% endif %}
-            {{ message|safe }}
-        </div>
-        {% endfor %}
-        {% endif %}
-        {% endwith %}
+    {% from '_flash_messages.html' import render_flash_messages %}
+    {{ render_flash_messages() }}
     </div>
     
     {% if blockchains|length > 0 %}
@@ -121,7 +110,7 @@
                             <p>{{_('ERROR: Unable to join a pool because:')}}</p>
                             <ul>
                                 {% for warning in pool_configs[blockchain].warnings %}
-                                <li>{{ warning|safe }}</li>
+                                <li>{{ warning }}</li>
                                 {% endfor %}
                             </ul>
                         {% else %}

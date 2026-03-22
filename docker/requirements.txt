@@ -26,3 +26,5 @@ geoip2
 gdown
 pendulum
 py-spy
+pyotp
+qrcode[pil]

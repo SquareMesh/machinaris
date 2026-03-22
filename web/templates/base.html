@@ -154,11 +154,26 @@
                                     href="https://github.com/guydavis/machinaris/blob/main/LICENSE">{{_('License')}}</a></li>
                             <li><a class="dropdown-item" target="_blank"
                                     href="https://github.com/guydavis/machinaris/blob/main/CREDITS.md">{{_('Credits')}}</a></li>
+                            {% if session.get('totp_authenticated') %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}"><i class="bi-box-arrow-right"></i> {{_('Logout')}}</a></li>
+                            {% endif %}
                         </ul>
                     </div>
                 </div>
             </div>
             <div class="col py-3">
+
+                {% if not totp_configured %}
+                <div class="alert alert-info alert-dismissible fade show" role="alert">
+                    <i class="bi-shield-lock"></i>
+                    <strong>{{_('Security:')}}</strong>
+                    {{_('Two-factor authentication is not set up.')}}
+                    <a href="{{ url_for('auth.setup_totp') }}" class="alert-link">{{_('Set it up now')}}</a>
+                    {{_('to protect your Machinaris dashboard.')}}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endif %}
 
                 {% block content %}{% endblock %}
 

@@ -16,6 +16,7 @@ import yaml
 from flask import Flask, jsonify, abort, request, flash
 from flask.helpers import make_response
 from flask_babel import _, lazy_gettext as _l
+from markupsafe import Markup
 from subprocess import Popen, TimeoutExpired, PIPE
 
 from common.models import plottings as pl, transfers as t, keys as k
@@ -76,7 +77,7 @@ def start_plotman(plotter):
         if response.status_code == 200:
             flash(_('Plotman started successfully.'), 'success')
         else:
-            flash("<pre>{0}</pre>".format(response.content.decode('utf-8')), 'danger')
+            flash(response.content.decode('utf-8'), 'danger_pre')
 
 def action_plots(action, plot_ids):
     plots_by_worker = group_plots_by_worker(plot_ids)
@@ -98,7 +99,7 @@ def action_plots(action, plot_ids):
             app.logger.info(traceback.format_exc())
     if error:
         flash(_('Failed to %(action)s all plots!', action=action), 'danger')
-        flash('<pre>{0}</pre>'.format(error_message), 'warning')
+        flash(error_message, 'warning_pre')
     else:
         flash(_('Plotman was able to %(action)s the selected plots successfully.', action=action), 'success')
 
@@ -128,7 +129,7 @@ def stop_plotman(plotter):
         if response.status_code == 200:
             flash(_('Plotman stopped successfully. No new plots will be started, but existing ones will continue on.'), 'success')
         else:
-            flash("<pre>{0}</pre>".format(response.content.decode('utf-8')), 'danger')
+            flash(response.content.decode('utf-8'), 'danger_pre')
 
 def start_archiving(plotter):
     app.logger.info("Starting Archiver....")
@@ -141,7 +142,7 @@ def start_archiving(plotter):
         if response.status_code == 200:
             flash(_('Archiver started successfully.'), 'success')
         else:
-            flash("<pre>{0}</pre>".format(response.content.decode('utf-8')), 'danger')
+            flash(response.content.decode('utf-8'), 'danger_pre')
 
 def stop_archiving(plotter):
     app.logger.info("Stopping Archiver run....")
@@ -154,7 +155,7 @@ def stop_archiving(plotter):
         if response.status_code == 200:
             flash(_('Archiver stopped successfully.'), 'success')
         else:
-            flash("<pre>{0}</pre>".format(response.content.decode('utf-8')), 'danger')
+            flash(response.content.decode('utf-8'), 'danger_pre')
 
 def load_key_pk(type, blockchain):
     try:
@@ -230,8 +231,8 @@ def inspect_config(hostname, config):
         elif 'pool_pk' in config['plotting']:
             app.logger.info("Saving config to {0}, found pool_pk {1}".format(
                 hostname, config['plotting']['pool_pk']))
-            flash(_('Current configuration will plot %(open_b)sSOLO%(close_b)s plots, not %(open_b)sPORTABLE%(close_b)s plots for pooling. If this is not your choice, please see the %(wiki_open)swiki%(wiki_close)s.', 
-                open_b='<b>', close_b='</b>', wiki_open='<a target="_blank" href="https://github.com/guydavis/machinaris/wiki/Pooling#setup-and-config">', wiki_close='</a>'), 'message')
+            flash(Markup(_('Current configuration will plot %(open_b)sSOLO%(close_b)s plots, not %(open_b)sPORTABLE%(close_b)s plots for pooling. If this is not your choice, please see the %(wiki_open)swiki%(wiki_close)s.',
+                open_b='<b>', close_b='</b>', wiki_open='<a target="_blank" href="https://github.com/guydavis/machinaris/wiki/Pooling#setup-and-config">', wiki_close='</a>')), 'message')
     else:
          app.logger.info("Saving config to {0}, found a malformed config without a 'plotting' section.")
 
@@ -252,7 +253,7 @@ def save_config(plotter, blockchain, config):
         if response.status_code == 200:
             flash(_('Nice! Plotman\'s plotman.yaml validated and saved successfully.'), 'success')
         else:
-            flash("<pre>{0}</pre>".format(response.content.decode('utf-8')), 'danger')
+            flash(response.content.decode('utf-8'), 'danger_pre')
 
 def analyze(plot_id):
     analyze_file = '/root/.chia/plotman/analyze/{0}.log'.format(plot_id)

@@ -3,6 +3,7 @@ import json
 import os
 import traceback
 
+from markupsafe import Markup
 from common.config import globals
 from common.models import plottings as pl
 
@@ -226,8 +227,8 @@ class WorkerSummary:
 class WorkerWarning:
 
     def __init__(self, title, message, level="info"):
-        self.title = title
-        self.message = message
+        self.title = Markup(title)
+        self.message = Markup(message)
         if level == "info":
             self.icon = "fs4 bi-info-circle text-success"
         if level == "warning":

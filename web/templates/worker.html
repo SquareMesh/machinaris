@@ -15,19 +15,8 @@
 </header>
 
 <div>
-  {% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-  {% for category, message in messages %}
-  {% if category == 'message' %}
-  <div class="alert alert-warning" role="alert">
-    {% else %}
-    <div class="alert alert-{{ category }}" role="alert">
-      {% endif %}
-      {{ message|safe }}
-    </div>
-    {% endfor %}
-    {% endif %}
-    {% endwith %}
+  {% from '_flash_messages.html' import render_flash_messages %}
+  {{ render_flash_messages() }}
   </div>
 
   <div class="row" style="padding-left: 1em; padding-right: 1em; ">
@@ -103,8 +92,8 @@
           <tr>
             <td>
               <i class="{{warning.icon}}"></i>
-              <span style='font-weight:500;padding-left:7px'>{{warning.title|safe}}</span><br/>
-              {{warning.message|safe}}
+              <span style='font-weight:500;padding-left:7px'>{{ warning.title }}</span><br/>
+              {{ warning.message }}
             </td>
           </tr>
           {% endfor %}

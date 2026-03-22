@@ -1,0 +1,20 @@
+{% macro render_flash_messages() %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+{% for category, message in messages %}
+    {% if category.endswith('_pre') %}
+    {% set base_category = category[:-4] %}
+    {% else %}
+    {% set base_category = category %}
+    {% endif %}
+    {% if base_category == 'message' %}
+    <div class="alert alert-warning" role="alert">
+    {% else %}
+    <div class="alert alert-{{ base_category }}" role="alert">
+    {% endif %}
+        {% if category.endswith('_pre') %}<pre>{{ message }}</pre>{% else %}{{ message }}{% endif %}
+    </div>
+{% endfor %}
+{% endif %}
+{% endwith %}
+{% endmacro %}

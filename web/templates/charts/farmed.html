@@ -60,7 +60,7 @@
                 <tr>
                     <td>{{farmed_block.hostname}}</td>
                     <td>{{farmed_block.plot_files}}</td>
-                    <td>{{farmed_block.farmed_block|alltheblocks_blocklink(farmed_block.blockchain)|safe}}</td>
+                    <td>{{ farmed_block.farmed_block|alltheblocks_blocklink(farmed_block.blockchain) }}</td>
                     <td>{{farmed_block.created_at[:-7]}}</td>
                 </tr>
                 {% endfor %}
