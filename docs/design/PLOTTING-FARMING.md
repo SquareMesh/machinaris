@@ -1,17 +1,19 @@
 # Plotting and Farming Design
 
 > Plot creation tools, farming operations, GPU support, archiving, and replotting.
+>
+> **Note:** As of v2.7.0, Machinaris is Chia-only. Gigahorse has been removed from the build. Bladebit and Madmax remain as the supported plotters.
 
 ## 1. Overview
 
-Machinaris orchestrates multiple plotting tools and farming operations through Plotman (plot scheduler) and direct integration with blockchain-specific farmer services.
+Machinaris orchestrates plotting tools and farming operations through Plotman (plot scheduler) and direct integration with the Chia farmer service.
 
 ### Plotting Pipeline
 
 ```
 Plotman (scheduler)
   ↓ spawns
-Plotter (Bladebit, Madmax, or Gigahorse)
+Plotter (Bladebit or Madmax)
   ↓ creates
 Plot files (.plot)
   ↓ optionally
@@ -28,7 +30,6 @@ Farmer/Harvester reads plots for challenges
 |---|---|
 | **Install script** | `scripts/bladebit_setup.sh` |
 | **Binary location** | `/usr/bin/bladebit`, `/usr/bin/bladebit_cuda` |
-| **Blockchain support** | Chia only |
 | **Architectures** | x86_64, ARM64 |
 | **Modes** | Disk, RAM, GPU (CUDA) |
 | **Version** | v3.1.0 (prebuilt binaries from Chia-Network/bladebit) |
@@ -40,22 +41,10 @@ Farmer/Harvester reads plots for challenges
 |---|---|
 | **Install script** | `scripts/madmax_setup.sh` |
 | **Binary location** | `/usr/bin/chia_plot`, `/usr/bin/chia_plot_k34` |
-| **Blockchain support** | All forks (CPU plotting) |
 | **Architectures** | x86_64 only (ARM64 unsupported, prints warning) |
 | **Variants** | CPU (`chia_plot`), CUDA (`cuda_plot_k26` through `cuda_plot_k33`) |
 | **Additional tools** | ProofOfSpace binary for compressed plot verification |
 | **Skip flag** | `madmax_skip_build=true` |
-
-### Gigahorse
-
-| Attribute | Value |
-|---|---|
-| **Install script** | `scripts/forks/gigahorse_install.sh` |
-| **Source** | Closed-source binary from madMAx43v3r/chia-gigahorse |
-| **Blockchain support** | Chia (uses alternative binary) |
-| **Features** | Compressed plotting and farming |
-| **GPU** | Requires GPU drivers for recompute server |
-| **ARM64** | Pinned to v2.4.1 (newer versions may break) |
 
 ## 3. Plotman (Plot Scheduler)
 
@@ -63,22 +52,12 @@ Farmer/Harvester reads plots for challenges
 
 - **Script:** `scripts/plotman_setup.sh`
 - **Source:** `guydavis/plotman` (enhanced fork)
-- **Condition:** fullnode/plotter modes AND (chia/chives/mmx/gigahorse)
+- **Condition:** fullnode/plotter modes
 
 ### Configuration
 
-Four sample configs based on blockchain:
-
-| Config File | Blockchain |
-|---|---|
-| `config/plotman.sample.yaml` | Chia (default) |
-| `config/plotman.sample-chives.yaml` | Chives |
-| `config/plotman.sample-mmx.yaml` | MMX |
-| `config/plotman.sample-gigahorse.yaml` | Gigahorse |
-
-### Key Settings
-
 ```yaml
+# config/plotman.sample.yaml — Chia default
 directories:
   tmp: [/plotting]       # Temp space for plot creation
   dst: [/plots]          # Final plot destination
@@ -129,7 +108,7 @@ FREE_GIBS_REQUIRED_FOR_KSIZE = {29: 13, 30: 26, 31: 52, 32: 104, 33: 210, 34: 43
 ### Installation
 
 - **Build time:** `scripts/gpu_drivers_install.sh` (OpenCL packages, AMD drivers)
-- **Runtime:** `scripts/gpu_drivers_setup.sh` (per-fork GPU enablement)
+- **Runtime:** `scripts/gpu_drivers_setup.sh` (GPU enablement)
 
 ### Environment Variables
 
@@ -145,7 +124,6 @@ OPENCL_GPU=null|amd|nvidia
 |---|---|
 | Bladebit CUDA | NVIDIA (via `bladebit_cuda`) |
 | Madmax CUDA | NVIDIA (`cuda_plot_k26` through `cuda_plot_k33`) |
-| Gigahorse | NVIDIA/AMD (recompute server) |
 
 ### AMD GPU Notes
 
@@ -174,11 +152,12 @@ The farmer receives challenges from the blockchain network:
 
 ### Wallet Operations
 
-- Wallet sync managed by blockchain service
+- Wallet sync managed by Chia blockchain service
 - Auto-sync every 15 minutes (`periodically_sync_wallet`)
 - Wallet can be paused/resumed via config file
 - Cold wallet balance tracking via AllTheBlocks API
 - Stuck farmer auto-restart every 10 minutes
+- Balance change notifications via Telegram (see TELEGRAM-NOTIFICATIONS.md)
 
 ## 7. Archiving
 
@@ -235,14 +214,3 @@ On-demand via WebUI:
 - Detailed analysis of individual plot files
 - Results stored in plot's `plot_analyze` field
 - Triggered via AJAX request to farming blueprint
-
-## 10. Plottable and Poolable Blockchains
-
-Not all blockchains support all operations:
-
-```python
-PLOTTABLE_BLOCKCHAINS = ['chia', 'chives', 'gigahorse', 'mmx']
-POOLABLE_BLOCKCHAINS = ['chia', 'chives', 'gigahorse']
-```
-
-Other forks can only farm existing plots or receive OG (original) plots.

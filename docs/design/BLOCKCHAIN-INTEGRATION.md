@@ -1,12 +1,14 @@
 # Blockchain Integration Design
 
-> How Machinaris interfaces with Chia and 34+ blockchain forks.
+> How Machinaris interfaces with the Chia blockchain.
+>
+> **Note:** As of v2.7.0, Machinaris is Chia-only. All 33 non-Chia forks have been removed from the Docker build. The fork install scripts remain in `scripts/forks/` for reference but are not executed. `blockchains.json` still contains legacy fork metadata (see TODO-008).
 
 ## 1. Blockchain Registry
 
-All supported blockchains are defined in `common/config/blockchains.json`. This file is the single source of truth for blockchain metadata.
+Blockchain metadata is defined in `common/config/blockchains.json`. Only the Chia entry is active.
 
-### Per-Blockchain Configuration
+### Chia Configuration
 
 ```json
 {
@@ -35,61 +37,35 @@ All supported blockchains are defined in `common/config/blockchains.json`. This 
 | Field | Purpose |
 |---|---|
 | `name` | Display name in UI |
-| `symbol` | Ticker symbol (XCH, XCC, etc.) |
+| `symbol` | Ticker symbol (XCH) |
 | `binary` | Path to blockchain CLI executable |
 | `network_path` | Data directory for blockchain state |
-| `network_name` | Network identifier (mainnet/testnet) |
+| `network_name` | Network identifier (mainnet) |
 | `network_port` | P2P protocol port |
 | `farmer_port` | Farmer service port |
 | `fullnode_rpc_port` | RPC endpoint port |
-| `worker_port` | Machinaris API port for this fork |
+| `worker_port` | Machinaris API port (8927) |
 | `reward` | Block reward amount |
 | `mojos_per_coin` | Smallest unit conversion factor |
 | `blocks_per_day` | Block frequency (affects win probability) |
 
-## 2. Supported Blockchains
-
-### Active (with install scripts)
-
-| Blockchain | Symbol | Worker Port | Notes |
-|---|---|---|---|
-| **Chia** | XCH | 8927 | Reference implementation |
-| **Gigahorse** | XCH | 8959 | Madmax compressed farming |
-| **MMX** | MMX | 8940 | Madmax alternative blockchain |
-| **Chives** | XCC | 8931 | Alternative CLI wrapper |
-| **BPX** | BPX | 8945 | |
-| **Cactus** | CAC | 8936 | |
-| **Flax** | XFX | 8928 | Early Chia fork |
-| **Flora** | XFL | 8932 | |
-| **HddCoin** | HDD | 8930 | |
-| **Staicoin** | STAI | 8948 | Half-mojos conversion quirk |
-| + 24 more forks | Various | 8929-8960 | See blockchains.json |
-
-### Deprecated/Legacy
-
-These forks are still in `blockchains.json` but many appear abandoned:
-achi, ballcoin, coffee, ecostake, gold, mint, nchain, petroleum, profit, silicoin, stor
-
-### Special Cases
-
-| Blockchain | Speciality |
-|---|---|
-| **Gigahorse** | Closed-source binary from Madmax; uses alternative Chia binary at `/chia-gigahorse-farmer/chia.bin`; requires GPU drivers |
-| **MMX** | Not a traditional Chia fork; uses Madmax binaries; JSON config instead of YAML; testnet10 network |
-| **Chives** | Alternative fork URL support (Foxy fork); creates symlinks to `/chia-blockchain` |
-| **Staicoin** | Unit conversion quirk (half-mojos, renamed to "stai") |
-
-## 3. RPC Client Architecture
+## 2. RPC Client Architecture
 
 ### File: `api/commands/rpc.py`
 
-Dynamic imports for 40+ blockchains based on `globals.enabled_blockchains()`:
+Chia-only RPC imports using Chia 2.6.x module paths:
 
 ```python
-# Each blockchain provides RPC client classes:
-from chia.rpc.full_node_rpc_client import FullNodeRpcClient
-from chia.rpc.farmer_rpc_client import FarmerRpcClient
-from chia.rpc.wallet_rpc_client import WalletRpcClient
+# Chia 2.6.x moved RPC clients to service-specific directories
+from chia.farmer.farmer_rpc_client import FarmerRpcClient
+from chia.full_node.full_node_rpc_client import FullNodeRpcClient
+from chia.wallet.wallet_rpc_client import WalletRpcClient
+from chia.data_layer.data_layer_rpc_client import DataLayerRpcClient
+from chia.daemon.client import DaemonProxy
+
+# Sized ints moved to chia_rs in 2.6.x
+from chia_rs.sized_ints import uint16, uint64
+from chia_rs.sized_bytes import bytes32
 ```
 
 ### Key RPC Methods
@@ -117,7 +93,7 @@ async def get_all_plots():
 
 Uses `asyncio` for non-blocking I/O when querying multiple harvesters in parallel.
 
-## 4. CLI Interaction
+## 3. CLI Interaction
 
 ### File: `api/commands/chia_cli.py`
 
@@ -148,14 +124,14 @@ result = subprocess.run(
 
 CLI output is parsed using regex and text matching. Results are stored in model `details` columns as raw text, with property methods extracting structured data on demand.
 
-## 5. External Services
+## 4. External Services
 
 ### File: `api/commands/websvcs.py`
 
 | Service | Purpose | Endpoint Pattern |
 |---|---|---|
-| AllTheBlocks | Cold wallet balance tracking | `https://api.alltheblocks.net/{blockchain}/address/{address}` |
-| CoinGecko | Blockchain price data | Via API |
+| AllTheBlocks | Cold wallet balance tracking | `https://api.alltheblocks.net/chia/address/{address}` |
+| CoinGecko | Chia price data | Via API |
 | CoinPaprika | Alternative price source | Via API |
 
 ### Caching
@@ -164,7 +140,7 @@ CLI output is parsed using regex and text matching. Results are stored in model 
 - Exchange rates cached in `/root/.chia/machinaris/cache/exchange_rates_cache.json`
 - Transaction pagination limited to 20 pages max
 
-## 6. Global Configuration Functions
+## 5. Global Configuration Functions
 
 ### File: `common/config/globals.py`
 
@@ -190,9 +166,9 @@ CLI output is parsed using regex and text matching. Results are stored in model 
 RELOAD_MINIMUM_DAYS = 1
 ```
 
-Version detection runs `<binary> version` via subprocess. Results are cached for at least 1 day to avoid repeated subprocess overhead. Handles pre-release suffixes (`.dev`, `rc`, `b1-b3`).
+Version detection runs `chia version` via subprocess. Results are cached for at least 1 day to avoid repeated subprocess overhead.
 
-## 7. Certificate Management
+## 6. Certificate Management
 
 Harvesters need SSL certificates from the farmer/fullnode for RPC access:
 
@@ -201,17 +177,17 @@ Harvesters need SSL certificates from the farmer/fullnode for RPC access:
 3. Stores certificates in local blockchain config directory
 4. Uses certificates for all subsequent RPC calls
 
-## 8. Chia Version Alignment
+## 7. Chia Version Alignment
 
 **Key project goal:** Maintain alignment with latest Chia versions from chia.net.
 
-Current state (v2.6.0):
-- Chia v2.6.0 support (Python 3.13, TLS 1.3, preliminary V2 plot format)
-- Chia blockchain download via torrent bootstrapping
+Current state (v2.7.0):
+- Chia v2.6.1 support
+- Chia 2.6.x module restructure: RPC clients moved to service directories, sized ints moved to `chia_rs`
 - V1 and V2 blockchain database format detection
 - GPU-accelerated binary support (CUDA chia-blockchain-cli)
 
 Upgrade considerations:
 - New Chia versions may introduce breaking changes to RPC APIs
-- V2 plot format support is preliminary — full support pending
+- V2 plot format support is preliminary — full support pending (see TODO-009)
 - Python version requirements may change with new Chia releases

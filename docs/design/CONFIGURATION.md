@@ -1,6 +1,8 @@
 # Configuration Design
 
 > Environment variables, config files, setup flow, internationalization, and security.
+>
+> **Note:** As of v2.7.0, Machinaris is Chia-only. Fork-specific environment variables and config options have been removed.
 
 ## 1. Configuration Sources
 
@@ -19,7 +21,7 @@ Machinaris uses a layered configuration approach:
 
 | Variable | Default | Purpose |
 |---|---|---|
-| `blockchains` | `chia` | Space-separated blockchain list (single per container enforced) |
+| `blockchains` | `chia` | Blockchain identifier (Chia-only as of v2.7.0) |
 | `mode` | `fullnode` | Operating mode: fullnode, farmer, harvester, plotter, farmer+plotter, harvester+plotter |
 | `keys` | — | Colon-separated paths to mnemonic.txt files |
 | `plots_dir` | `/plots` | Colon-separated plot directories |
@@ -40,7 +42,7 @@ Machinaris uses a layered configuration approach:
 | `controller_web_port` | `8926` | WebUI port |
 | `controller_api_port` | `8927` | API port |
 | `worker_address` | — | This worker's IP (required for distributed) |
-| `worker_api_port` | `8927` | Worker API port (varies by fork) |
+| `worker_api_port` | `8927` | Worker API port |
 | `farmer_address` | `null` | Remote farmer IP (harvester mode) |
 | `farmer_port` | `8447` | Farmer protocol port |
 
@@ -53,8 +55,6 @@ Machinaris uses a layered configuration approach:
 | `chia_data` | `false` | Enable Chia Data Layer services |
 | `chia_exporter` | `false` | Enable Prometheus metrics export |
 | `chia_db_download` | `true` | Torrent-based blockchain DB bootstrap |
-| `chives_masternode` | `false` | Chives masternode mode |
-| `gigahorse_recompute_server` | `false` | GPU proof recomputation |
 
 ### GPU Configuration
 
@@ -88,7 +88,6 @@ Machinaris uses a layered configuration approach:
 |---|---|
 | `bladebit_skip_build=true` | Skip Bladebit installation |
 | `madmax_skip_build=true` | Skip Madmax installation |
-| `forktools_skip_build=true` | Skip Forktools installation |
 
 ## 3. Config Files
 
@@ -107,9 +106,10 @@ Machinaris uses a layered configuration approach:
 │   │   ├── web.cfg                        # WebUI settings
 │   │   ├── locale_settings.json           # Currency preference
 │   │   ├── wallet_settings.json           # Wallet pause state
-│   │   └── cold_wallet_addresses.json     # Cold wallet tracking
+│   │   ├── cold_wallet_addresses.json     # Cold wallet tracking
+│   │   └── notifications.json            # Telegram notification config
 │   ├── cache/
-│   │   ├── blockchain_prices_cache.json   # USD prices per blockchain
+│   │   ├── blockchain_prices_cache.json   # USD prices
 │   │   └── exchange_rates_cache.json      # Fiat exchange rates
 │   ├── dbs/                               # SQLite databases (21+)
 │   └── logs/                              # Application logs
@@ -128,7 +128,7 @@ Created automatically by `scripts/config_api_server.sh` with architecture-specif
 
 ### Plotman Config (`plotman.yaml`)
 
-Initialized from sample configs with credential injection:
+Initialized from `config/plotman.sample.yaml` with credential injection:
 ```bash
 sed -i "s/farmer_pk:.*/farmer_pk: ${farmer_pk}/" plotman.yaml
 sed -i "s/pool_pk:.*/pool_pk: ${pool_pk}/" plotman.yaml
@@ -236,7 +236,7 @@ For production deployments exposed to networks:
 
 ### Version File
 
-`/machinaris/VERSION` contains the current version string (e.g., `2.6.0`).
+`/machinaris/VERSION` contains the current version string (e.g., `2.7.0`).
 
 ### Component Version Detection
 

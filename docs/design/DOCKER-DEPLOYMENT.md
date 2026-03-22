@@ -1,31 +1,30 @@
 # Docker and Deployment Design
 
-> Container build process, entrypoint orchestration, scripts, and multi-container deployment.
+> Container build process, entrypoint orchestration, scripts, and deployment.
+>
+> **Note:** As of v2.7.0, Machinaris is Chia-only. The Docker image builds only Chia. Base image published under `squaremesh` namespace on GHCR.
 
 ## 1. Docker Image Architecture
 
-### Base Images
-
-Two Ubuntu base images support multi-architecture builds:
+### Base Image
 
 | Image | OS | Architectures |
 |---|---|---|
-| `machinaris-base-jammy` | Ubuntu 22.04 (Jammy) | linux/amd64, linux/arm64 |
-| `machinaris-base-noble` | Ubuntu 24.04 (Noble) | linux/amd64, linux/arm64 |
+| `ghcr.io/squaremesh/machinaris-base-noble` | Ubuntu 24.04 (Noble) | linux/amd64, linux/arm64 |
 
-Base images install: Python 3, build tools, git, cmake, sqlite3, smartmontools, archive utilities, Docker networking tools.
+Base image installs: Python 3, build tools, git, cmake, sqlite3, smartmontools, archive utilities, Docker networking tools.
 
 ### Main Dockerfile
 
-Multi-stage build inheriting from the versioned base image:
+Single-stage build inheriting from the base image:
 
 ```dockerfile
-FROM ghcr.io/guydavis/machinaris-base-${UBUNTU_VER}:${MACHINARIS_STREAM}
+FROM ghcr.io/squaremesh/machinaris-base-noble:${MACHINARIS_STREAM}
 ```
 
 **Build sequence:**
 1. Copy Machinaris source code to `/machinaris/`
-2. Run 34 fork install scripts (chained with `&&`)
+2. Run Chia install script
 3. Pull 3rd-party JS libraries (vendored, no CDN)
 4. Install Machinaris application
 5. Compile i18n translation files
@@ -33,14 +32,8 @@ FROM ghcr.io/guydavis/machinaris-base-${UBUNTU_VER}:${MACHINARIS_STREAM}
 
 ### Build Arguments
 
-34 blockchain fork branches are parametric build arguments:
-
 ```dockerfile
 ARG CHIA_BRANCH=latest
-ARG CHIVES_BRANCH=latest
-ARG MMX_BRANCH=latest
-ARG FLAX_BRANCH=latest
-# ... 30 more forks
 ```
 
 ### Exposed Ports
@@ -51,7 +44,6 @@ ARG FLAX_BRANCH=latest
 | 8447 | Farmer port | Internal only (DO NOT forward) |
 | 8926 | Machinaris WebUI | Proxy if exposing externally |
 | 8927 | Machinaris API | Workers connect here |
-| 8928-8960 | Fork-specific worker ports | One per blockchain fork |
 
 ### Volume Mounts
 
@@ -70,21 +62,17 @@ The entrypoint is the container startup orchestrator. It runs sequentially:
 
 ```
 1. Validate hostname (no spaces/quotes)
-2. Enforce single-blockchain-per-container
-3. Validate worker_address is set
-4. Run version-specific upgrade migrations
-5. Launch blockchain services (via blockchains_launch.sh)
-6. Start Machinaris WebUI + API (via start_machinaris.sh)
-7. Install tools (staggered with random sleep):
+2. Validate worker_address is set
+3. Run version-specific upgrade migrations
+4. Launch Chia blockchain services (via chia_launch.sh)
+5. Start Machinaris WebUI + API (via start_machinaris.sh)
+6. Install tools:
    a. Plotman (plotters/fullnodes only)
    b. Chiadog (fullnodes/harvesters only)
-   c. Random 1-180s sleep (stagger multi-container startup)
-   d. fd-cli (non-Chia forks)
-   e. Bladebit (Chia plotters)
-   f. Madmax (all forks for CPU plotting)
-   g. Plotman auto-plot/archive (if AUTO_PLOT/AUTO_ARCHIVE)
-   h. Forktools (non-MMX/Gigahorse fullnodes)
-8. Tail /dev/null (keep container alive)
+   c. Bladebit (Chia plotters)
+   d. Madmax (CPU plotting, x86_64 only)
+   e. Plotman auto-plot/archive (if AUTO_PLOT/AUTO_ARCHIVE)
+7. Tail /dev/null (keep container alive)
 ```
 
 ### Upgrade Migrations
@@ -102,7 +90,7 @@ The entrypoint includes version-specific migration checks:
 ### Machinaris Startup (`start_machinaris.sh`)
 
 1. Create log and config directories
-2. Configure Plotman with blockchain-specific sample config
+2. Configure Plotman with Chia sample config
 3. Inject farmer_pk, pool_pk, pool_contract_address via sed
 4. Import SSH key if `/id_rsa` volume mounted
 5. Initialize database (`setup_databases.sh` → `flask db upgrade`)
@@ -112,22 +100,12 @@ The entrypoint includes version-specific migration checks:
 
 ## 3. Script Architecture
 
-### Fork Installation Scripts
-
-Each fork has paired scripts in `scripts/forks/`:
+### Chia Installation
 
 | Script | Purpose |
 |---|---|
-| `[fork]_install.sh` | Clone repo, build, install dependencies |
-| `[fork]_launch.sh` | Start services based on operating mode |
-
-**Installation pattern:**
-```bash
-git clone --branch ${FORK_BRANCH} [REPO_URL] /[fork]-blockchain
-cd /[fork]-blockchain && ./install.sh
-# Symlink to /chia-blockchain for tool compatibility
-# Create wrapper for `chia` command
-```
+| `scripts/forks/chia_install.sh` | Clone repo, build, install dependencies |
+| `scripts/forks/chia_launch.sh` | Start services based on operating mode |
 
 **Launch pattern (mode-dependent):**
 - `fullnode` → `chia start farmer` (or `farmer-no-wallet`)
@@ -139,14 +117,12 @@ cd /[fork]-blockchain && ./install.sh
 
 | Script | Condition | Purpose |
 |---|---|---|
-| `plotman_setup.sh` | fullnode/plotter + chia/chives/mmx/gigahorse | Install Plotman plot scheduler |
-| `chiadog_setup.sh` | fullnode/harvester, all forks except mmx | Install log monitoring daemon |
-| `bladebit_setup.sh` | fullnode/plotter + chia only | Download Bladebit plotters |
-| `madmax_setup.sh` | all forks | Download Madmax plotters (CPU + CUDA) |
-| `forktools_setup.sh` | fullnode/harvester, non-mmx/gigahorse | Install fork reward recovery |
-| `fd-cli_setup.sh` | fullnode, non-chia/chives/mmx/gigahorse | Install Flora dev CLI |
+| `plotman_setup.sh` | fullnode/plotter | Install Plotman plot scheduler |
+| `chiadog_setup.sh` | fullnode/harvester | Install log monitoring daemon |
+| `bladebit_setup.sh` | fullnode/plotter | Download Bladebit plotters |
+| `madmax_setup.sh` | fullnode/plotter | Download Madmax plotters (CPU + CUDA) |
 | `gpu_drivers_install.sh` | build time | Install OpenCL + AMD GPU drivers |
-| `gpu_drivers_setup.sh` | runtime, per-fork | Enable GPU-specific features |
+| `gpu_drivers_setup.sh` | runtime | Enable GPU-specific features |
 
 ### Infrastructure Scripts
 
@@ -156,7 +132,7 @@ cd /[fork]-blockchain && ./install.sh
 | `config_api_server.sh` | Create API config with arch-specific defaults |
 | `pull_3rd_party_libs.sh` | Download and vendor all JS/CSS libraries |
 | `mount_remote_shares.sh` | Mount CIFS/SMB network shares |
-| `worker_port_warning.sh` | Validate worker API ports match fork defaults |
+| `worker_port_warning.sh` | Validate worker API port (simplified to 4 lines) |
 | `chiadog_notifier.sh` | Custom notification hook |
 | `plotman_autoplot.sh` | Auto-start plotting/archiving |
 
@@ -176,7 +152,7 @@ cd /[fork]-blockchain && ./install.sh
 | `compile.sh` | Compile .po to .mo files |
 | `init.sh` | Initialize new language translation |
 
-## 4. Multi-Container Deployment Patterns
+## 4. Deployment Patterns
 
 ### Standalone Fullnode
 
@@ -206,17 +182,6 @@ Plotter 1:
   AUTO_PLOT=true
 ```
 
-### Multi-Fork Farm
-
-One container per fork (enforced single-blockchain):
-```
-Container 1: blockchains=chia,  mode=fullnode, worker_api_port=8927
-Container 2: blockchains=flax,  mode=fullnode, worker_api_port=8928
-Container 3: blockchains=chives, mode=fullnode, worker_api_port=8931
-```
-
-All connect to same controller for centralized metrics.
-
 ## 5. CI/CD Pipeline
 
 ### GitHub Actions Workflows
@@ -232,16 +197,17 @@ All connect to same controller for centralized metrics.
 | `main-blockchains.yaml` | Manual dispatch | Build production blockchain images |
 | `codeql-analysis.yml` | Scheduled | Security scanning |
 
-### Container Registries
+### Container Registry
 
-- DockerHub: `ghcr.io/guydavis/machinaris-base-*`
-- GitHub Container Registry (GHCR): Secondary registry
+- GitHub Container Registry (GHCR): `ghcr.io/squaremesh/machinaris`
+- Base images: `ghcr.io/squaremesh/machinaris-base-noble`
 
 ### Image Tags
 
 - `:latest` — Production release
 - `:develop` — Development builds
 - `:test` — Test builds
+- `:<version>` — Pinned version (e.g., `:2.7.0`)
 
 ## 6. Log Rotation
 
@@ -249,7 +215,6 @@ All connect to same controller for centralized metrics.
 |---|---|---|
 | Machinaris (apisrv, webui) | `/etc/logrotate.d/machinaris` | 7-day daily |
 | Plotman | `/etc/logrotate.d/plotman` | 3-day daily |
-| MMX (node, farmer, harvester) | `/etc/logrotate.d/mmx-*` | 3-day daily |
 
 ## 7. Python Dependencies
 
@@ -259,4 +224,3 @@ Installed from `docker/requirements.txt`:
 - APScheduler
 - Gunicorn
 - psutil, requests, pexpect
-- And blockchain-specific libraries per fork
