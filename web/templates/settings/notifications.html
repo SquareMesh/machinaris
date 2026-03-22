@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<header class="pb-3 mb-4 border-bottom">
+    <span class="fs-4">{{_('Notifications')}} - {{_('Telegram Balance Alerts')}}</span>
+</header>
+
+<div>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    {% if category == 'message' %}
+    <div class="alert alert-warning" role="alert">
+        {% else %}
+        <div class="alert alert-{{ category }}" role="alert">
+            {% endif %}
+            {{ message|safe }}
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Setup Guide -->
+    <div class="accordion mb-4" id="setupGuide">
+        <div class="accordion-item bg-dark">
+            <h2 class="accordion-header" id="headingGuide">
+                <button class="accordion-button collapsed bg-dark text-white" type="button"
+                    data-bs-toggle="collapse" data-bs-target="#collapseGuide"
+                    aria-expanded="false" aria-controls="collapseGuide">
+                    <i class="bi-info-circle me-2"></i> {{_('How to set up Telegram notifications')}}
+                </button>
+            </h2>
+            <div id="collapseGuide" class="accordion-collapse collapse" aria-labelledby="headingGuide"
+                data-bs-parent="#setupGuide">
+                <div class="accordion-body text-white-50">
+                    <ol>
+                        <li class="mb-2">
+                            <strong>{{_('Create a Telegram Bot')}}</strong><br>
+                            {{_('Open Telegram and search for')}} <code>@BotFather</code>.
+                            {{_('Send')}} <code>/newbot</code> {{_('and follow the prompts to name your bot.')}}
+                        </li>
+                        <li class="mb-2">
+                            <strong>{{_('Copy your Bot Token')}}</strong><br>
+                            {{_('BotFather will give you an API token that looks like:')}}
+                            <code>123456789:ABCdefGHIjklMNOpqrSTUvwxYZ</code><br>
+                            {{_('Copy this token and paste it in the Bot Token field below.')}}
+                        </li>
+                        <li class="mb-2">
+                            <strong>{{_('Start a chat with your bot')}}</strong><br>
+                            {{_('Search for your bot by the name you gave it and send it')}} <code>/start</code>.
+                            {{_('This is required before the bot can send you messages.')}}
+                        </li>
+                        <li class="mb-2">
+                            <strong>{{_('Get your Chat ID')}}</strong><br>
+                            {{_('After sending /start to your bot, open this URL in your browser (replace YOUR_TOKEN with your actual token):')}}
+                            <br><code>https://api.telegram.org/botYOUR_TOKEN/getUpdates</code><br>
+                            {{_('Look for')}} <code>"chat":{"id":XXXXXXXX}</code> {{_('in the response. That number is your Chat ID.')}}
+                        </li>
+                        <li class="mb-2">
+                            <strong>{{_('Enter credentials and test')}}</strong><br>
+                            {{_('Paste the Bot Token and Chat ID below, then click Send Test to verify everything works.')}}
+                        </li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Configuration Form -->
+    <form method="POST" id="notifications-form">
+        <div class="card bg-dark border-secondary mb-4">
+            <div class="card-header border-secondary">
+                <h5 class="card-title mb-0">{{_('Telegram Settings')}}</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-sm-6">
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="enabled" name="enabled"
+                                {% if config.telegram.enabled %}checked{% endif %}>
+                            <label class="form-check-label text-white" for="enabled">
+                                <strong>{{_('Enable Telegram balance notifications')}}</strong>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <label for="bot_token" class="col-sm-2 col-form-label text-white">{{_('Bot Token')}}</label>
+                    <div class="col-sm-6">
+                        <input type="text" class="form-control" id="bot_token" name="bot_token"
+                            value="{{ config.telegram.bot_token }}"
+                            placeholder="123456789:ABCdefGHIjklMNOpqrSTUvwxYZ">
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <label for="chat_id" class="col-sm-2 col-form-label text-white">{{_('Chat ID')}}</label>
+                    <div class="col-sm-6">
+                        <input type="text" class="form-control" id="chat_id" name="chat_id"
+                            value="{{ config.telegram.chat_id }}"
+                            placeholder="123456789">
+                    </div>
+                </div>
+
+                <hr class="border-secondary">
+
+                <div class="row mb-3">
+                    <div class="col-sm-6">
+                        <h6 class="text-white mb-3">{{_('Notification Triggers')}}</h6>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="notify_on_increase" name="notify_on_increase"
+                                {% if config.telegram.notify_on_increase %}checked{% endif %}>
+                            <label class="form-check-label text-white" for="notify_on_increase">
+                                {{_('Balance increases (incoming XCH)')}}
+                            </label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="notify_on_decrease" name="notify_on_decrease"
+                                {% if config.telegram.notify_on_decrease %}checked{% endif %}>
+                            <label class="form-check-label text-white" for="notify_on_decrease">
+                                {{_('Balance decreases (outgoing XCH)')}}
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <label for="min_change_threshold" class="col-sm-2 col-form-label text-white">{{_('Minimum change')}}</label>
+                    <div class="col-sm-3">
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="min_change_threshold" name="min_change_threshold"
+                                value="{{ config.telegram.min_change_threshold }}"
+                                step="0.000001" min="0" placeholder="0.0">
+                            <span class="input-group-text">XCH</span>
+                        </div>
+                        <small class="text-white-50">{{_('Ignore changes smaller than this amount')}}</small>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-sm-6">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="include_cold_wallet" name="include_cold_wallet"
+                                {% if config.telegram.include_cold_wallet %}checked{% endif %}>
+                            <label class="form-check-label text-white" for="include_cold_wallet">
+                                {{_('Include cold wallet balance in total')}}
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-footer border-secondary">
+                <button type="submit" class="btn btn-outline-success" id="btnSave">
+                    {{_('Save')}}
+                </button>
+                <button type="button" class="btn btn-outline-info ms-2" id="btnTest">
+                    {{_('Send Test Message')}}
+                </button>
+            </div>
+        </div>
+    </form>
+
+    <!-- Hidden test form -->
+    <form method="POST" id="test-form" style="display:none;">
+        <input type="hidden" name="action" value="test">
+        <input type="hidden" name="bot_token" id="test_bot_token">
+        <input type="hidden" name="chat_id" id="test_chat_id">
+    </form>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $("#btnSave").click(function () {
+        $(this).prop("disabled", true);
+        $(this).html(
+            '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> {{_("Saving...")}}'
+        );
+        $("#notifications-form").submit();
+    });
+
+    $("#btnTest").click(function () {
+        var token = $("#bot_token").val().trim();
+        var chatId = $("#chat_id").val().trim();
+        if (!token || !chatId) {
+            alert('{{_("Please enter both Bot Token and Chat ID before testing.")}}');
+            return;
+        }
+        $(this).prop("disabled", true);
+        $(this).html(
+            '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> {{_("Sending...")}}'
+        );
+        $("#test_bot_token").val(token);
+        $("#test_chat_id").val(chatId);
+        $("#test-form").submit();
+    });
+</script>
+{% endblock %}

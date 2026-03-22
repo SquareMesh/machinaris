@@ -5,6 +5,7 @@ from flask.views import MethodView
 
 from api import app
 from api.commands.websvcs import cold_wallet_balance
+from api.commands import balance_notifications
 from api.extensions.api import Blueprint, SQLCursorPage
 from api.commands import websvcs
 from common.extensions.database import db
@@ -36,8 +37,10 @@ class Wallets(MethodView):
     @blp.response(201, WalletSchema)
     def post(self, new_item):
         blockchain = new_item['blockchain']
-        item = db.session.query(Wallet).filter(Wallet.hostname==new_item['hostname'], \
+        hostname = new_item['hostname']
+        item = db.session.query(Wallet).filter(Wallet.hostname==hostname, \
             Wallet.blockchain==blockchain).first()
+        old_details = item.details if item else None
         try:
             new_item['cold_balance'] = websvcs.cold_wallet_balance(blockchain)
         except Exception as ex:
@@ -50,6 +53,12 @@ class Wallets(MethodView):
             item = Wallet(**new_item)
         db.session.add(item)
         db.session.commit()
+        try:
+            balance_notifications.check_and_notify(
+                blockchain, hostname, old_details,
+                new_item.get('details'), new_item.get('cold_balance'))
+        except Exception as ex:
+            app.logger.error("Balance notification failed: {0}".format(str(ex)))
         return item
 
 

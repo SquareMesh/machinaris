@@ -1,12 +1,41 @@
-from flask import Blueprint, render_template, request, make_response, abort, current_app
+from flask import Blueprint, render_template, request, make_response, abort, current_app, flash
 from markupsafe import escape
 from flask_babel import _, lazy_gettext as _l
 from common.config import globals
-from web.actions import forktools, worker, chiadog, chia, plotman
+from web.actions import forktools, worker, chiadog, chia, plotman, notifications
 from web.utils import find_selected_worker
 import requests
 
 settings_bp = Blueprint('settings', __name__)
+
+
+@settings_bp.route('/settings/notifications', methods=['GET', 'POST'])
+def notifications_settings():
+    gc = globals.load()
+    if request.method == 'POST':
+        action = request.form.get('action')
+        if action == 'test':
+            bot_token = request.form.get('bot_token', '').strip()
+            chat_id = request.form.get('chat_id', '').strip()
+            if not bot_token or not chat_id:
+                flash(_('Bot token and chat ID are required to send a test message.'), 'danger')
+            else:
+                notifications.send_test(bot_token, chat_id)
+        else:
+            config = {
+                "telegram": {
+                    "enabled": request.form.get('enabled') == 'on',
+                    "bot_token": request.form.get('bot_token', '').strip(),
+                    "chat_id": request.form.get('chat_id', '').strip(),
+                    "notify_on_increase": request.form.get('notify_on_increase') == 'on',
+                    "notify_on_decrease": request.form.get('notify_on_decrease') == 'on',
+                    "min_change_threshold": float(request.form.get('min_change_threshold', 0.0) or 0.0),
+                    "include_cold_wallet": request.form.get('include_cold_wallet') == 'on',
+                }
+            }
+            notifications.save_config(config)
+    config = notifications.load_config()
+    return render_template('settings/notifications.html', config=config, global_config=gc)
 
 @settings_bp.route('/settings/tools', methods=['GET', 'POST'])
 def tools():

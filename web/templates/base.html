@@ -104,6 +104,12 @@
                                 {% endif %}
                                 {% if global_config.farming_enabled %}
                                 <li>
+                                    <a href="{{ url_for('settings.notifications_settings') }}" class="nav-link px-0"> <i class="fs-4 bi-chat-dots"></i>
+                                        <span class="d-none d-sm-inline text-white">{{_('Notifications')}}</span> </a>
+                                </li>
+                                {% endif %}
+                                {% if global_config.farming_enabled %}
+                                <li>
                                     <a href="{{ url_for('farming.settings') }}" class="nav-link px-0"> <i class="fs-4 bi-tree"></i>
                                         <span class="d-none d-sm-inline text-white">{{_('Farming')}}</span> </a>
                                 </li>

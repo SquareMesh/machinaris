@@ -9,6 +9,7 @@ from api import app
 from api.extensions.api import Blueprint
 
 from api.commands import chiadog_cli, chia_cli, plotman_cli, forktools_cli, mmx_cli, rewards
+from common.utils import notifications
 
 blp = Blueprint(
     'Config',
@@ -48,6 +49,9 @@ class ConfigByType(MethodView):
             mimetype = "application/json"
         elif type == "tools":
             config = forktools_cli.load_config(blockchain)
+        elif type == "notifications":
+            config = json.dumps(notifications.load_config())
+            mimetype = "application/json"
         else:
             abort(400, "Unknown config type provided: {0}".format(type))
         response = make_response(config, 200)
@@ -81,6 +85,8 @@ class ConfigByType(MethodView):
                 chia_cli.save_wallet_settings(json.loads(request.data.decode('utf-8')), blockchain)
             elif type == "plotnfts":
                 rewards.save_chia_plotnfts(json.loads(request.data.decode('utf-8')))
+            elif type == "notifications":
+                notifications.save_config(json.loads(request.data.decode('utf-8')))
             else:
                 abort(400, "Unknown config type provided: {0}".format(type))
             response = make_response("Successfully saved config.", 200)
