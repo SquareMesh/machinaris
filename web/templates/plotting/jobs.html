@@ -113,6 +113,7 @@
             </li>
         </ul>
         <form method="POST" id="plotman-form" style="padding-bottom: 10px;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <input type="hidden" id="hostname" name="hostname" />
             <input type="hidden" id="blockchain" name="blockchain" />
             <fieldset>
@@ -179,6 +180,7 @@
         {% endwith %}
     </div>
     <form method="POST" id="plotting-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div class="p-3 mb-4 bg-light border rounded-3">
             <div class="table-responsive">
                 <table id="data" class="table table-dark">

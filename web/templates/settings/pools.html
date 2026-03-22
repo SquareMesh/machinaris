@@ -53,6 +53,7 @@
     <div class="modal-dialog bg-dark rounded-3">
         <div class="modal-content bg-dark">
           <form method="POST" id="unconfirmed-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <input type="hidden" id="walletid" name="walletid" />
             <input type="hidden" name="action" value="deleteUnconfirmed"/>
             <div class="modal-header bg-dark">
@@ -109,6 +110,7 @@
                 {% for blockchain in blockchains %}
                 <div class="tab-pane {% if blockchain == selected_blockchain %}active{% endif %}" id="{{blockchain}}" role="tabpanel" aria-labelledby="{{blockchain}}-tab">
                     <form method="POST" id="{{blockchain}}-pooling-form">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <input type="hidden" id="{{blockchain}}-fee_mojos" name="{{blockchain}}-fee_mojos" />
                     <div class="p-1 mb-4 bg-light border rounded-3">
                         <div class="container m-4">

@@ -21,6 +21,7 @@
     <div class="modal-dialog bg-dark rounded-3 modal-xl">
         <div class="modal-content bg-dark">
             <form method="POST" id="check-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div class="modal-header bg-dark">
                     <h5 class="modal-title" id="checkModalLabel">{{_('Plot Check')}}</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -77,6 +78,7 @@
         </div>
         <div class="modal-body bg-dark">
           <form method="POST" id="settings-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="mb-3">
                 <div class="row align-items-center">
                     <div class="col">
@@ -180,6 +182,7 @@
         </div>
         <div class="modal-body bg-dark">
           <form method="POST" id="wallet-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <input type="hidden" id="blockchain_field" name="blockchain" value="" />
             <div class="mb-3">
               <a style='float:right' href="https://github.com/guydavis/machinaris/wiki/Wallets" target="_blank">
@@ -212,6 +215,7 @@
             </li>
         </ul>
         <form class="d-flex" method="POST" style="padding-bottom:5px" id="main-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <fieldset>
                     {% for farmer in farmers %}
                     <div class="btn-group" {% if loop.last %}style="padding-right:50px"{% endif %} >

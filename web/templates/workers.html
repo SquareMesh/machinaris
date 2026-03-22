@@ -42,6 +42,7 @@
 
   {% if workers.workers|length > 0 %}
   <form method="POST" id="workers-form" style="padding-bottom: 10px;">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <fieldset>
       <table id="data" class="table table-dark">
         <thead>

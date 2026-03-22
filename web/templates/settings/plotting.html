@@ -21,6 +21,7 @@
                 {{_('Optionally, you may schedule start and stop of the plotting manager to save on electricity (off-peak), avoid back-ups, minimize fan noise, etc.')}}
             </div>
             <form method="POST" id="schedule-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div class="row pl-3 pr-3">
                     <div class="col text-end"><b>Start</b></div>
                     <div class="col" style="padding-right: 0px">&nbsp;</div>
@@ -70,6 +71,7 @@
     <div class="alert alert-warning" role="error" id="config_error" style="display: none"></div>
     <div class="alert alert-warning" role="error" id="dirs_error" style="display: none"></div>
     <form method="POST" id="settings-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <fieldset>
             <div class="row mb-3">
                 <label for="worker" class="col-sm-1 col-form-label-lg text-end p-1">{{_('Worker')}}</label>
@@ -296,7 +298,8 @@
                 }
             }
             console.log(schedules);
-            var data = { 
+            var data = {
+                'csrf_token': '{{ csrf_token() }}',
                 'type': 'schedule',
                 'worker' : $("#worker").val(),
                 'blockchain': $("#blockchain").val(),

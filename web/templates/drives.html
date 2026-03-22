@@ -69,6 +69,7 @@
       </div>
       <div class="modal-body bg-dark">
         <form method="POST" id="settings-form">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <h6>Temperatures</h6>
           <label class="col-form-label"><i class="bi-check-circle text-success"></i> {{_('Good')}}</label>
           &nbsp;&lt;&nbsp;
@@ -121,6 +122,7 @@
 
   {% if drives.rows|length > 0 %}
   <form method="POST" id="drives-form" style="padding-bottom: 10px;">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <fieldset>
       {% if (request.args.get('view') == 'table' or drives.rows|length >= 10) and request.args.get('view') != 'grid' %}
       <table id="data" class="table table-dark">

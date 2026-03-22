@@ -84,6 +84,7 @@
                         <p>{{_('To get started with Machinaris as a Chia%(trademark)s fullnode, either import your existing 24-word mnemonic seed phrase', trademark='™')}}: </p>
                         <!-- "placeholder" is an example mnemonic to hint required format with, key long since thrown-away -->
                         <form id="main-form" method="POST">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <input class="form-control me-2" id="mnemonic" name="mnemonic" type="text" autocomplete="off"
                                 placeholder="north divorce holiday whisper inquiry toy rare minute father ostrich surprise runway ill episode dance rather unaware concert sunset maid gather grain gift wire"
                                 aria-label="Import Key">

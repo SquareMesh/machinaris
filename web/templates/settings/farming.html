@@ -32,6 +32,7 @@
     </div>
     <div class="alert alert-warning" style="display:none" role="alert" id='errors'></div>
     <form method="POST" id="settings-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <fieldset>
             <div class="row mb-3">
                 <label for="worker" class="col-sm-1 col-form-label-lg text-end p-1">{{_('Worker')}}</label>

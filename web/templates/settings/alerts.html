@@ -6,6 +6,7 @@
     <div class="modal-dialog bg-dark rounded-3">
         <div class="modal-content bg-dark">
           <form method="POST" id="test-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <input type="hidden" id="hostname_field" name="worker" value="" />
             <input type="hidden" id="blockchain_field" name="blockchain" value="" />
             <input type="hidden" name="action" value="test"/>
@@ -61,6 +62,7 @@
     </div>
 
     <form method="POST" id="settings-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <fieldset>
             <div class="row mb-3">
                 <label for="worker" class="col-sm-1 col-form-label-lg text-end p-1">{{_('Worker')}}</label>

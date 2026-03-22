@@ -48,6 +48,7 @@
         </div>
         <div class="modal-body bg-dark">
           <form method="POST" id="settings-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="mb-3">
               <label for="local_currency" class="col-form-label">{{_('Local Currency:')}}</label>
               <select type="text" class="form-control" id="local_currency_field" name="local_currency">
@@ -87,6 +88,7 @@
         </div>
         <div class="modal-body bg-dark">
           <form method="POST" id="wallet-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <input type="hidden" id="blockchain_field" name="blockchain" value="" />
             <div class="mb-3">
               <a style='float:right' href="https://github.com/guydavis/machinaris/wiki/Wallets" target="_blank">
@@ -114,6 +116,7 @@
             </div>
             <div class="modal-body">
               <form method="POST" id="restart-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <input type="hidden" id="hostname_field" name="hostname" value="" />
                 <input type="hidden" id="wallet_blockchain_field" name="blockchain" value="" />
                 <input type="hidden" id="action_field" name="action" value="" />
@@ -132,6 +135,7 @@
     <div class="modal-dialog bg-dark rounded-3">
         <div class="modal-content bg-dark">
           <form method="POST" id="rewards-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <input type="hidden" name="action" value="recover"/>
             <div class="modal-header bg-dark">
                 <h5 class="modal-title" id="rewardsModalLabel">{{_('Portable Plots - 7/8 Reward Recovery')}}</h5>
@@ -174,6 +178,7 @@
 
 {% if wallets.rows|length > 0 %}
 <form method="POST" id="wallet-form" style="padding-bottom: 10px;">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <table id="data" class="table table-dark">
         <thead>
             <tr>

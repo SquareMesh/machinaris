@@ -32,6 +32,7 @@
 
 
     <form method="POST" id="chiadog-form" style="padding-bottom: 10px;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <fieldset>
             {% for farmer in farmers %}
             <div class="btn-group">
@@ -62,6 +63,7 @@
 
     {% if notifications.rows|length > 0 %}
     <form method="POST" id="alerts-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div class="table-responsive">
             <table id="data" class="table table-dark">
                 <thead>

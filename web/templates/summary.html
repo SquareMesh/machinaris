@@ -27,6 +27,7 @@
         </div>
         <div class="modal-body bg-dark">
           <form method="POST" id="settings-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="mb-3">
               <label for="local_currency" class="col-form-label">{{_('Local Currency:')}}</label>
               <select type="text" class="form-control" id="local_currency_field" name="local_currency">
@@ -71,6 +72,7 @@
 
 {% if summaries.rows|length > 0 %}
 <form method="POST" id="blockchain-form" style="padding-bottom: 10px; padding-top: 15px">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <table id="data" class="table table-dark">
         <thead>
             <tr>

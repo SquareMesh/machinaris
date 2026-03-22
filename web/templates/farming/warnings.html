@@ -55,6 +55,7 @@
         <h3 class="text-center" >{{_('Duplicate Plots')}}</h3>
         {% if plot_warnings.duplicates|length > 0 %}
         <form method="POST" id="dupelicates-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="table-responsive">
                 <table id="duplicates_data" class="table table-dark">
                     <thead>
@@ -92,6 +93,7 @@
         <h3 class="text-center" >{{_('Invalid Plots')}}</h3>
         {% if plot_warnings.invalids|length > 0 %}
         <form method="POST" id="invalids-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="table-responsive">
                 <table id="invalids_data" class="table table-dark">
                     <thead>
@@ -129,6 +131,7 @@
         <h3 class="text-center" >{{_('Missing Keys')}}</h3>
         {% if plot_warnings.missingkeys|length > 0 %}
         <form method="POST" id="missingkeys-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="table-responsive">
                 <table id="missingkeys_data" class="table table-dark">
                     <thead>
@@ -164,6 +167,7 @@
     
     </div>
     <form method="POST" id="warnings-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <fieldset>
         <button form="warnings-form" type="submit" name="action" value="clear" class="btn btn-outline-success"
             id="btnClear">{{_('Clear All')}}</button>

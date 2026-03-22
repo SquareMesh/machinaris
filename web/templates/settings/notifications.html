@@ -70,6 +70,7 @@
 
     <!-- Configuration Form -->
     <form method="POST" id="notifications-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div class="card bg-dark border-secondary mb-4">
             <div class="card-header border-secondary">
                 <h5 class="card-title mb-0">{{_('Telegram Settings')}}</h5>
@@ -166,6 +167,7 @@
 
     <!-- Hidden test form -->
     <form method="POST" id="test-form" style="display:none;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input type="hidden" name="action" value="test">
         <input type="hidden" name="bot_token" id="test_bot_token">
         <input type="hidden" name="chat_id" id="test_chat_id">

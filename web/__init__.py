@@ -6,6 +6,7 @@ import re
 from flask import Flask, request
 from flask_babel import Babel
 from flask_sqlalchemy import SQLAlchemy
+from flask_wtf.csrf import CSRFProtect
 from sqlalchemy.engine import Engine
 from sqlalchemy import event
 
@@ -18,6 +19,8 @@ app.secret_key = b'$}#P)eu0A.O,s0Mz'
 app.config.from_object(DefaultConfig)
 # Override config with optional settings file
 app.config.from_envvar('WEB_SETTINGS_FILE', silent=True)
+
+csrf = CSRFProtect(app)
 
 def get_locale():
     try:

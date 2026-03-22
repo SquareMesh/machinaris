@@ -27,6 +27,7 @@
             </div>
             <div class="modal-body bg-dark">
               <form method="POST" id="settings-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div class="mb-3">
                     <a style='float:right' href="https://github.com/guydavis/machinaris/wiki/Connections#maxmind" target="_blank">
                         <i class="fs-4 bi-question-circle"></i>
@@ -152,6 +153,7 @@
                     role="tabpanel" aria-labelledby="{{connection.blockchain}}-tab">
                     <br />
                     <form method="POST" id="form_{{connection.displayname}}_{{connection.blockchain}}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <input type="hidden" name="blockchain" value="{{connection.blockchain}}" />
                         <div class="table-responsive">
                             <table id="conns_{{connection.displayname}}_{{connection.blockchain}}"
