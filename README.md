@@ -1,3 +1,8 @@
+# Side project continue for Chia only
+
+This fork attempts to continue Machinaris for Chia only. Big appreciation to Guy for all the hard work and effort. I'm using Claude Code to maintain this moving forward. 
+The aim is now only to align with Chia latest versions and focused on Farming use case only, not intending to look at plotting side of things.
+
 # Project Closure 
 
 Hi all, as an update on the future of Machinaris, I want to set everyone's expectations for CNI group's plans for Chia's new plot format.  Machinaris is essentially a bundling of various tools and forks that sprouted up around Chia when it first appeared years ago.  With the loss of interest in Chia, all those related tools have been dropped by their authors.
