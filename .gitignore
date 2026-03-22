@@ -1,3 +1,7 @@
+# Agent and command framework (local-only)
+.agent/
+.claude/commands/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
