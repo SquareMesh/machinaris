@@ -550,6 +550,26 @@ const SESSIONS = [
     "stack_depth": 1,
     "commits": [],
     "tags": ["architecture", "design", "tooling"]
+  },
+  {
+    "session": 2,
+    "date": "2026-03-22",
+    "summary": "Reviewed and cleaned entrypoint.sh for dead fork code paths. Fixed Chia 2.6.x RPC import breakage (modules moved to service dirs, ints to chia_rs). Built base + main Docker images. Added .gitattributes for LF line endings. Published to ghcr.io/squaremesh/. Deployed and verified on Unraid.",
+    "areas": {
+      "docs": ["BLOCKCHAIN-INTEGRATION", "DOCKER-DEPLOYMENT"],
+      "systems": ["docker", "api", "entrypoint", "ghcr"]
+    },
+    "metrics": {
+      "decisions": 3,
+      "issues_opened": 0,
+      "issues_resolved": 0,
+      "todos_added": 0,
+      "todos_resolved": 1,
+      "scenarios_added": 1
+    },
+    "stack_depth": 2,
+    "commits": ["3623f57e"],
+    "tags": ["bugfix", "implementation", "tooling"]
   }
 ];
 // SESSION_DATA_END
