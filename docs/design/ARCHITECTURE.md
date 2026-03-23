@@ -22,9 +22,9 @@ Machinaris is a **multi-tier, multi-container** application for managing Chia bl
 
 ```
 Frontend:  Bootstrap 5, Chart.js, DataTables, Leaflet, jQuery
-Backend:   Python 3.10+, Flask, Gunicorn, SQLAlchemy, APScheduler
+Backend:   Python 3.12+, Flask, Gunicorn, SQLAlchemy, APScheduler
 Database:  SQLite (21 separate databases via WAL mode)
-Infra:     Docker (Ubuntu 22.04/24.04), multi-arch (amd64/arm64)
+Infra:     Docker (Ubuntu 24.04 Noble), multi-arch (amd64/arm64)
 ```
 
 ## 2. Architecture Tiers
