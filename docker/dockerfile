@@ -55,6 +55,8 @@ ENV controller_web_port=8926
 ENV controller_api_port=8927
 ENV worker_address="null"
 ENV worker_api_port=8927
+# Bind address for API server: 127.0.0.1 = local only (default), 0.0.0.0 = allow remote workers
+ENV api_bind_address="127.0.0.1"
 
 # Nvidia GPU support
 ENV NVIDIA_VISIBLE_DEVICES all
@@ -68,6 +70,8 @@ ENV LANGUAGE en_US.UTF-8
 ENV XDG_CONFIG_HOME=/root/.chia
 ENV AUTO_PLOT=false
 ENV AUTO_ARCHIVE=false
+# Set to false to install plotman/bladebit/madmax at boot (requires container restart)
+ENV plotting_disabled=true
 ENV PLOTMAN_BRANCH=${PLOTMAN_BRANCH}
 ENV CHIADOG_BRANCH=${CHIADOG_BRANCH}
 ENV BLADEBIT_BRANCH=${BLADEBIT_BRANCH}

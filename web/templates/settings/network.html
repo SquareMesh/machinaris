@@ -1,0 +1,251 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<header class="pb-3 mb-4 border-bottom">
+    <span class="fs-4">{{_('Network & Services')}}</span>
+</header>
+
+<!-- Current Status -->
+<div class="card bg-dark border-secondary mb-4">
+    <div class="card-header border-secondary">
+        <h5 class="card-title mb-0">{{_('Current Configuration')}}</h5>
+    </div>
+    <div class="card-body">
+        <div class="row mb-3">
+            <div class="col-md-8">
+                <table class="table table-dark table-borderless mb-0">
+                    <tr>
+                        <td class="text-white-50" style="width: 180px;">{{_('API bind address')}}</td>
+                        <td><code>{{ network.api_bind_address }}</code></td>
+                    </tr>
+                    <tr>
+                        <td class="text-white-50">{{_('API port')}}</td>
+                        <td><code>{{ network.api_port }}</code></td>
+                    </tr>
+                    <tr>
+                        <td class="text-white-50">{{_('Web UI port')}}</td>
+                        <td><code>{{ network.web_port }}</code></td>
+                    </tr>
+                    <tr>
+                        <td class="text-white-50">{{_('API access mode')}}</td>
+                        <td>
+                            {% if network.api_local_only %}
+                            <span class="badge bg-success"><i class="bi-lock-fill me-1"></i>{{_('Local only')}}</span>
+                            <span class="text-white-50 ms-2">{{_('API is only accessible from within this container')}}</span>
+                            {% else %}
+                            <span class="badge bg-warning text-dark"><i class="bi-unlock-fill me-1"></i>{{_('Open to network')}}</span>
+                            <span class="text-white-50 ms-2">{{_('API is accessible from remote workers on your LAN')}}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-white-50">{{_('Plotting tools')}}</td>
+                        <td>
+                            {% if network.plotting_disabled %}
+                            <span class="badge bg-secondary"><i class="bi-pause-circle me-1"></i>{{_('Disabled')}}</span>
+                            <span class="text-white-50 ms-2">{{_('Plotman, Bladebit, and Madmax are not installed or started')}}</span>
+                            {% else %}
+                            <span class="badge bg-success"><i class="bi-check-circle me-1"></i>{{_('Enabled')}}</span>
+                            <span class="text-white-50 ms-2">{{_('Plotting tools are installed and available')}}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Guides -->
+<div class="accordion mb-4" id="networkGuide">
+
+    <!-- Plotting Tools -->
+    <div class="accordion-item bg-dark">
+        <h2 class="accordion-header" id="headingPlotting">
+            <button class="accordion-button {% if not network.plotting_disabled %}collapsed{% endif %} bg-dark text-white" type="button"
+                data-bs-toggle="collapse" data-bs-target="#collapsePlotting"
+                aria-expanded="{{ 'true' if network.plotting_disabled else 'false' }}" aria-controls="collapsePlotting">
+                <i class="bi-speedometer me-2"></i> {{_('Plotting Tools (Plotman, Bladebit, Madmax)')}}
+            </button>
+        </h2>
+        <div id="collapsePlotting" class="accordion-collapse collapse {% if network.plotting_disabled %}show{% endif %}" aria-labelledby="headingPlotting"
+            data-bs-parent="#networkGuide">
+            <div class="accordion-body text-white-50">
+                <p>
+                    {{_('Machinaris can install and manage plotting tools (Plotman, Bladebit, Madmax) for creating Chia plots. These tools are downloaded and configured during container startup, which takes time and uses disk space.')}}
+                </p>
+                <p>
+                    {{_('If you are not actively plotting, you can disable these tools to speed up container boot time and reduce resource usage. Your existing plots and farming are not affected.')}}
+                </p>
+
+                {% if network.plotting_disabled %}
+                <div class="alert alert-info bg-transparent border-info mt-3" role="alert">
+                    <i class="bi-info-circle me-2"></i>
+                    <strong>{{_('Plotting is currently disabled.')}}</strong>
+                    {{_('The Plotting page and plotting settings are hidden from the sidebar. To re-enable:')}}
+                </div>
+                <ol>
+                    <li class="mb-2">
+                        <strong>{{_('Remove or change the environment variable')}}</strong><br>
+                        {{_('In your Docker container configuration, either remove the')}} <code>plotting_disabled</code> {{_('variable or set it to')}} <code>false</code>{{_(':')}}
+                        <pre class="bg-black p-2 rounded mt-1 mb-0"><code>plotting_disabled=false</code></pre>
+                        <small>{{_('In Unraid: Edit the container, find the variable under "Show more settings" and change or remove it.')}}</small>
+                    </li>
+                    <li class="mb-2">
+                        <strong>{{_('Restart the container')}}</strong><br>
+                        {{_('The plotting tools will be downloaded and installed during startup. This may take a few minutes on first boot.')}}
+                    </li>
+                </ol>
+                {% else %}
+                <div class="alert alert-success bg-transparent border-success mt-3" role="alert">
+                    <i class="bi-check-circle me-2"></i>
+                    <strong>{{_('Plotting is currently enabled.')}}</strong>
+                    {{_('Plotting tools are installed and the Plotting page is available in the sidebar.')}}
+                </div>
+                <p>{{_('To disable plotting tools and speed up boot time:')}}</p>
+                <ol>
+                    <li class="mb-2">
+                        <strong>{{_('Add this environment variable to your Docker container configuration:')}}</strong>
+                        <pre class="bg-black p-2 rounded mt-1 mb-0"><code>plotting_disabled=true</code></pre>
+                        <small>{{_('In Unraid: Edit the container, add a new variable under "Show more settings".')}}</small>
+                    </li>
+                    <li class="mb-2">
+                        <strong>{{_('Restart the container')}}</strong><br>
+                        {{_('Plotman, Bladebit, and Madmax will be skipped during startup.')}}
+                    </li>
+                </ol>
+                {% endif %}
+
+                <div class="alert alert-secondary bg-transparent border-secondary mt-3" role="alert">
+                    <i class="bi-shield-check me-2"></i>
+                    <strong>{{_('What is not affected:')}}</strong>
+                    {{_('Disabling plotting tools has no impact on farming, harvesting, wallet operations, or existing plots. It only prevents the installation and startup of plot-creation software.')}}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Single Instance API -->
+    <div class="accordion-item bg-dark">
+        <h2 class="accordion-header" id="headingSingle">
+            <button class="accordion-button collapsed bg-dark text-white" type="button"
+                data-bs-toggle="collapse" data-bs-target="#collapseSingle"
+                aria-expanded="false" aria-controls="collapseSingle">
+                <i class="bi-lock-fill me-2"></i> {{_('Single Instance Mode (recommended for most users)')}}
+            </button>
+        </h2>
+        <div id="collapseSingle" class="accordion-collapse collapse" aria-labelledby="headingSingle"
+            data-bs-parent="#networkGuide">
+            <div class="accordion-body text-white-50">
+                <p>
+                    {{_('When running a single Machinaris instance for farming, the API server only needs to be accessible from within its own container. This is the default and most secure configuration.')}}
+                </p>
+                <p>
+                    {{_('With')}} <code>api_bind_address=127.0.0.1</code>{{_(', the internal API (port ')}}{{ network.api_port }}{{_(') is not reachable from other machines on your network. The Web UI continues to work normally because it communicates with the API internally.')}}
+                </p>
+                <div class="alert alert-success bg-transparent border-success mt-3" role="alert">
+                    <i class="bi-check-circle me-2"></i>
+                    <strong>{{_('No action needed.')}}</strong> {{_('This is the default configuration. Your API is secured.')}}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Multi-Worker API -->
+    <div class="accordion-item bg-dark">
+        <h2 class="accordion-header" id="headingMulti">
+            <button class="accordion-button collapsed bg-dark text-white" type="button"
+                data-bs-toggle="collapse" data-bs-target="#collapseMulti"
+                aria-expanded="false" aria-controls="collapseMulti">
+                <i class="bi-diagram-3 me-2"></i> {{_('Multi-Worker Mode (remote harvesters / plotters)')}}
+            </button>
+        </h2>
+        <div id="collapseMulti" class="accordion-collapse collapse" aria-labelledby="headingMulti"
+            data-bs-parent="#networkGuide">
+            <div class="accordion-body text-white-50">
+                <p>
+                    {{_('If you have additional machines running Machinaris as remote workers (harvesters or plotters), those workers need to reach the controller\'s API over your local network.')}}
+                </p>
+                <h6 class="text-white mt-3">{{_('How to enable remote worker access')}}</h6>
+                <ol>
+                    <li class="mb-2">
+                        <strong>{{_('On the controller (this machine)')}}</strong><br>
+                        {{_('Add this environment variable to your Docker container configuration:')}}
+                        <pre class="bg-black p-2 rounded mt-1 mb-0"><code>api_bind_address=0.0.0.0</code></pre>
+                        <small>{{_('In Unraid: Edit the container, add a new variable under "Show more settings".')}}</small>
+                    </li>
+                    <li class="mb-2">
+                        <strong>{{_('On each remote worker')}}</strong><br>
+                        {{_('Set the controller\'s IP address so the worker knows where to report:')}}
+                        <pre class="bg-black p-2 rounded mt-1 mb-0"><code>controller_host=&lt;controller-ip-address&gt;</code></pre>
+                    </li>
+                    <li class="mb-2">
+                        <strong>{{_('Restart both containers')}}</strong><br>
+                        {{_('The controller and worker containers must be restarted for changes to take effect.')}}
+                    </li>
+                </ol>
+
+                <div class="alert alert-warning bg-transparent border-warning mt-3" role="alert">
+                    <i class="bi-exclamation-triangle me-2"></i>
+                    <strong>{{_('Security note:')}}</strong>
+                    {{_('When set to')}} <code>0.0.0.0</code>{{_(', the API (port ')}}{{ network.api_port }}{{_(') is accessible to any device on your local network. The API has no authentication — only enable this on a trusted LAN. Never expose port ')}}{{ network.api_port }}{{_(' to the internet.')}}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Port Reference -->
+    <div class="accordion-item bg-dark">
+        <h2 class="accordion-header" id="headingPorts">
+            <button class="accordion-button collapsed bg-dark text-white" type="button"
+                data-bs-toggle="collapse" data-bs-target="#collapsePorts"
+                aria-expanded="false" aria-controls="collapsePorts">
+                <i class="bi-info-circle me-2"></i> {{_('Understanding ports and services')}}
+            </button>
+        </h2>
+        <div id="collapsePorts" class="accordion-collapse collapse" aria-labelledby="headingPorts"
+            data-bs-parent="#networkGuide">
+            <div class="accordion-body text-white-50">
+                <table class="table table-dark table-sm">
+                    <thead>
+                        <tr>
+                            <th>{{_('Port')}}</th>
+                            <th>{{_('Service')}}</th>
+                            <th>{{_('Purpose')}}</th>
+                            <th>{{_('Expose to internet?')}}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>8444</code></td>
+                            <td>{{_('Chia Protocol')}}</td>
+                            <td>{{_('Blockchain peer connections')}}</td>
+                            <td><span class="badge bg-success">{{_('Yes — forward at router')}}</span></td>
+                        </tr>
+                        <tr>
+                            <td><code>8447</code></td>
+                            <td>{{_('Chia Farmer')}}</td>
+                            <td>{{_('Farmer-to-harvester on LAN')}}</td>
+                            <td><span class="badge bg-danger">{{_('No')}}</span></td>
+                        </tr>
+                        <tr>
+                            <td><code>{{ network.web_port }}</code></td>
+                            <td>{{_('Machinaris Web UI')}}</td>
+                            <td>{{_('Browser access to dashboard')}}</td>
+                            <td><span class="badge bg-danger">{{_('No — use reverse proxy')}}</span></td>
+                        </tr>
+                        <tr>
+                            <td><code>{{ network.api_port }}</code></td>
+                            <td>{{_('Machinaris API')}}</td>
+                            <td>{{_('Internal data and control')}}</td>
+                            <td><span class="badge bg-danger">{{_('No — LAN only')}}</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

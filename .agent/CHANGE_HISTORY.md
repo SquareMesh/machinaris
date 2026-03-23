@@ -665,3 +665,57 @@ Created three new capabilities:
 - Future sessions have one-command deploy: `/deploy` or `/deploy full`
 - Template tag mismatches caught before deploy, not at runtime
 - Hard rules codify lessons learned (no bare except, template tag balance, set -eo pipefail, Chia-only)
+
+---
+## [2026-03-23] — API Bind Address Restriction
+
+**Type:** Implementation
+**Affects:** docker/dockerfile, scripts/start_machinaris.sh, scripts/dev/start-api.sh, web/blueprints/settings.py, web/templates/settings/network.html, web/templates/base.html
+**Design doc ref:** CONFIGURATION.md — Security
+
+### Context
+The API server (port 8927) was binding to `0.0.0.0`, making it accessible to any machine on the network. The API has no authentication, so any device on the LAN could read/write configs, trigger actions, and access wallet data. For single-instance farming setups, only the WebUI (inside the same container) needs to reach the API.
+
+### Options Considered
+- **Option A:** Bind API to `127.0.0.1` always — Pro: Maximum security Con: Breaks multi-worker setups permanently
+- **Option B:** Configurable bind via env var, default `127.0.0.1` — Pro: Secure by default, can be opened for workers Con: Requires restart to change
+
+### Decision
+Option B — new `api_bind_address` env var (default `127.0.0.1`). Set to `0.0.0.0` when remote workers are needed.
+
+### Technical Rationale
+WebUI calls the API at `http://localhost:8927` from within the container, so binding to `127.0.0.1` doesn't break single-instance usage. Multi-worker mode is a deliberate opt-in via Docker env var.
+
+### Impact
+- API is no longer exposed on the network by default
+- New Settings > Network page shows current status and provides guidance for both modes
+- Network page added to sidebar (always visible, not gated by farming_enabled)
+
+### Follow-up Required
+- [ ] None — feature complete
+
+---
+## [2026-03-23] — Plotting Tools Disable Toggle
+
+**Type:** Implementation
+**Affects:** docker/dockerfile, docker/entrypoint.sh, common/config/globals.py, web/templates/settings/network.html
+**Design doc ref:** CONFIGURATION.md — Environment Variables, DOCKER-DEPLOYMENT.md — Entrypoint
+
+### Context
+Container boot installs plotman (git clone + pip install + apt), bladebit (binary downloads), and madmax (binary downloads) on every first boot. This takes significant time and resources even when the user is not actively plotting. User requested the ability to skip this entirely.
+
+### Options Considered
+- **Option A:** Always install but don't run — Pro: No config needed Con: Still wastes boot time and disk
+- **Option B:** New `plotting_disabled` env var that skips setup scripts and hides UI — Pro: Fast boot, clean UI Con: Requires container restart to change
+
+### Decision
+Option B — `plotting_disabled=true` by default. When set, skips plotman_setup.sh, bladebit_setup.sh, madmax_setup.sh, and plotman_autoplot.sh. Also returns `False` from `globals.plotting_enabled()` which hides the Plotting page and settings from the sidebar, and skips plotting scheduler jobs.
+
+### Technical Rationale
+Chiadog (monitoring) was moved outside the plotting guard since it monitors farming/harvesting, not plotting. The `plotting_enabled()` function in globals.py was the natural place to add the check since it already gates all plotting UI and scheduler behavior.
+
+### Impact
+- Default boot is faster (no plotting tool installation)
+- Users opt in to plotting when needed by setting `plotting_disabled=false`
+- Network & Services settings page provides context-aware guidance for both states
+- Farming, harvesting, wallet operations, and existing plots are completely unaffected

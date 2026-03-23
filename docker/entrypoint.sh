@@ -88,20 +88,25 @@ if /usr/bin/bash /machinaris/scripts/forks/${blockchains}_launch.sh; then
   blockchain_binary=$(cat /machinaris/common/config/blockchains.json | jq -r .${blockchains}.binary)
   trap "${blockchain_binary} stop all -d; exit 0" SIGINT SIGTERM
 
-  # Conditionally install plotman on plotters and fullnodes, after the plotters setup
-  /usr/bin/bash /machinaris/scripts/plotman_setup.sh ${PLOTMAN_BRANCH} > /tmp/plotman_setup.log 2>&1
+  # Plotting tools: skip entirely when plotting_disabled=true
+  if [[ "${plotting_disabled,,}" != "true" ]]; then
+    # Conditionally install plotman on plotters and fullnodes, after the plotters setup
+    /usr/bin/bash /machinaris/scripts/plotman_setup.sh ${PLOTMAN_BRANCH} > /tmp/plotman_setup.log 2>&1
+
+    # Conditionally build bladebit on plotters and fullnodes
+    /usr/bin/bash /machinaris/scripts/bladebit_setup.sh ${BLADEBIT_BRANCH} > /tmp/bladebit_setup.log 2>&1
+
+    # Conditionally madmax on plotters and fullnodes
+    /usr/bin/bash /machinaris/scripts/madmax_setup.sh ${MADMAX_BRANCH} > /tmp/madmax_setup.log 2>&1
+
+    # Conditionally start plotman on plotters and fullnodes
+    /usr/bin/bash /machinaris/scripts/plotman_autoplot.sh > /tmp/plotman_autoplot.log 2>&1
+  else
+    echo 'Plotting disabled (plotting_disabled=true) — skipping plotman, bladebit, and madmax setup.'
+  fi
 
   # Conditionally install chiadog on harvesters and fullnodes
   /usr/bin/bash /machinaris/scripts/chiadog_setup.sh ${CHIADOG_BRANCH} > /tmp/chiadog_setup.log 2>&1
-
-  # Conditionally build bladebit on plotters and fullnodes
-  /usr/bin/bash /machinaris/scripts/bladebit_setup.sh ${BLADEBIT_BRANCH} > /tmp/bladebit_setup.log 2>&1
-
-  # Conditionally madmax on plotters and fullnodes, sleep a bit first
-  /usr/bin/bash /machinaris/scripts/madmax_setup.sh ${MADMAX_BRANCH} > /tmp/madmax_setup.log 2>&1
-
-  # Conditionally install plotman on plotters and fullnodes, after the plotters setup
-  /usr/bin/bash /machinaris/scripts/plotman_autoplot.sh > /tmp/plotman_autoplot.log 2>&1
 
 fi
 

@@ -1,3 +1,5 @@
+import os
+
 from flask import Blueprint, render_template, request, make_response, abort, current_app, flash
 from markupsafe import escape
 from flask_babel import _, lazy_gettext as _l
@@ -36,6 +38,22 @@ def notifications_settings():
             notifications.save_config(config)
     config = notifications.load_config()
     return render_template('settings/notifications.html', config=config, global_config=gc)
+
+@settings_bp.route('/settings/network')
+def network_settings():
+    gc = globals.load()
+    api_bind = os.environ.get('api_bind_address', '127.0.0.1')
+    api_port = os.environ.get('worker_api_port', '8927')
+    web_port = os.environ.get('controller_web_port', '8926')
+    plotting_disabled = os.environ.get('plotting_disabled', 'false').lower() == 'true'
+    network_info = {
+        'api_bind_address': api_bind,
+        'api_port': api_port,
+        'web_port': web_port,
+        'api_local_only': api_bind in ('127.0.0.1', 'localhost'),
+        'plotting_disabled': plotting_disabled,
+    }
+    return render_template('settings/network.html', network=network_info, global_config=gc)
 
 @settings_bp.route('/settings/config', defaults={'path': ''})
 @settings_bp.route('/settings/config/<path:path>')
