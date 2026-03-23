@@ -610,6 +610,26 @@ const SESSIONS = [
     "stack_depth": 3,
     "commits": ["8ec20fc2", "d6368f7d", "027211a1", "8a3a37fa"],
     "tags": ["security", "design", "bugfix", "docker"]
+  },
+  {
+    "session": 5,
+    "date": "2026-03-22",
+    "summary": "TOTP two-factor authentication, removed all |safe XSS filters, file-based secret key, TODO review and dismissals. Docker image rebuilt and verified on Unraid.",
+    "areas": {
+      "docs": ["CONFIGURATION", "WEB-FRONTEND"],
+      "systems": ["auth", "web-templates", "flask-session", "docker"]
+    },
+    "metrics": {
+      "decisions": 4,
+      "issues_opened": 0,
+      "issues_resolved": 0,
+      "todos_added": 0,
+      "todos_resolved": 6,
+      "scenarios_added": 0
+    },
+    "stack_depth": 3,
+    "commits": ["ea5c6c29"],
+    "tags": ["security", "authentication", "xss", "docker"]
   }
 ];
 // SESSION_DATA_END
