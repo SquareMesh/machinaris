@@ -1,4 +1,5 @@
 #!/bin/env bash
+set -eo pipefail
 #
 # Installs Machinaris for the WebUI
 #

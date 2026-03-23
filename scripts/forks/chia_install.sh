@@ -1,4 +1,5 @@
 #!/bin/env bash
+set -eo pipefail
 #
 # Installs Chia as per https://github.com/Chia-Network/chia-blockchain
 #

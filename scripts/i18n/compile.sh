@@ -1,3 +1,5 @@
+#!/bin/bash
+set -eo pipefail
 #
 # Compile current messages.po into messages.mo for use at runtime.
 #

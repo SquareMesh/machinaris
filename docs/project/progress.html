@@ -630,6 +630,26 @@ const SESSIONS = [
     "stack_depth": 3,
     "commits": ["ea5c6c29"],
     "tags": ["security", "authentication", "xss", "docker"]
+  },
+  {
+    "session": 6,
+    "date": "2026-03-23",
+    "summary": "Aligned Python version to 3.12 across CI/pyproject/docs (TODO-006). Trimmed blockchains.json from 34 entries to Chia-only, deleted forktools files, removed dead fork code paths and hardcoded fork lists (TODO-008). Net -848 lines.",
+    "areas": {
+      "docs": ["ARCHITECTURE", "BLOCKCHAIN-INTEGRATION"],
+      "systems": ["ci-cd", "config", "globals", "web-templates", "api-configs", "settings"]
+    },
+    "metrics": {
+      "decisions": 2,
+      "issues_opened": 0,
+      "issues_resolved": 0,
+      "todos_added": 1,
+      "todos_resolved": 2,
+      "scenarios_added": 0
+    },
+    "stack_depth": 4,
+    "commits": ["acc418e6", "881a22fb"],
+    "tags": ["cleanup", "chia-only", "python-version", "infra"]
   }
 ];
 // SESSION_DATA_END

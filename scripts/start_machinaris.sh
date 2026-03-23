@@ -1,4 +1,5 @@
 #!/bin/env bash
+set -eo pipefail
 #
 # Configures Chia and Plotman, then launches Machinaris web server
 #
@@ -45,8 +46,8 @@ else
 fi
 
 # Kill gunicorn if already running to allow restart
-api_pid=$(pidof 'gunicorn: master [api:app]')
-if [ ! -z $api_pid ]; then 
+api_pid=$(pidof 'gunicorn: master [api:app]' || true)
+if [ ! -z "$api_pid" ]; then
     kill $api_pid
 fi
 echo 'Starting Machinaris API server...'
@@ -61,8 +62,8 @@ echo 'Starting Machinaris API server...'
     api:app &
 
 # Kill gunicorn if already running to allow restart
-web_pid=$(pidof 'gunicorn: master [web:app]')
-if [ ! -z $web_pid ]; then 
+web_pid=$(pidof 'gunicorn: master [web:app]' || true)
+if [ ! -z "$web_pid" ]; then
     kill $web_pid
 fi
 echo 'Starting Machinaris Web server...'

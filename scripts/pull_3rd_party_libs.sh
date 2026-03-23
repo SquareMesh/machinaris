@@ -1,4 +1,5 @@
 #!/bin/bash
+set -eo pipefail
 #
 # Due to complaints about JS CDNs, this pulls all JS libs into web/static/3rd_party folder
 #

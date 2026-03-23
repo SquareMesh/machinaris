@@ -84,5 +84,8 @@ EXPOSE 8926
 # Machinaris API - DO NOT forward at router
 EXPOSE 8927
 
+HEALTHCHECK --interval=60s --timeout=10s --start-period=300s --retries=3 \
+    CMD curl -sf http://localhost:8927/ping || exit 1
+
 WORKDIR /chia-blockchain
 ENTRYPOINT ["bash", "./entrypoint.sh"]

@@ -18,29 +18,29 @@ def send_get(worker, path, query_params={}, timeout=30, debug=False):
     http.client.HTTPConnection.debuglevel = 0
     return response
 
-def send_post(path, payload, debug=False):
+def send_post(path, payload, timeout=30, debug=False):
     controller_url = get_controller_url()
     headers = {'Content-type': 'application/json', 'Accept': 'application/json'}
     if debug:
         http.client.HTTPConnection.debuglevel = 1
-    response = requests.post(controller_url + path, headers = headers, data = json.dumps(payload))
+    response = requests.post(controller_url + path, headers = headers, data = json.dumps(payload), timeout=timeout)
     http.client.HTTPConnection.debuglevel = 0
     return response
 
-def send_worker_post(worker, path, payload, debug=False):
+def send_worker_post(worker, path, payload, timeout=30, debug=False):
     headers = {'Content-type': 'application/json', 'Accept': 'application/json'}
     if debug:
         http.client.HTTPConnection.debuglevel = 1
-    response = requests.post(worker.url + path, headers = headers, data = json.dumps(payload))
+    response = requests.post(worker.url + path, headers = headers, data = json.dumps(payload), timeout=timeout)
     http.client.HTTPConnection.debuglevel = 0
     return response
 
-def send_delete(path, debug=False):
+def send_delete(path, timeout=30, debug=False):
     controller_url = get_controller_url()
     headers = {'Content-type': 'application/json', 'Accept': 'application/json'}
     if debug:
         http.client.HTTPConnection.debuglevel = 1
-    response = requests.delete(controller_url + path, headers = headers)
+    response = requests.delete(controller_url + path, headers = headers, timeout=timeout)
     http.client.HTTPConnection.debuglevel = 0
     return response
 

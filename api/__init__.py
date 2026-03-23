@@ -44,3 +44,7 @@ migrate = Migrate(app, db)
 
 api = extensions.create_api(app)
 views.register_blueprints(api)
+
+@app.route('/ping')
+def ping():
+    return 'pong', 200
