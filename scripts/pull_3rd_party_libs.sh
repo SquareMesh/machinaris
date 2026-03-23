@@ -29,13 +29,12 @@ for url in $LIST ; do
   wget -nv -O ${BASEPATH}/$(basename $url) "$url"
 done
 
-# Bootstrap Icons
-wget -nv -O ${BASEPATH}/bsi-icons.zip "https://github.com/twbs/icons/releases/download/v${BSI_VERSION}/bootstrap-icons-${BSI_VERSION}.zip"
-unzip -q -o ${BASEPATH}/bsi-icons.zip -d $BASEPATH/
-mv $BASEPATH/bootstrap-icons-${BSI_VERSION} $BASEPATH/icons
-mv ${BASEPATH}/icons/font/* ${BASEPATH}/icons/
-rmdir ${BASEPATH}/icons/font/ 
-rm -f ${BASEPATH}/bsi-icons.zip
+# Bootstrap Icons (font CSS + woff2 from npm, not the SVG-only GitHub zip)
+mkdir -p ${BASEPATH}/icons/fonts
+wget -nv -O ${BASEPATH}/icons/bootstrap-icons.css "https://cdn.jsdelivr.net/npm/bootstrap-icons@${BSI_VERSION}/font/bootstrap-icons.css"
+wget -nv -O ${BASEPATH}/icons/bootstrap-icons.min.css "https://cdn.jsdelivr.net/npm/bootstrap-icons@${BSI_VERSION}/font/bootstrap-icons.min.css"
+wget -nv -O ${BASEPATH}/icons/fonts/bootstrap-icons.woff2 "https://cdn.jsdelivr.net/npm/bootstrap-icons@${BSI_VERSION}/font/fonts/bootstrap-icons.woff2"
+wget -nv -O ${BASEPATH}/icons/fonts/bootstrap-icons.woff "https://cdn.jsdelivr.net/npm/bootstrap-icons@${BSI_VERSION}/font/fonts/bootstrap-icons.woff"
 
 # Bootstrap
 wget -O ${BASEPATH}/bs.zip -nv "https://github.com/twbs/bootstrap/releases/download/v${BOOTSTRAP_VERSION}/bootstrap-${BOOTSTRAP_VERSION}-dist.zip" && \
@@ -60,8 +59,7 @@ do
   fi
 
   lang_hyphen=${lang/_/-}
-  wget -nv -O ${BASEPATH}/i18n/datatables.${lang}.json https://raw.githubusercontent.com/DataTables/Plugins/master/i18n/${lang_hyphen}.json
-  if [ $? == 0 ]; then
+  if wget -nv -O ${BASEPATH}/i18n/datatables.${lang}.json https://raw.githubusercontent.com/DataTables/Plugins/master/i18n/${lang_hyphen}.json; then
     echo "Successfully downloaded DataTables language translations for ${lang}."
   else
     echo "ERROR: Failed to download DataTables language translations for ${lang}."
