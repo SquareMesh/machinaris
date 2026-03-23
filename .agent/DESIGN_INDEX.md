@@ -7,7 +7,7 @@
 | Section | Status | Code Location | Last Verified | Notes |
 |---|---|---|---|---|
 | ARCHITECTURE.md — System Overview | IMPLEMENTED | entire codebase | 2026-03-23 | Updated: Python 3.12+, Ubuntu Noble-only |
-| ARCHITECTURE.md — Controller-Worker Model | IMPLEMENTED | api/, web/, docker/ | 2026-03-21 | Hub-and-spoke pattern |
+| ARCHITECTURE.md — Controller-Worker Model | IMPLEMENTED | api/, web/, docker/ | 2026-03-23 | Hub-and-spoke pattern. _resolve_url() rewrites local worker URLs to localhost when API is bound locally. |
 | ARCHITECTURE.md — Data Flow | IMPLEMENTED | api/schedules/, api/commands/ | 2026-03-21 | Worker-to-Controller status pipeline |
 | API.md — Flask-Smorest Framework | IMPLEMENTED | api/__init__.py, api/views/ | 2026-03-23 | 27 resource modules. /ping health endpoint added. Request timeouts on all HTTP utils. marshmallow-toplevel replaced with inline TopLevelSchema. |
 | API.md — Background Scheduler | IMPLEMENTED | api/schedules/, gunicorn.conf.py | 2026-03-21 | APScheduler with 22+ jobs |

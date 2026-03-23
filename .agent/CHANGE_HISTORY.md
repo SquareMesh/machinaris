@@ -745,3 +745,28 @@ The old approach had a fundamental flaw: it compared two independently parsed ve
 - State survives worker restarts, container restarts
 - Removed dependency on `old_details` parameter (still passed but unused for comparison)
 - No user-visible changes other than correct notification behavior
+
+---
+## [2026-03-23] — Fix Local Worker URL Resolution for Localhost-Bound API
+
+**Type:** Bugfix
+**Affects:** api/utils.py, web/utils.py
+**Design doc ref:** CONFIGURATION.md — Security, ARCHITECTURE.md — Controller-Worker Model
+
+### Context
+After binding the API to `127.0.0.1` (previous commit), the blockchain status showed "Offline" despite Chia being fully synced. The controller's ping scheduler was hitting `http://<LAN-IP>:8927/ping` (the worker's registered URL), but the API was only listening on `127.0.0.1`, causing "Connection Refused". The same issue affected all WebUI → API calls (actions, configs, data queries).
+
+### Options Considered
+- **Option A:** Change worker registration to use localhost — Pro: Simple Con: Breaks multi-worker discovery, worker needs its LAN IP for remote access
+- **Option B:** Add `_resolve_url()` helper that rewrites to localhost for local workers — Pro: Transparent, works for both single and multi-worker Con: Minor overhead per request
+
+### Decision
+Option B — added `_resolve_url(worker)` to both `api/utils.py` and `web/utils.py`. When `api_bind_address` is `127.0.0.1` and the target worker's hostname matches the local hostname, the URL is rewritten to `http://localhost:<port>`. Remote workers continue to use their registered LAN IP URLs.
+
+### Technical Rationale
+The worker registration must keep the LAN IP in the database so that multi-worker setups work when the API is opened to the network. The URL rewriting happens at the HTTP call layer, not at registration, so the stored data remains correct for both modes.
+
+### Impact
+- Controller ping, WebUI actions, and config reads all work correctly with localhost-bound API
+- No changes needed when switching to multi-worker mode (just change `api_bind_address` to `0.0.0.0`)
+- Both `api/utils.py` and `web/utils.py` have identical `_resolve_url()` logic
