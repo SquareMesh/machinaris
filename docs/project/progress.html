@@ -634,22 +634,22 @@ const SESSIONS = [
   {
     "session": 6,
     "date": "2026-03-23",
-    "summary": "Aligned Python version to 3.12 across CI/pyproject/docs (TODO-006). Trimmed blockchains.json from 34 entries to Chia-only, deleted forktools files, removed dead fork code paths and hardcoded fork lists (TODO-008). Net -848 lines.",
+    "summary": "Python 3.12 alignment (TODO-006). Chia-only cleanup: blockchains.json 34→1, forktools deleted, dead fork code removed, -848 lines (TODO-008). Full performance review across API, web, data, and Docker layers. Tier 1 production safety: request timeouts, pinned deps, HEALTHCHECK, shell error handling.",
     "areas": {
-      "docs": ["ARCHITECTURE", "BLOCKCHAIN-INTEGRATION"],
-      "systems": ["ci-cd", "config", "globals", "web-templates", "api-configs", "settings"]
+      "docs": ["ARCHITECTURE", "BLOCKCHAIN-INTEGRATION", "DOCKER-DEPLOYMENT", "API"],
+      "systems": ["ci-cd", "config", "globals", "web-templates", "api-configs", "settings", "docker", "api-utils", "shell-scripts"]
     },
     "metrics": {
-      "decisions": 2,
+      "decisions": 3,
       "issues_opened": 0,
       "issues_resolved": 0,
-      "todos_added": 1,
+      "todos_added": 6,
       "todos_resolved": 2,
       "scenarios_added": 0
     },
-    "stack_depth": 4,
-    "commits": ["acc418e6", "881a22fb"],
-    "tags": ["cleanup", "chia-only", "python-version", "infra"]
+    "stack_depth": 5,
+    "commits": ["acc418e6", "881a22fb", "3aff6aff"],
+    "tags": ["cleanup", "chia-only", "python-version", "infra", "reliability", "performance-review"]
   }
 ];
 // SESSION_DATA_END
