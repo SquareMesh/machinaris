@@ -2,18 +2,19 @@
 # Balance change detection and Telegram notification dispatch
 #
 
-import locale
+import json
+import os
 import traceback
 
 from api import app
 from common.utils import fiat, notifications
 
-# In-memory dedup: tracks last notified balance per hostname:blockchain
-_last_notified = {}
+# File-persisted balance state — survives gunicorn worker restarts
+_BALANCE_STATE_FILE = '/root/.chia/machinaris/config/balance_state.json'
 
 
 def check_and_notify(blockchain, hostname, old_details, new_details, cold_balance=None):
-    """Compare old vs new wallet balance and send Telegram notification if changed.
+    """Compare new wallet balance against last known balance and send Telegram notification if changed.
 
     Called from Wallets.post() after upsert. Must never raise — all exceptions are caught.
     """
@@ -25,50 +26,48 @@ def check_and_notify(blockchain, hostname, old_details, new_details, cold_balanc
         if not telegram.get('bot_token') or not telegram.get('chat_id'):
             return
 
-        # Skip first insert (no previous balance to compare)
-        if old_details is None:
-            new_balance = notifications.parse_chia_balance(new_details)
-            cold = _parse_cold(cold_balance, telegram)
-            _last_notified[_key(hostname, blockchain)] = new_balance + cold
-            app.logger.info("Balance notifications: initial balance recorded for {0}/{1}: {2} XCH".format(
-                hostname, blockchain, new_balance + cold))
-            return
-
         # Skip if wallet is not synced (balance may be inaccurate)
         if not notifications.is_wallet_synced(new_details):
             return
 
         new_balance = notifications.parse_chia_balance(new_details)
-        old_balance = notifications.parse_chia_balance(old_details)
-
         cold = _parse_cold(cold_balance, telegram)
-
         new_total = new_balance + cold
-        old_total = old_balance + cold
 
-        # Check against last notified balance for dedup
+        # Load persisted balance state
         key = _key(hostname, blockchain)
-        if key in _last_notified and abs(_last_notified[key] - new_total) < 1e-12:
+        state = _load_state()
+
+        if key not in state:
+            # First time seeing this wallet — record balance, don't notify
+            state[key] = new_total
+            _save_state(state)
+            app.logger.info("Balance notifications: initial balance recorded for {0}: {1} XCH".format(
+                key, new_total))
             return
 
-        diff = new_total - old_total
+        last_known = state[key]
+        diff = new_total - last_known
+
         if abs(diff) < 1e-12:
-            # No change
-            _last_notified[key] = new_total
+            # No change from last known balance
             return
 
         # Check threshold
         threshold = telegram.get('min_change_threshold', 0.0)
         if abs(diff) < threshold:
-            _last_notified[key] = new_total
+            state[key] = new_total
+            _save_state(state)
             return
 
         # Check direction
         if diff > 0 and not telegram.get('notify_on_increase', True):
-            _last_notified[key] = new_total
+            state[key] = new_total
+            _save_state(state)
             return
         if diff < 0 and not telegram.get('notify_on_decrease', False):
-            _last_notified[key] = new_total
+            state[key] = new_total
+            _save_state(state)
             return
 
         # Format and send
@@ -77,12 +76,14 @@ def check_and_notify(blockchain, hostname, old_details, new_details, cold_balanc
             telegram['bot_token'], telegram['chat_id'], message)
 
         if success:
-            app.logger.info("Balance notification sent: {0:+f} XCH for {1}/{2}".format(
-                diff, hostname, blockchain))
+            app.logger.info("Balance notification sent: {0:+f} XCH for {1}".format(diff, key))
         else:
             app.logger.error("Failed to send balance notification: {0}".format(error))
 
-        _last_notified[key] = new_total
+        # Always update state after attempting notification (success or fail)
+        # to prevent repeated notifications for the same change
+        state[key] = new_total
+        _save_state(state)
 
     except Exception as ex:
         app.logger.error("Balance notification error: {0}".format(str(ex)))
@@ -91,6 +92,27 @@ def check_and_notify(blockchain, hostname, old_details, new_details, cold_balanc
 
 def _key(hostname, blockchain):
     return "{0}:{1}".format(hostname, blockchain)
+
+
+def _load_state():
+    """Load persisted balance state from disk."""
+    if not os.path.exists(_BALANCE_STATE_FILE):
+        return {}
+    try:
+        with open(_BALANCE_STATE_FILE) as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
+def _save_state(state):
+    """Persist balance state to disk."""
+    try:
+        os.makedirs(os.path.dirname(_BALANCE_STATE_FILE), exist_ok=True)
+        with open(_BALANCE_STATE_FILE, 'w') as f:
+            json.dump(state, f, indent=2)
+    except Exception as ex:
+        app.logger.error("Failed to save balance state: {0}".format(str(ex)))
 
 
 def _parse_cold(cold_balance, telegram_config):

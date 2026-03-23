@@ -25,6 +25,6 @@
 | CONFIGURATION.md — Environment Variables | IMPLEMENTED | docker/dockerfile | 2026-03-23 | Added api_bind_address (default 127.0.0.1) and plotting_disabled (default true). |
 | CONFIGURATION.md — Security | VERIFIED | web/__init__.py, web/blueprints/auth.py, web/blueprints/settings.py, web/templates/settings/network.html | 2026-03-23 | TOTP auth. CSRF. API bound to localhost by default. Network & Services settings page with guidance. |
 | CONFIGURATION.md — i18n | IMPLEMENTED | web/translations/, scripts/i18n/ | 2026-03-21 | 7 languages |
-| TELEGRAM-NOTIFICATIONS.md — Balance Change Detection | IMPLEMENTED | api/commands/balance_notifications.py, api/views/wallets/resources.py | 2026-03-22 | Hooks into Wallets.post() for near-real-time detection |
+| TELEGRAM-NOTIFICATIONS.md — Balance Change Detection | IMPLEMENTED | api/commands/balance_notifications.py, api/views/wallets/resources.py | 2026-03-23 | Fixed false notifications: persisted balance state replaces in-memory dedup cache. Compares against last known balance, not re-parsed CLI text. |
 | TELEGRAM-NOTIFICATIONS.md — Notification Config | IMPLEMENTED | common/utils/notifications.py, api/views/configs/resources.py | 2026-03-22 | JSON config at /root/.chia/machinaris/config/notifications.json |
 | TELEGRAM-NOTIFICATIONS.md — Web UI | IMPLEMENTED | web/blueprints/settings.py, web/templates/settings/notifications.html | 2026-03-22 | Settings > Notifications page with guided setup |

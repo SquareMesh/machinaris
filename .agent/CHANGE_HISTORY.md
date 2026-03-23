@@ -719,3 +719,29 @@ Chiadog (monitoring) was moved outside the plotting guard since it monitors farm
 - Users opt in to plotting when needed by setting `plotting_disabled=false`
 - Network & Services settings page provides context-aware guidance for both states
 - Farming, harvesting, wallet operations, and existing plots are completely unaffected
+
+---
+## [2026-03-23] — Fix False Balance Change Notifications
+
+**Type:** Bugfix
+**Affects:** api/commands/balance_notifications.py
+**Design doc ref:** TELEGRAM-NOTIFICATIONS.md — Balance Change Detection
+
+### Context
+User received a "Balance Changed" Telegram notification despite no actual XCH balance change. Root cause: two compounding issues — (1) the in-memory dedup cache (`_last_notified` dict) was lost on gunicorn worker restart (every 1000 requests via max_requests), and (2) the comparison re-parsed old CLI text from the database each time, which could produce slightly different float values if Chia's wallet output formatting varied between runs.
+
+### Options Considered
+- **Option A:** Increase float tolerance from 1e-12 to something larger — Pro: Simple Con: Doesn't fix the root cause (lost dedup cache), risks masking real small changes
+- **Option B:** Persist balance state to disk, compare against last known balance — Pro: Survives restarts, eliminates re-parsing variance Con: File I/O on each check (negligible)
+
+### Decision
+Option B — replaced in-memory dict with file-persisted JSON at `/root/.chia/machinaris/config/balance_state.json`. New balance is compared against the last known balance from this file, not by re-parsing previous CLI output.
+
+### Technical Rationale
+The old approach had a fundamental flaw: it compared two independently parsed versions of Chia's wallet CLI output. Even with identical balances, `locale.atof()` could produce different floats depending on whitespace, ordering, or pending transaction state in the CLI output. By storing the parsed balance as a float and comparing future parses against that stored value, we eliminate variance from the parsing step entirely.
+
+### Impact
+- False notifications eliminated — balance comparison is now deterministic
+- State survives worker restarts, container restarts
+- Removed dependency on `old_details` parameter (still passed but unused for comparison)
+- No user-visible changes other than correct notification behavior
