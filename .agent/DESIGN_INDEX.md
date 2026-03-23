@@ -18,7 +18,7 @@
 | DATA-LAYER.md — ORM Models | IMPLEMENTED | common/models/ | 2026-03-23 | 18 model classes + 17 stat classes. All bare except: replaced. |
 | BLOCKCHAIN-INTEGRATION.md — Chia Integration | VERIFIED | common/config/blockchains.json, api/commands/rpc.py | 2026-03-23 | Chia-only. blockchains.json trimmed to single entry. All fork-specific code paths cleaned. |
 | BLOCKCHAIN-INTEGRATION.md — RPC Client | IMPLEMENTED | api/commands/rpc.py | 2026-03-22 | Updated for Chia 2.6.x module restructure. Chia-only imports. |
-| DOCKER-DEPLOYMENT.md — Container Build | IMPLEMENTED | docker/dockerfile | 2026-03-23 | Added HEALTHCHECK. Deps pinned. Build scripts have set -eo pipefail. |
+| DOCKER-DEPLOYMENT.md — Container Build | VERIFIED | docker/dockerfile | 2026-03-23 | Added HEALTHCHECK. Deps pinned. Build scripts have set -eo pipefail. Bootstrap-icons font download fixed. Gunicorn max_requests=1000. Built and deployed to GHCR. |
 | DOCKER-DEPLOYMENT.md — Entrypoint | VERIFIED | docker/entrypoint.sh | 2026-03-23 | set -eo pipefail added to entrypoint.sh + 11 other scripts. grep -q anti-patterns fixed. |
 | PLOTTING-FARMING.md — Plotter Support | IMPLEMENTED | scripts/bladebit_setup.sh, scripts/madmax_setup.sh | 2026-03-22 | Gigahorse removed. Bladebit + Madmax remain. Design doc updated. |
 | MONITORING-ALERTS.md — Chiadog | IMPLEMENTED | scripts/chiadog_setup.sh, config/chiadog/ | 2026-03-21 | Log-based monitoring |
