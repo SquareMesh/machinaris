@@ -14,7 +14,7 @@ from api import app
 def send_get(worker, path, query_params={}, timeout=30, debug=False):
     if debug:
         http.client.HTTPConnection.debuglevel = 1
-    response = requests.get(worker.url + path, params = query_params, timeout=timeout)
+    response = requests.get(_resolve_url(worker) + path, params = query_params, timeout=timeout)
     http.client.HTTPConnection.debuglevel = 0
     return response
 
@@ -31,7 +31,7 @@ def send_worker_post(worker, path, payload, timeout=30, debug=False):
     headers = {'Content-type': 'application/json', 'Accept': 'application/json'}
     if debug:
         http.client.HTTPConnection.debuglevel = 1
-    response = requests.post(worker.url + path, headers = headers, data = json.dumps(payload), timeout=timeout)
+    response = requests.post(_resolve_url(worker) + path, headers = headers, data = json.dumps(payload), timeout=timeout)
     http.client.HTTPConnection.debuglevel = 0
     return response
 
@@ -78,6 +78,13 @@ def convert_chia_ip_address(chia_ip_address):
     if chia_ip_address in ['127.0.0.1']:
         return get_hostname()
     return chia_ip_address  # TODO Map duplicated IPs from docker internals...
+
+def _resolve_url(worker):
+    """Rewrite worker URL to localhost when API is bound locally and worker is this machine."""
+    api_bind = os.environ.get('api_bind_address', '127.0.0.1')
+    if api_bind in ('127.0.0.1', 'localhost') and worker.hostname == get_hostname():
+        return "http://localhost:{0}".format(app.config['WORKER_PORT'])
+    return worker.url
 
 def current_memory_megabytes():
     process = psutil.Process(os.getpid())

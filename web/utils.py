@@ -16,7 +16,7 @@ def send_get(worker, path, query_params={}, timeout=30, debug=False, lang=None):
     headers = {}
     if lang:
         headers['Accept-Language'] = lang
-    response = requests.get(worker.url + path, headers = headers, params = query_params, timeout=timeout)
+    response = requests.get(_resolve_url(worker) + path, headers = headers, params = query_params, timeout=timeout)
     http.client.HTTPConnection.debuglevel = 0
     return response
 
@@ -26,7 +26,7 @@ def send_post(worker, path, payload, debug=False, lang=None, timeout=None):
         headers['Accept-Language'] = lang
     if debug:
         http.client.HTTPConnection.debuglevel = 1
-    response = requests.post(worker.url + path, headers = headers, data = json.dumps(payload), timeout=timeout)
+    response = requests.post(_resolve_url(worker) + path, headers = headers, data = json.dumps(payload), timeout=timeout)
     http.client.HTTPConnection.debuglevel = 0
     return response
 
@@ -36,7 +36,7 @@ def send_put(worker, path, payload, debug=False, lang=None, timeout=None):
         headers['Accept-Language'] = lang
     if debug:
         http.client.HTTPConnection.debuglevel = 1
-    response = requests.put(worker.url + path, headers = headers, data = json.dumps(payload), timeout=timeout)
+    response = requests.put(_resolve_url(worker) + path, headers = headers, data = json.dumps(payload), timeout=timeout)
     http.client.HTTPConnection.debuglevel = 0
     return response
 
@@ -46,9 +46,17 @@ def send_delete(worker, path, debug=False, lang=None, timeout=None):
         headers['Accept-Language'] = lang
     if debug:
         http.client.HTTPConnection.debuglevel = 1
-    response = requests.delete(worker.url + path, headers = headers, timeout=timeout)
+    response = requests.delete(_resolve_url(worker) + path, headers = headers, timeout=timeout)
     http.client.HTTPConnection.debuglevel = 0
     return response
+
+def _resolve_url(worker):
+    """Rewrite worker URL to localhost when API is bound locally and worker is this machine."""
+    api_bind = os.environ.get('api_bind_address', '127.0.0.1')
+    if api_bind in ('127.0.0.1', 'localhost') and worker.hostname == get_hostname():
+        port = os.environ.get('worker_api_port', '8927')
+        return "http://localhost:{0}".format(port)
+    return worker.url
 
 def get_controller_url():
     return "{0}://{1}:{2}".format(
