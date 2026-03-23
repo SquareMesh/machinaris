@@ -644,3 +644,24 @@ All five changes are low-risk improvements with no behavioral changes to happy p
 - Silent error swallowing eliminated across Python codebase
 - Shell scripts fail fast on real errors instead of continuing silently
 - marshmallow 4.x upgrade path unblocked
+
+---
+## [2026-03-23] — Add /deploy, /validate Skills and CLAUDE.md Hard Rules
+
+**Type:** Implementation
+**Affects:** .claude/commands/, CLAUDE.md
+**Design doc ref:** CLAUDE.md §4.2, §5.1, §9b
+
+### Context
+Session review identified recurring patterns: Docker build/push cycle was manual and error-prone (forgot :latest tag), pre-existing bugs only caught at runtime (orphaned endif, bootstrap-icons zip change), no local validation before deploy.
+
+### Decision
+Created three new capabilities:
+1. `/deploy` skill — automates `docker build` + `docker push ghcr.io/squaremesh/machinaris:latest`
+2. `/validate` skill — pre-flight checks (Python syntax, Jinja2 tag balance, code quality, shell scripts)
+3. CLAUDE.md hard rules (5 rules) and deployment workflow section (§9b)
+
+### Impact
+- Future sessions have one-command deploy: `/deploy` or `/deploy full`
+- Template tag mismatches caught before deploy, not at runtime
+- Hard rules codify lessons learned (no bare except, template tag balance, set -eo pipefail, Chia-only)

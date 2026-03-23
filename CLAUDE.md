@@ -118,18 +118,12 @@ Ask yourself — and answer explicitly in your response:
 
 ### 4.2 Hard Rules — Never Violate
 
-<!-- TEMPLATE NOTE: Define your project's non-negotiable rules here.
-     These are rules that should NEVER be broken silently.
-     Examples:
-     RULE-1  No secrets in source code. Use environment variables.
-     RULE-2  All external input must be validated at the boundary.
-     RULE-3  Core logic must not depend on UI/presentation layer.
-     RULE-4  All state mutations must be logged/traceable.
--->
-
 ```
-RULE-1  [Define your first hard rule]
-RULE-2  [Define your second hard rule]
+RULE-1  No secrets in source code. Use environment variables or file-based keys.
+RULE-2  After removing any Jinja2 template block (if/for/block/macro), verify the matching end tag is also removed.
+RULE-3  No bare except: clauses. Always use except Exception: at minimum.
+RULE-4  All shell scripts must have #!/usr/bin/env bash and set -eo pipefail.
+RULE-5  Chia-only — no other blockchain fork code. See feedback_chia_only.md.
 ```
 
 If asked to break any of these rules, **refuse and explain why**, then offer the correct approach.
@@ -202,6 +196,8 @@ Project-specific commands in `.claude/commands/`. Use these to maintain consiste
 | `/design-review [focus]` | Review design docs for quality, gaps, blockers — output to `docs/reviews/` |
 | `/design-update [doc] [section]` | Update design doc and design index atomically |
 | `/design-audit [scope]` | Audit code against design docs — find drift, gaps, violations |
+| `/validate` | Pre-flight checks — Python syntax, template tags, code quality |
+| `/deploy [full]` | Build Docker image and push to GHCR. `full` = commit + push code first |
 | `/push [N] [title]` | Save a response to the stack for later recall |
 | `/pop [N]` | Recall the Nth most recent stack item (default: 1) |
 | `/stack` | List all items on the push/pop stack |
@@ -416,6 +412,37 @@ Reserve Bash for commands that genuinely need shell execution: `git`, build tool
 
 ---
 
+## 9b. Deployment Workflow
+
+This project deploys as a Docker container to Unraid via GHCR.
+
+### Registry
+- **Image:** `ghcr.io/squaremesh/machinaris:latest`
+- **Base image:** `ghcr.io/squaremesh/machinaris-base-noble:main`
+- **Dockerfile:** `docker/dockerfile`
+
+### Build and Push
+```bash
+docker build -t ghcr.io/squaremesh/machinaris:latest -f docker/dockerfile .
+docker push ghcr.io/squaremesh/machinaris:latest
+```
+
+Use `/deploy` to automate the full cycle. Use `/deploy full` to include commit + code push.
+
+### Runtime Environment
+- **Target:** Unraid server (not local development machine)
+- **No local testing:** Docker runs on Unraid, not the dev machine. The only way to verify runtime behavior is to deploy and check container logs.
+- **Logs:** `docker logs <container>` or `/root/.chia/machinaris/logs/web.log` inside the container.
+
+### Pre-Deploy Checklist
+Always run `/validate` before deploying. It catches:
+- Python syntax errors
+- Jinja2 template tag mismatches (e.g., orphaned `{% endif %}`)
+- Bare `except:` clauses
+- Shell script issues
+
+---
+
 ## 10. When You Are Unsure
 
 Ranked preference for resolving uncertainty:
@@ -538,8 +565,11 @@ REFERENCE        docs/reference/  — external source material
 COMMANDS         .claude/commands/  — project slash commands
 STACK            .agent/stack/  — push/pop response bookmarks
 COMMIT           /commit  — sync tracking + commit (mid-session checkpoint)
+VALIDATE         /validate  — pre-flight checks before commit/deploy
+DEPLOY           /deploy  — build + push Docker image to GHCR
 
 TOOL USAGE       Section 9a — no cd to project root, prefer dedicated tools
+DEPLOYMENT       Section 9b — Docker build/push to GHCR, Unraid target
 HARD RULES       Section 4.2 — never break silently
 DESIGN CHALLENGE Section 4.3 — format for raising conflicts
 SESSION START    Section 2 — /session-start
