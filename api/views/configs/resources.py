@@ -8,7 +8,7 @@ from flask.views import MethodView
 from api import app
 from api.extensions.api import Blueprint
 
-from api.commands import chiadog_cli, chia_cli, plotman_cli, forktools_cli, mmx_cli, rewards
+from api.commands import chiadog_cli, chia_cli, plotman_cli, mmx_cli, rewards
 from common.utils import notifications
 
 blp = Blueprint(
@@ -23,7 +23,7 @@ blp = Blueprint(
 class Configs(MethodView):
 
     def get(self):
-        response = make_response(json.dumps(['alerts', 'farming', 'plotting', 'forktools']), 200)
+        response = make_response(json.dumps(['alerts', 'farming', 'plotting']), 200)
         response.mimetype = "application/json"
         return response
 
@@ -47,8 +47,6 @@ class ConfigByType(MethodView):
         elif type == "plotting_schedule":
             config = plotman_cli.load_schedule()
             mimetype = "application/json"
-        elif type == "tools":
-            config = forktools_cli.load_config(blockchain)
         elif type == "notifications":
             config = json.dumps(notifications.load_config())
             mimetype = "application/json"
@@ -79,8 +77,6 @@ class ConfigByType(MethodView):
                 plotman_cli.save_config(self.clean_config(request.data), blockchain)
             elif type == "plotting_schedule":
                 plotman_cli.save_schedule(json.loads(request.data))
-            elif type == "tools":
-                forktools_cli.save_config(self.clean_config(request.data), blockchain)
             elif type == "wallet":
                 chia_cli.save_wallet_settings(json.loads(request.data.decode('utf-8')), blockchain)
             elif type == "plotnfts":

@@ -782,7 +782,7 @@ class Connections:
                             self.set_geolocation(geoip_cache, connection, lang)
                         except:
                             traceback.print_exc()
-                        if blockchain == 'hddcoin' or vals[0] != "FULL_NODE":  # FARMER and WALLET only on one line 
+                        if vals[0] != "FULL_NODE":  # FARMER and WALLET only on one line
                             conns.append(connection)
                     else:
                         app.logger.info("Bad connection line: {0}".format(line))

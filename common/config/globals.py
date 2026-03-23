@@ -96,8 +96,6 @@ def load():
         cfg['fullnode_db_version'] = fullnode_db_version
     if 'fullnode' in cfg['machinaris_mode']:
         cfg['wallet_status'] = "running" if wallet_running() else "paused"
-        if cfg['enabled_blockchains'][0] == 'mmx':
-            cfg['mmx_reward'] = gather_mmx_reward()
     return cfg
 
 def load_blockchain_info(blockchain, key):
@@ -453,49 +451,14 @@ def get_disks(disk_type):
             return []
 
 def get_alltheblocks_name(blockchain):
-    if blockchain == 'staicoin':
-        return 'stai' # Special case for staicoin's inconsistent naming convention
-    elif blockchain == 'gigahorse':
-        return 'chia' # Special case for gigahorse which is really Chia
     return blockchain
 
 def legacy_blockchain(blockchain):
-    return blockchain in ['achi', 'ballcoin', 'coffee', 'ecostake', 'gold', 'mint', 'nchain', 'petroleum', 'profit', 'silicoin', 'stor']
-
-last_mmx_reward = None
-last_mmx_reward_load_time = None
-def gather_mmx_reward():
-    mmx_binary = get_blockchain_binary('mmx')
-    global last_mmx_reward
-    global last_mmx_reward_load_time
-    if last_mmx_reward_load_time and last_mmx_reward_load_time >= \
-            (datetime.datetime.now() - datetime.timedelta(minutes=15)):
-        return last_mmx_reward
-    last_mmx_reward = ""
-    try:
-        proc = Popen("{0} node info | grep -i reward".format(mmx_binary),
-                stdout=PIPE, stderr=PIPE, shell=True)
-        outs, errs = proc.communicate(timeout=90)
-        reward_line = outs.decode('utf-8').strip()
-        if reward_line.startswith("Reward:"):
-            # Example -> "Reward:   0.439271 MMX"
-            last_mmx_reward = reward_line.split(':')[1][:-3].strip()
-    except TimeoutExpired:
-        proc.kill()
-        proc.communicate()
-    except:
-        logging.error(traceback.format_exc())
-    last_mmx_reward_load_time = datetime.datetime.now()
-    return last_mmx_reward
+    return False
 
 def wallet_running():
     blockchain = enabled_blockchains()[0]
-    if blockchain == 'mmx':
-        return True # Always running for MMX
-    if blockchain == 'gigahorse':
-        chia_binary_short = 'chia' # wallet process is 'chia_wallet'
-    else:
-        chia_binary_short = get_blockchain_binary(blockchain).split('/')[-1]
+    chia_binary_short = get_blockchain_binary(blockchain).split('/')[-1]
     try:
         proc = Popen(["pidof", "{0}_wallet".format(chia_binary_short)], stdout=PIPE, stderr=PIPE)
         outs, errs = proc.communicate(timeout=90)
