@@ -34,7 +34,7 @@ def recent_challenges(blockchain):
     try:
         schedule_every_x_minutes = app.config['STATUS_EVERY_X_MINUTES']
         CHALLENGES_TO_LOAD = CHALLENGES_PER_MINUTE * int(schedule_every_x_minutes) + CHALLENGES_PER_MINUTE
-    except:
+    except Exception:
         CHALLENGES_TO_LOAD = CHALLENGES_PER_MINUTE * 2 + CHALLENGES_PER_MINUTE
     log_file = get_farming_log_file(blockchain)
     if not os.path.exists(log_file):

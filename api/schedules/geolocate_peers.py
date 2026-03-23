@@ -85,11 +85,11 @@ def geolocate_ip_addresses(ip_addresses):
                 }
                 try:
                     geoip_cache[ip_address]['city'] = ast.literal_eval(str(response.city.names))
-                except:
+                except Exception:
                     pass
                 try:
                     geoip_cache[ip_address]['country'] = ast.literal_eval(str(response.country.names))
-                except:
+                except Exception:
                     pass
             except Exception as ex:
                 geoip_cache[ip_address] = None

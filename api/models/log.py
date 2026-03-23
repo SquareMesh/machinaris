@@ -43,7 +43,7 @@ class Challenges:
                         'time_taken': str(re.search(r'Time: (\d+\.?\d*) s.', line, re.IGNORECASE).group(1)) + ' secs',
                         'created_at': line.split()[0].replace('T', ' ')
                     })
-            except:
+            except Exception:
                 app.logger.info("Failed to parse challenge line: {0}".format(line))
                 app.logger.info(traceback.format_exc())
         self.rows.reverse()
@@ -71,7 +71,7 @@ class Partials:
                     created_at = None
                     launcher_id = None
                     pool_url = None
-            except:
+            except Exception:
                 app.logger.info("Failed to parse partial line: {0}".format(line))
                 app.logger.info(traceback.format_exc())
         self.rows.reverse()
@@ -133,7 +133,7 @@ class Blocks:
                         app.logger.info("time_taken: {0}".format(time_taken))
                         app.logger.info("created_at: {0}".format(created_at))
                         app.logger.info("Missing farmed blocks data for farmed_block {0}".format(farmed_block))
-            except:
+            except Exception:
                 app.logger.info("Failed to parse blocks line: {0}".format(line))
                 app.logger.info(traceback.format_exc())
         self.rows.reverse()
@@ -156,6 +156,6 @@ class Blocks:
                     'created_at': created_at
                 })
                 #app.logger.info(self.rows)
-            except:
+            except Exception:
                 app.logger.info("Failed to parse MMX blocks line: {0}".format(line))
                 app.logger.info(traceback.format_exc())

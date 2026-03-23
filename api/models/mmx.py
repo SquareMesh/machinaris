@@ -49,7 +49,7 @@ class FarmSummary:
                 self.display_netspace_size = "{:0.3f} EiB".format(float(size_value) / 1000)
             else:
                 self.display_netspace_size = self.netspace_size
-        except:
+        except Exception:
             app.logger.info("Unable to split network size value: {0}".format(netspace_size))
             self.display_netspace_size = self.netspace_size
     

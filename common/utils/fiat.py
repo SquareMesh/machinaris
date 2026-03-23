@@ -116,7 +116,7 @@ def save_local_currency(currency):
     try:
         with open(LOCALE_SETTINGS) as f:
             settings = json.load(f)
-    except:
+    except Exception:
         pass
     try:
         settings['local_currency'] = currency

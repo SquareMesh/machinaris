@@ -87,7 +87,7 @@ def collect():
                 effort = (time.time() - oldest_plot_time) / 60 / etw_minutes * 100
                 app.logger.info("Effort based on oldest plot file ({0}) is {1}%".format(readable(oldest_plot_time)), round(effort, 0))
                 send_stat(blockchain, effort, current_datetime)
-        except:
+        except Exception:
             app.logger.info("Failed to calculate blockchain effort.")
             app.logger.info(traceback.format_exc())
 
@@ -104,6 +104,6 @@ def send_stat(blockchain, value, current_datetime):
             "created_at": current_datetime,
         })
         utils.send_post('/stats/effort', payload, debug=False)
-    except:
+    except Exception:
         app.logger.info("Failed to send latest stat to /stats/effort.")
         app.logger.info(traceback.format_exc())

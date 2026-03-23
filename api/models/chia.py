@@ -73,7 +73,7 @@ class FarmSummary:
                 self.display_netspace_size = "{:0.3f} EiB".format(float(size_value) / 1000)
             else:
                 self.display_netspace_size = self.netspace_size
-        except:
+        except Exception:
             app.logger.debug("Unable to split network size value: {0}".format(netspace_size))
             self.display_netspace_size = self.netspace_size
 
@@ -118,11 +118,11 @@ class Wallets:
                 hot_balance = self.sum_chia_wallet_balance(wallet.hostname, wallet.blockchain, False)
             try:
                 cold_balance = float(wallet.cold_balance)
-            except:
+            except Exception:
                 cold_balance = 0.0
             try:
                 total_balance = float(hot_balance) + float(cold_balance)
-            except:
+            except Exception:
                 total_balance = hot_balance
             if hot_balance or cold_balance:
                 self.rows.append({ 

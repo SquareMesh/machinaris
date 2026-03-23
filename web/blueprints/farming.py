@@ -30,7 +30,7 @@ def data():
     try:
         [draw, recordsTotal, recordsFiltered, data] = chia.load_plots(request.args)
         return make_response({'draw': draw, 'recordsTotal': recordsTotal, 'recordsFiltered': recordsFiltered, "data": data}, 200)
-    except: 
+    except Exception:
         traceback.print_exc()
     return make_response(_("Error! Please see logs."), 500)
 

@@ -1,4 +1,5 @@
-#!/bin/env bash
+#!/usr/bin/env bash
+set -eo pipefail
 #
 # Installs Madmax plotters:
 #   * Classic open source for the default Chia image

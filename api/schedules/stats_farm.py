@@ -24,7 +24,7 @@ def delete_old_stats():
         for table in TABLES:
             db.session.query(table).filter(table.created_at <= cutoff.strftime("%Y%m%d%H%M")).delete()
         db.session.commit()
-    except:
+    except Exception:
         app.logger.info("Failed to delete old statistics.")
         app.logger.info(traceback.format_exc())
 
@@ -51,24 +51,24 @@ def store_locally(blockchain, farm_summary, current_datetime):
     hostname = utils.get_hostname()
     try:
         db.session.add(stats.StatPlotCount(hostname=hostname, blockchain=blockchain, value=farm_summary.plot_count, created_at=current_datetime))
-    except:
+    except Exception:
         app.logger.info(traceback.format_exc())
     try:
         db.session.add(stats.StatPlotsSize(hostname=hostname, blockchain=blockchain, value=converters.str_to_gibs(farm_summary.plots_size), created_at=current_datetime))
-    except:
+    except Exception:
         app.logger.info(traceback.format_exc())
     if farm_summary.status == "Farming":  # Only collect if fully synced
         try:
             db.session.add(stats.StatTotalCoins(hostname=hostname, blockchain=blockchain, value=farm_summary.total_coins, created_at=current_datetime))
-        except:
+        except Exception:
             app.logger.info(traceback.format_exc())
         try:
             db.session.add(stats.StatNetspaceSize(hostname=hostname, blockchain=blockchain, value=converters.str_to_gibs(farm_summary.netspace_size), created_at=current_datetime))
-        except:
+        except Exception:
             app.logger.info(traceback.format_exc())
         try:
             db.session.add(stats.StatTimeToWin(hostname=hostname, blockchain=blockchain, value=converters.etw_to_minutes(farm_summary.time_to_win), created_at=current_datetime))
-        except:
+        except Exception:
             app.logger.info(traceback.format_exc())
     db.session.commit()
 
@@ -90,6 +90,6 @@ def send_stat(blockchain, endpoint, value, current_datetime):
             "created_at": current_datetime,
         })
         utils.send_post(endpoint, payload, debug=False)
-    except:
+    except Exception:
         app.logger.info("Failed to send latest stat to {0}.".format(endpoint))
         app.logger.info(traceback.format_exc())

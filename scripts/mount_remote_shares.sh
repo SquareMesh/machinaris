@@ -1,4 +1,5 @@
-#!/bin/env bash
+#!/usr/bin/env bash
+set -eo pipefail
 #
 # For each CIFS share in the provided comma-separated list
 #

@@ -1,4 +1,5 @@
-#!/bin/env bash
+#!/usr/bin/env bash
+set -eo pipefail
 #
 # Setups GPU drivers for either Nvidia, AMD, or Intel
 #

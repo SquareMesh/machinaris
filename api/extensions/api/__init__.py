@@ -56,6 +56,21 @@ class AutoSchema(SQLAlchemyAutoSchema):
         }
 
 
+class TopLevelSchema(ma.Schema):
+    """Schema that deserializes/serializes a top-level JSON array.
+
+    Replaces the unmaintained marshmallow-toplevel package.
+    Subclasses define a ``_toplevel`` Nested field; load/dump operate
+    on the list directly instead of wrapping it in a dict.
+    """
+
+    def _deserialize(self, data, *, many=None, partial=None, unknown=None):
+        return self.fields['_toplevel']._deserialize(data, '_toplevel', data)
+
+    def _serialize(self, obj, *, many=None):
+        return self.fields['_toplevel']._serialize(obj, '_toplevel', obj)
+
+
 class SQLCursorPage(Page):
     """SQL cursor pager"""
 

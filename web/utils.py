@@ -93,7 +93,7 @@ def get_lang(request):
             return match
         app.logger.debug("LOCALE: Accept-Language: {0} returned no match so defaulting to 'en'.".format(accept))
         return "en"
-    except:
+    except Exception:
         app.logger.debug("LOCALE: Request had no Accept-Language header, returning default locale of 'en'")
         return "en"
 

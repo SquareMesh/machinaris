@@ -1,4 +1,5 @@
-#!/bin/env bash
+#!/usr/bin/env bash
+set -eo pipefail
 #
 # Installs Chiadog for log monitoring and alerting,
 # using an enhanced and supported fork of the original project.
@@ -21,9 +22,9 @@ if [[ (${mode} =~ ^fullnode.*  || ${mode} =~ "harvester") && ${blockchains} != '
     cp -f /machinaris/scripts/chiadog_notifier.sh /root/.chia/chiadog/notifier.sh && chmod 755 /root/.chia/chiadog/notifier.sh
     echo 'Starting Chiadog...'
     cd /chiadog
-    chiadog_pids=$(pidof python3)
+    chiadog_pids=$(pidof python3 || true)
     if [[ ! -z $chiadog_pids ]]; then
-        kill $chiadog_pids
+        kill $chiadog_pids || true
     fi
     /chia-blockchain/venv/bin/python3 -u main.py --config /root/.chia/chiadog/config.yaml > /root/.chia/chiadog/logs/chiadog.log 2>&1 &
 fi

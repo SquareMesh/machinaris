@@ -26,6 +26,6 @@ def get_log_lines(lang, worker, log_type, log_id, blockchain):
             payload['blockchain'] = blockchain
         response = utils.send_get(worker, "/logs/{0}".format(log_type), payload, debug=False, lang=lang)
         return response.content.decode('utf-8')
-    except:
+    except Exception:
         app.logger.info(traceback.format_exc())
         return 'Failed to load log file from {0}:{1} running {2}'.format(worker.hostname, worker.port, blockchain)

@@ -176,7 +176,7 @@ def cold_wallet_balance(blockchain):
                         total_balance += address_balance
                     else:
                         app.logger.error("No cold wallet details found for {0} {1}.".format(cold_blockchain, address))
-            except:
+            except Exception:
                 app.logger.error("Failed to request cold wallet balance for {0} due to {1}".format(cold_blockchain, str(ex)))
         save_cold_wallet_cache(cold_wallet_cache)
     # Now for that specific blockchain, check for a cold wallet balance in the cache
@@ -445,12 +445,12 @@ def request_chain_statuses(statuses, debug=False):
             for cell in row.find_all('td'):
                 try:
                     blockchain = cell.a.contents[0].string.strip().lower().replace('stai', 'staicoin').replace('n-chain', 'nchain').replace('onechain', 'one')
-                except:
+                except Exception:
                     pass
                 try:
                     if 'NO SYNC' in str(cell):
                         chain_status = 'NO SYNC'
-                except:
+                except Exception:
                     pass
             if blockchain in statuses:
                 details = statuses[blockchain]

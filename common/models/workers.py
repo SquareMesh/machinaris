@@ -26,43 +26,43 @@ class Worker(db.Model):
     def farming_status(self):
         try:
             return j.loads(self.services)['farming_status']
-        except: # Old key
+        except Exception: # Old key
             try:
                 return j.loads(self.services)['farm_status']
-            except:
+            except Exception:
                 return "unknown"
     
     def plotting_status(self):
         try:
             return j.loads(self.services)['plotting_status']
-        except: # Old key
+        except Exception: # Old key
             try:
                 return j.loads(self.services)['plotman_status']
-            except:
+            except Exception:
                 return "unknown"
 
     def archiving_status(self):
         try:
             return j.loads(self.services)['archiving_status']
-        except: # Old key
+        except Exception: # Old key
             try:
                 return j.loads(self.services)['archiver_status']
-            except:
+            except Exception:
                 return "unknown"
 
     def archiving_enabled(self):
         try:
             return j.loads(self.config)['archiving_enabled']
-        except:
+        except Exception:
             return "unknown"
     
     def monitoring_status(self):
         try:
             return j.loads(self.services)['monitoring_status']
-        except: # Old key
+        except Exception: # Old key
             try:
                 return j.loads(self.services)['chiadog_status'] 
-            except:
+            except Exception:
                 return "unknown"
     
     def container_memory_usage_gib(self):
@@ -82,11 +82,11 @@ class Worker(db.Model):
     def machinaris_version(self):
         try:
             return j.loads(self.config)['machinaris_version']
-        except:
+        except Exception:
             return None
 
     def fullnode_db_version(self):
         try:
             return j.loads(self.config)['fullnode_db_version']
-        except:
+        except Exception:
             return None

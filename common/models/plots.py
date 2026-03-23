@@ -24,7 +24,7 @@ class Plot(db.Model):
 
     hostname = sa.Column(sa.String(length=255), primary_key=True)
     displayname = sa.Column(sa.String(length=255), nullable=True)
-    blockchain = sa.Column(sa.String(length=64), nullable=False)
+    blockchain = sa.Column(sa.String(length=64), nullable=False, index=True)
     plot_id = sa.Column(sa.String(length=16), primary_key=True)
     type = sa.Column(sa.String(length=32), nullable=False)
     dir = sa.Column(sa.String(length=255), nullable=False)
@@ -32,5 +32,5 @@ class Plot(db.Model):
     size = sa.Column(sa.Integer, nullable=False)
     plot_check = sa.Column(sa.String(length=255), nullable=True)
     plot_analyze = sa.Column(sa.String(length=255), nullable=True)
-    created_at = sa.Column(sa.String(length=64), nullable=False)
+    created_at = sa.Column(sa.String(length=64), nullable=False, index=True)
     updated_at = sa.Column(sa.DateTime(), onupdate=func.now())

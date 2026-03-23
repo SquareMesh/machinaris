@@ -29,7 +29,7 @@ class Analysis(MethodView):
             body = json.loads(request.data)
             service = body['service']
             action = body['action']
-        except:
+        except Exception:
             abort("Invalid analysis request without service.", 400)
         if service == "plotting" and action == "analyze":
             analysis = plotman_cli.analyze(body['plot_file'])

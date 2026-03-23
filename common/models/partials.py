@@ -8,10 +8,10 @@ class Partial(db.Model):
     __tablename__ = "partials"
 
     unique_id = sa.Column(sa.String(length=255), primary_key=True)
-    hostname = sa.Column(sa.String(length=255), nullable=False)
-    blockchain = sa.Column(sa.String(length=64), nullable=False)
+    hostname = sa.Column(sa.String(length=255), nullable=False, index=True)
+    blockchain = sa.Column(sa.String(length=64), nullable=False, index=True)
     launcher_id = sa.Column(sa.String(length=255), nullable=False)
     pool_url = sa.Column(sa.String(length=255), nullable=False)
     pool_response = sa.Column(sa.String, nullable=False)
-    created_at = sa.Column(sa.String(length=64), nullable=False)
+    created_at = sa.Column(sa.String(length=64), nullable=False, index=True)
     

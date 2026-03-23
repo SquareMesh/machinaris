@@ -68,6 +68,6 @@ class DefaultConfig:
     # For latest APScheduler library, pass the TZ through
     try:
         SCHEDULER_TIMEZONE = os.environ['TZ']
-    except:
+    except Exception:
         print("Found no TZ environment variable containing timezone.  Generate a working Machinaris launch at https://www.machinaris.app")
         traceback.print_exc()

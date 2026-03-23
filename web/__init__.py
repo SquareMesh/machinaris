@@ -51,7 +51,7 @@ def get_locale():
             if alternative in app.config['LANGUAGES']:
                 return alternative
         app.logger.debug("INIT: Accept-Language: {0}  ---->  matched locale: {1}".format(accept, match))
-    except:
+    except Exception:
         app.logger.debug("INIT: Request had no Accept-Language, returning default locale of en.")
     return request.accept_languages.best_match(app.config['LANGUAGES'])
 

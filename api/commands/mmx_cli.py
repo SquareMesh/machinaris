@@ -50,7 +50,7 @@ def list_plots():
             entries = ((os.stat(path), path) for path in entries)
             entries = ((stat[ST_MTIME], stat[ST_SIZE], path) for stat, path in entries if S_ISREG(stat[ST_MODE]))
             all_entries.extend(entries)
-        except:
+        except Exception:
             app.logger.info("Failed to list files at {0}".format(dir_path))
             app.logger.info(traceback.format_exc())
     all_entries = sorted(all_entries, key=lambda entry: entry[0], reverse=True)

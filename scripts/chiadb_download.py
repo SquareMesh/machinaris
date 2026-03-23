@@ -43,6 +43,6 @@ try:
     print(h.status().name, 'Database download complete.')
     if os.path.exists(DOWNLOAD_STATUS_FILE):
         os.remove(DOWNLOAD_STATUS_FILE)
-except:
+except Exception:
     print(h.status().name, 'Database download failed.')
     traceback.print_exc()

@@ -1,4 +1,5 @@
-#!/bin/env bash
+#!/usr/bin/env bash
+set -eo pipefail
 #
 # Installs Plotman for plotting management; customized for non-interactive use by Machinaris
 #

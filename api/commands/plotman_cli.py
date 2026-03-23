@@ -133,7 +133,7 @@ def action_plots(job):
             proc = Popen(cmd_args, universal_newlines=True, stdout=log_fo, stderr=log_fo)
             # Plotman regressed on cleaning temp after kill so do it here:
             clean_tmp_dirs_after_kill(plot_id)
-        except:
+        except Exception:
             app.logger.info('Failed to {0} selected plot {1}.'.format(action, plot_id))
             app.logger.info(traceback.format_exc())
             return
@@ -263,7 +263,7 @@ def find_plotting_job_log(plot_id):
                 continue
             else:
                 continue
-        except:
+        except Exception:
             app.logger.info("find_plotting_job_log: Skipping error when reading head of {0}".format(filename))
             app.logger.info(traceback.format_exc())
     return None
@@ -322,7 +322,7 @@ def load_dirs(blockchain):
             response['destination'] = []
         if not 'archiving' in response:
             response['archiving'] = []
-    except:
+    except Exception:
         response = outs.decode('utf-8')
     result = {'response': response, }
     if errs.decode('utf-8'):

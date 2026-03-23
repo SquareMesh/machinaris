@@ -22,7 +22,7 @@ def delete_old_challenges(db):
         #app.logger.info("Purging old challenges earlier than {0}".format(cutoff_str))
         db.session.query(c.Challenge).filter(c.Challenge.created_at < cutoff_str).delete()
         db.session.commit()
-    except:
+    except Exception:
         app.logger.info("Failed to delete old challenges.")
         app.logger.info(traceback.format_exc())
 

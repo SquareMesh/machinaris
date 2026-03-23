@@ -66,7 +66,7 @@ def start_chiadog(farmer):
     app.logger.info("Starting Chiadog monitoring...")
     try:
         utils.send_post(farmer, "/actions/", {"service": "monitoring","action": "start"}, debug=False)
-    except:
+    except Exception:
         app.logger.info(traceback.format_exc())
         flash(_('Failed to start Chiadog monitoring! Please see log files.'), 'danger')
     else:
@@ -76,7 +76,7 @@ def stop_chiadog(farmer):
     app.logger.info("Stopping Chiadog monitoring...")
     try:
         utils.send_post(farmer, "/actions/", payload={"service": "monitoring","action": "stop"}, debug=False)
-    except:
+    except Exception:
         app.logger.info(traceback.format_exc())
         flash(_('Failed to stop Chiadog monitoring! Please see log files.'), 'danger')
     else:

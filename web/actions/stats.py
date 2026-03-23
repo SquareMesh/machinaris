@@ -330,7 +330,7 @@ def load_plotting_stats():
             values = workers[worker_displayname]
             try:
                 values[converted_date] = round(float(analyze_seconds) / 60, 2) # Convert from seconds to minutes
-            except:
+            except Exception:
                 app.logger.error("Inavlid plot_analyze time found in ip_addr|seconds: {0}".format(p.plot_analyze))
                 values[converted_date] = 'null'
         if len(dates) > 0:
@@ -512,7 +512,7 @@ def load_host_memory_usage():
             try:
                 w = worker.get_worker(p.hostname)
                 displayname = w.displayname
-            except:
+            except Exception:
                 app.logger.debug("Failed to find worker for hostname: {0}".format(p.hostname))
                 displayname = p.hostname
         if not displayname in workers:
@@ -565,7 +565,7 @@ def load_farmed_blocks(blockchain):
         try:
             w = worker.get_worker(row.hostname)
             displayname = w.displayname
-        except:
+        except Exception:
             app.logger.debug("Failed to find worker for hostname: {0}".format(w.hostname))
             displayname = row.hostname
         blocks.append({
@@ -704,7 +704,7 @@ def load_container_memory(hostname, blockchain):
     app.logger.debug("{0} after {1}".format(blockchain, converted_values))
     try:
         displayname = worker.get_worker(hostname).displayname
-    except:
+    except Exception:
         displayname = hostname
     return { 'title': blockchain.capitalize() + ' - ' + _('Container Memory Usage') +  ' - ' + displayname, 'dates': dates, 'vals': converted_values, 
         'y_axis_title': _('GiB') }

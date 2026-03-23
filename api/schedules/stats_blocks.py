@@ -43,7 +43,7 @@ def store_locally(blockchain, blocks):
                     created_at=block['created_at']))
             else:
                 app.logger.debug("Already in database: {0}".format(block['farmed_block']))
-        except:
+        except Exception:
             app.logger.info(traceback.format_exc())
     db.session.commit()
 
@@ -64,6 +64,6 @@ def send_to_controller(blockchain, blocks):
                 }
             )
         utils.send_post('/stats/farmedblocks/', payload, debug=False)
-    except:
+    except Exception:
         app.logger.info("Failed to send latest stat to {0}.".format('/stats/farmedblocks'))
         app.logger.info(traceback.format_exc())

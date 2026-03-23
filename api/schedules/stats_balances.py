@@ -32,7 +32,7 @@ def delete_old_stats():
         for table in TABLES:
             db.session.query(table).filter(table.created_at <= cutoff.strftime("%Y%m%d%H%M")).delete()
         db.session.commit()
-    except:
+    except Exception:
         app.logger.info("Failed to delete old statistics.")
         app.logger.info(traceback.format_exc())
 
@@ -64,7 +64,7 @@ def collect():
                 app.logger.info("From {0} wallet rows, fiat total (including cold wallet balance) is {1} {2}".format(len(wallets.rows), round(fiat_total, 2), currency_symbol))
             if not cold_wallet_balance_error: # Don't record a total across all wallets if one is temporarily erroring out
                 store_total_locally(round(fiat_total, 2), currency_symbol, current_datetime)
-        except:
+        except Exception:
             app.logger.info("Failed to load and store wallet balance.")
             app.logger.info(traceback.format_exc())
 
@@ -77,7 +77,7 @@ def store_balance_locally(blockchain, wallet_balance, current_datetime):
             blockchain=blockchain,
             value = wallet_balance,
             created_at=current_datetime))
-    except:
+    except Exception:
         app.logger.info(traceback.format_exc())
     db.session.commit()
 
@@ -89,6 +89,6 @@ def store_total_locally(total_balance, currency_symbol, current_datetime):
             value = total_balance,
             currency = currency_symbol,
             created_at=current_datetime))
-    except:
+    except Exception:
         app.logger.info(traceback.format_exc())
     db.session.commit()

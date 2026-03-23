@@ -28,7 +28,7 @@ class Actions(MethodView):
         try:
             body = json.loads(request.data)
             service = body['service']
-        except:
+        except Exception:
             abort("Invalid action request without service.", 400)
         try:
             if service in ["plotting", "archiving"]:

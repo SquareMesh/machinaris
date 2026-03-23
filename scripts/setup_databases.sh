@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -eo pipefail
 #
 # Use flask-migrate to manage the different sqlite dbs
 #

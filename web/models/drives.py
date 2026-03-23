@@ -13,7 +13,7 @@ class Drives:
             try:
                 w = worker.get_worker(drive.hostname)
                 displayname = w.displayname
-            except:
+            except Exception:
                 app.logger.debug("Failed to find worker for hostname: {0}".format(drive.hostname))
                 displayname = drive.hostname
             self.rows.append({

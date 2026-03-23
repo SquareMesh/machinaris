@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+set -eo pipefail
 #
 #  Configure and start plotting and farming services.
 #
@@ -38,8 +40,7 @@ fi
 
 # v0.8.3 upgrade step - new format blockchain prices cache
 if [[ -d /root/.chia/machinaris/cache ]] && [[ -f /root/.chia/machinaris/cache/blockchain_prices_cache.json ]] ; then
-  grep -q alltheblocks /root/.chia/machinaris/cache/blockchain_prices_cache.json
-  if [[ $? != 0 ]] ; then
+  if ! grep -q alltheblocks /root/.chia/machinaris/cache/blockchain_prices_cache.json; then
     echo "Removing old blockchain prices cache as part of upgrade to latest version..."
     rm -f /root/.chia/machinaris/cache/blockchain_prices_cache.json
   fi
@@ -55,8 +56,7 @@ if [[ -f /root/.chia/machinaris/logs/fd-cli.log ]]; then
 fi
 # v0.8.5 - improve plotman logging configuration for archving
 if [[ -f /root/.chia/plotman/plotman.yaml ]]; then
-  grep -q "transfers:" /root/.chia/plotman/plotman.yaml
-  if [[ $? != 0 ]]; then
+  if ! grep -q "transfers:" /root/.chia/plotman/plotman.yaml; then
     echo 'Patching Plotman logging configuration in /root/.chia/plotman/plotman.yaml'
     backup=`date +plotman.%Y%m%d-%H%M%S.yaml`
     cp /root/.chia/plotman/plotman.yaml /root/.chia/plotman/$backup

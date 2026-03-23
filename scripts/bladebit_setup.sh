@@ -1,4 +1,5 @@
-#!/bin/env bash
+#!/usr/bin/env bash
+set -eo pipefail
 #
 # Installs bladebit - A fast Chia plotter, offering disk, ram, and gpu modes.
 # See https://github.com/Chia-Network/bladebit

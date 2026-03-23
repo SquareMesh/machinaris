@@ -38,7 +38,7 @@ class Certificates(MethodView):
         zipname = "{0}.zip".format(zip)
         try:
             os.remove(zipname)
-        except:
+        except Exception:
             pass
         dir = globals.get_blockchain_network_path(blockchain) + '/config/ssl/ca'
         shutil.make_archive(zip, 'zip', dir)

@@ -21,7 +21,7 @@ class Plotnfts:
             try:
                 app.logger.debug("Found worker with hostname '{0}'".format(plotnft.hostname))
                 displayname = w.get_worker(plotnft.hostname).displayname
-            except:
+            except Exception:
                 app.logger.info("Plotnfts.init(): Unable to find a worker with hostname '{0}'".format(plotnft.hostname))
                 displayname = plotnft.hostname
             plotnft_obj = { 
@@ -54,7 +54,7 @@ class Pools:
             try:
                 app.logger.debug("Found worker with hostname '{0}'".format(pool.hostname))
                 displayname = w.get_worker(pool.hostname, pool.blockchain).displayname
-            except:
+            except Exception:
                 app.logger.info("Pools.init(): Unable to find a worker with hostname '{0}' for {1}".format(pool.hostname, pool.blockchain))
                 displayname = pool.hostname
             launcher_id = pool.launcher_id
@@ -113,7 +113,7 @@ class Pools:
                 try:
                     if not error['error_message'] in errors:
                         errors.append(error['error_message'])
-                except:# Some errors don't have an 'error_message' for some reason
+                except Exception:  # Some errors don't have an 'error_message' for some reason
                     if not str(error) in errors: 
                         errors.append(str(error))
         return errors

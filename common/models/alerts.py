@@ -10,10 +10,10 @@ class Alert(db.Model):
     __tablename__ = "alerts"
 
     unique_id = sa.Column(sa.String(length=128), primary_key=True)
-    hostname = sa.Column(sa.String(length=255), nullable=False)
-    blockchain = sa.Column(sa.String(length=64), nullable=False)
+    hostname = sa.Column(sa.String(length=255), nullable=False, index=True)
+    blockchain = sa.Column(sa.String(length=64), nullable=False, index=True)
     priority = sa.Column(sa.String(64), nullable=False)
     service = sa.Column(sa.String(64), nullable=False)
     message = sa.Column(sa.String, nullable=False)
-    created_at = sa.Column(sa.DateTime(), server_default=func.now())
+    created_at = sa.Column(sa.DateTime(), server_default=func.now(), index=True)
     updated_at = sa.Column(sa.DateTime(), onupdate=func.now())

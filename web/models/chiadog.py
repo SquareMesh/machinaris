@@ -11,7 +11,7 @@ class Alerts:
             try:
                 w = worker.get_worker(alert.hostname)
                 displayname = w.displayname
-            except:
+            except Exception:
                 app.logger.debug("Failed to find worker for hostname: {0}".format(alert.hostname))
                 displayname = alert.hostname
             self.rows.append({

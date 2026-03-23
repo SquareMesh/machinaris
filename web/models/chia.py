@@ -46,69 +46,69 @@ class Summaries:
             # Now collect each value in a separate try/except to guard against missing data
             try:
                 status = blockchain['status']
-            except:
+            except Exception:
                 status = ''
                 app.logger.error("No status found for blockchain: {0}".format(blockchain))
             try:
                 farmed = farm['total_coins']
-            except:
+            except Exception:
                 farmed = ''
                 app.logger.error("No total_coins found for farm: {0}".format(farm))
             try:
                 wallet_balance_float = wallet['total_balance_float']
                 wallet_balance = wallet['total_balance']
-            except:
+            except Exception:
                 wallet_balance_float = 0
                 wallet_balance = ''
                 app.logger.error("No total_balance found for wallet: {0}".format(wallet))
             try:
                 height = blockchain['peak_height']
-            except:
+            except Exception:
                 height = ''
                 app.logger.error("No peak_height found for blockchain: {0}".format(blockchain))
             try:
                 height = blockchain['peak_height']
-            except:
+            except Exception:
                 height = ''
                 app.logger.error("No peak_height found for blockchain: {0}".format(blockchain))
             try:
                 plots = farm['plot_count']
-            except:
+            except Exception:
                 plots = ''
                 app.logger.error("No plot_count found for farm: {0}".format(farm))
             try:
                 etw = self.etw_to_days(blockchain['blockchain'], farm['expected_time_to_win_english'])
-            except:
+            except Exception:
                 etw = ''
                 app.logger.error("No expected_time_to_win found for farm: {0}".format(farm))
             try:
                 harvesters = blockchain_stats['harvesters']
-            except:
+            except Exception:
                 harvesters = ''
                 app.logger.error("No harvesters found for blockchain stats: {0}".format(blockchain_stats))
             try:
                 max_resp = blockchain_stats['max_resp']
-            except:
+            except Exception:
                 max_resp = ''
                 app.logger.error("No max_resp found for blockchain stats: {0}".format(blockchain_stats))
             try:
                 partials_per_hour = blockchain_stats['partials_per_hour']
-            except:
+            except Exception:
                 partials_per_hour = ''
                 app.logger.error("No partials_per_hour found for blockchain stats: {0}".format(blockchain_stats))
             try:
                 edv = blockchain_stats['edv']
-            except:
+            except Exception:
                 edv = ''
                 app.logger.error("No edv found for blockchain stats: {0}".format(blockchain_stats))
             try:
                 edv_fiat = blockchain_stats['edv_fiat']
-            except:
+            except Exception:
                 edv_fiat = ''
                 app.logger.error("No edv_fiat found for blockchain stats: {0}".format(blockchain_stats))
             try:
                 effort = blockchain_stats['effort']
-            except:
+            except Exception:
                 effort = ''
                 app.logger.error("No effort found for blockchain stats: {0}".format(blockchain_stats))
             self.rows.append({
@@ -180,7 +180,7 @@ class FarmSummary:
                         wallet_balance = self.wallets.sum_mmx_wallet_balance(farm_rec.hostname, farm_rec.blockchain)
                     else:
                         wallet_balance = self.wallets.sum_chia_wallet_balance(farm_rec.hostname, farm_rec.blockchain)
-                except: 
+                except Exception:
                     wallet_balance = '?'
                 if farm_rec.total_coins:
                     total_coins = converters.round_balance(farm_rec.total_coins)
@@ -188,15 +188,15 @@ class FarmSummary:
                     total_coins = converters.round_balance(0)
                 try:
                     plots_display_size = converters.gib_to_fmt(farm_rec.plots_size)
-                except:
+                except Exception:
                     plots_display_size = ''
                 try:
                     netspace_display_size = converters.gib_to_fmt(farm_rec.netspace_size)
-                except:
+                except Exception:
                     netspace_display_size = '?'
                 try:
                     blockchain_symbol = globals.get_blockchain_symbol(farm_rec.blockchain)
-                except:
+                except Exception:
                     blockchain_symbol = None
                 farm = {
                     "plot_count": int(farm_rec.plot_count),
@@ -369,9 +369,9 @@ class Wallets:
                 try:
                     service_status = json.loads(worker.config)['wallet_status']
                     app.logger.debug("For {0} found wallet service status: {1}".format(wallet.blockchain, service_status))
-                except:
+                except Exception:
                     pass
-            except:
+            except Exception:
                 app.logger.info("Wallets.init(): Unable to find a worker with hostname '{0}'".format(wallet.hostname))
                 displayname = wallet.hostname
             if wallet.blockchain == 'mmx':
@@ -391,7 +391,7 @@ class Wallets:
                 total_balance = hot_balance
             try:
                 blockchain_symbol = globals.get_blockchain_symbol(wallet.blockchain).lower()
-            except:
+            except Exception:
                 blockchain_symbol = None
             self.rows.append({ 
                 'displayname': displayname, 
@@ -520,13 +520,13 @@ class Keys:
                 worker = w.get_worker(key.hostname, key.blockchain)
                 worker_status = worker.connection_status()
                 displayname = worker.displayname
-            except:
+            except Exception:
                 app.logger.info("Keys.init(): Unable to find a worker with hostname '{0}'".format(key.hostname))
                 displayname = key.hostname
             parsed_details = key.details
             try:
                 [addresses, parsed_details] = self.link_first_wallet_address(key.blockchain, key.details)
-            except:
+            except Exception:
                 traceback.print_exc()
                 parsed_details = key.details
                 addresses = []
@@ -567,7 +567,7 @@ class Blockchains:
                 worker = w.get_worker(blockchain.hostname, blockchain.blockchain)
                 worker_status = worker.connection_status()
                 displayname = worker.displayname
-            except:
+            except Exception:
                 app.logger.info("Blockchains.init(): Unable to find a worker with hostname '{0}'".format(blockchain.hostname))
                 displayname = blockchain.hostname
             row = { 
@@ -664,7 +664,7 @@ class Blockchains:
                 try:
                     peak_time = datetime.datetime.strptime(m.group(1).strip(), '%a %b %d %Y %H:%M:%S %Z')
                     return peak_time.strftime("%Y-%m-%d %H:%M")
-                except:
+                except Exception:
                     return m.group(1).strip() # Unconverted time
         return None
 
@@ -681,12 +681,12 @@ class Connections:
                 worker = w.get_worker(connection.hostname, connection.blockchain)
                 worker_status = worker.connection_status()
                 displayname = worker.displayname
-            except:
+            except Exception:
                 app.logger.info("Connections.init(): Unable to find a worker with hostname '{0}'".format(connection.hostname))
                 displayname = connection.hostname
             try:
                 farmer_port = globals.get_blockchain_network_port(connection.blockchain)
-            except:
+            except Exception:
                 farmer_port = None
             self.rows.append({
                 'displayname': displayname, 
@@ -728,11 +728,11 @@ class Connections:
             longitude = geoip['longitude']
             try:
                 city = self.get_geoname_for_lang(connection['ip'], geoip['city'], lang)
-            except:
+            except Exception:
                 traceback.print_exc()
             try:
                 country = self.get_geoname_for_lang(connection['ip'], geoip['country'], lang)
-            except:
+            except Exception:
                 traceback.print_exc()
         connection['latitude'] = latitude
         connection['longitude'] = longitude
@@ -780,13 +780,13 @@ class Connections:
                             connection['hash'] = vals[9]
                         try:
                             self.set_geolocation(geoip_cache, connection, lang)
-                        except:
+                        except Exception:
                             traceback.print_exc()
                         if vals[0] != "FULL_NODE":  # FARMER and WALLET only on one line
                             conns.append(connection)
                     else:
                         app.logger.info("Bad connection line: {0}".format(line))
-            except:
+            except Exception:
                 app.logger.info("Exception parsing connection line: {0}".format(line))
                 app.logger.info(traceback.format_exc())
         return conns
@@ -811,12 +811,12 @@ class Connections:
                     }
                     try:
                         self.set_geolocation(geoip_cache, connection, lang)
-                    except:
+                    except Exception:
                         traceback.print_exc()
                     conns.append(connection)
                 elif line.strip():
                     app.logger.info("Bad peer line: {0}".format(line))
-            except:
+            except Exception:
                 app.logger.info(traceback.format_exc())
         return conns
 
@@ -824,7 +824,7 @@ class Connections:
         if unit.lower() == 'k':
             try:
                 return float(rate) / 1024
-            except:
+            except Exception:
                 app.logger.error("Invalid transmission rate in KB/sec provided: {0}".format(rate))
                 return rate
         elif unit.lower() == 'm':
@@ -838,7 +838,7 @@ class Transactions:
     def __init__(self, blockchain, transactions):
         try:
             self.address_prefix = globals.get_blockchain_symbol(blockchain).lower()
-        except:
+        except Exception:
             self.address_prefix = None
         self.transactions = transactions
         self.rows = []

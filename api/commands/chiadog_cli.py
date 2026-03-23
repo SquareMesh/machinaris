@@ -82,7 +82,7 @@ def start_chiadog(chain = None):
             logfile = "/root/.chia/chiadog/logs/chiadog.log"
             proc = Popen("nohup /chia-blockchain/venv/bin/python3 -u main.py --config {0} >> {1} 2>&1 &".format(configfile, logfile), \
                 shell=True, universal_newlines=True, stdout=None, stderr=None, cwd="/chiadog")
-        except:
+        except Exception:
             app.logger.info('Failed to start monitoring!')
             app.logger.info(traceback.format_exc())
 
@@ -92,7 +92,7 @@ def stop_chiadog():
     for blockchain in blockchains:
         try:
             os.kill(get_chiadog_pid(blockchain), signal.SIGTERM)
-        except:
+        except Exception:
             app.logger.info('Failed to stop monitoring!')
             app.logger.info(traceback.format_exc())
 

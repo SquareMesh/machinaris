@@ -80,7 +80,7 @@ def dispatch_action(job):
 def get_plotnft_log():
     try:
         return open('/root/.{0}/mainnet/log/plotnft.log'.format(os.environ['blockchains']),"r").read()
-    except:
+    except Exception:
         return None
 
 def get_pool_login_link(launcher_id):

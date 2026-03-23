@@ -39,7 +39,7 @@ def get_supported_blockchains():
     try:
         data = json.load(open(INFO_FILE))
         return sorted(data.keys())
-    except:
+    except Exception:
         raise Exception("No blockchain info found at {0}.".format(INFO_FILE))
 
 def get_blockchain_binary(blockchain):
@@ -108,7 +108,7 @@ def load_blockchain_info(blockchain, key):
                 raise Exception("Blockchain info key not found for {0}/{1}".format(blockchain, key))
         else:
             raise Exception("Blockchain info not found for {0}/{1}".format(blockchain, key))
-    except:
+    except Exception:
         raise Exception("No blockchain info found at {0} for {1}/{2}".format(INFO_FILE, blockchain, key))
 
 def get_stats_db():
@@ -152,7 +152,7 @@ def is_setup():
             logging.info(os.listdir(os.path.dirname(key.strip())))
             try:
                 logging.info(os.stat(key.strip()))
-            except:
+            except Exception:
                 logging.info(traceback.format_exc())
     return foundKey
 
@@ -213,7 +213,7 @@ def archiving_enabled():
                 if line.strip().startswith("archiving"):
                     return True
         return False
-    except:
+    except Exception:
         logging.info("Failed to read plotman.yaml so archiving_enabled=False.")
         logging.info(traceback.format_exc())
 
@@ -248,7 +248,7 @@ def load_blockchain_version(blockchain):
         if "@@@@" in last_blockchain_version:  # SSL warning 
             try:
                 Popen(["chia", "init", "--fix-ssl-permissions"], stdout=PIPE, stderr=PIPE).communicate(timeout=30)
-            except:
+            except Exception:
                 pass
             last_blockchain_version = ""
         if last_blockchain_version.endswith('dev0') or last_blockchain_version.endswith('dev1'):
@@ -271,7 +271,7 @@ def load_blockchain_version(blockchain):
     except TimeoutExpired:
         proc.kill()
         proc.communicate()
-    except:
+    except Exception:
         logging.info(traceback.format_exc())
     last_blockchain_version_load_time = datetime.datetime.now()
     return last_blockchain_version
@@ -291,7 +291,7 @@ def load_plotman_version():
             logging.info("No existing plotman config found, so copying sample to: {0}" \
                 .format(PLOTMAN_CONFIG))
             shutil.copy(PLOTMAN_SAMPLE, PLOTMAN_CONFIG)
-        except:
+        except Exception:
             pass
     last_plotman_version = ""
     try:
@@ -308,7 +308,7 @@ def load_plotman_version():
     except TimeoutExpired:
         proc.kill()
         proc.communicate()
-    except:
+    except Exception:
         logging.error(traceback.format_exc())
     last_plotman_version_load_time = datetime.datetime.now()
     return last_plotman_version
@@ -336,7 +336,7 @@ def load_chiadog_version():
     except TimeoutExpired:
         proc.kill()
         proc.communicate()
-    except:
+    except Exception:
         logging.error(traceback.format_exc())
     last_chiadog_version_load_time = datetime.datetime.now()
     return last_chiadog_version
@@ -360,7 +360,7 @@ def load_madmax_version():
     except TimeoutExpired:
         proc.kill()
         proc.communicate()
-    except:
+    except Exception:
         logging.error(traceback.format_exc())
     last_madmax_version_load_time = datetime.datetime.now()
     return last_madmax_version
@@ -388,7 +388,7 @@ def load_bladebit_version():
     except TimeoutExpired:
         proc.kill()
         proc.communicate()
-    except:
+    except Exception:
         logging.debug(traceback.format_exc())
     last_bladebit_version_load_time = datetime.datetime.now()
     return last_bladebit_version
@@ -405,7 +405,7 @@ def load_machinaris_version():
     try:
         with open('/machinaris/VERSION') as version_file:
             last_machinaris_version = version_file.read().strip()
-    except:
+    except Exception:
         logging.info(traceback.format_exc())
     last_machinaris_version_load_time = datetime.datetime.now()
     return last_machinaris_version
@@ -427,7 +427,7 @@ def load_fullnode_db_version():
             return "v2"
         elif os.path.exists(v1_db_file):
             return "v1"
-    except:
+    except Exception:
         logging.info(traceback.format_exc())
     fullnode_db_version_load_time = datetime.datetime.now()
     return fullnode_db_version
@@ -436,7 +436,7 @@ def get_disks(disk_type):
     if disk_type == "plots":
         try:
             return os.environ['plots_dir'].split(':')
-        except:
+        except Exception:
             logging.info("Unable to find any plots dirs for stats.")
             logging.info(traceback.format_exc())
             return []
@@ -445,7 +445,7 @@ def get_disks(disk_type):
             stream = open('/root/.chia/plotman/plotman.yaml', 'r')
             config = yaml.load(stream, Loader=yaml.SafeLoader)
             return config["directories"]["tmp"]
-        except:
+        except Exception:
             logging.info("Unable to find any plotting for stats.")
             logging.info(traceback.format_exc())
             return []
@@ -471,7 +471,7 @@ def wallet_running():
     except TimeoutExpired:
         proc.kill()
         proc.communicate()
-    except:
+    except Exception:
         logging.error(traceback.format_exc())
     return False
 

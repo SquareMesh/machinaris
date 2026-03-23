@@ -25,7 +25,7 @@ def delete_old_stats():
         for table in TABLES:
             db.session.query(table).filter(table.created_at <= cutoff.strftime("%Y%m%d%H%M")).delete()
         db.session.commit()
-    except:
+    except Exception:
         app.logger.info("Failed to delete old statistics.")
         app.logger.info(traceback.format_exc())
 
@@ -51,7 +51,7 @@ def store_disk_stats(current_datetime, disk_type):
                 db.session.add(stat)
             db.session.commit()
             total_used += (free // (2**30))
-        except:
+        except Exception:
             app.logger.info(
                 "Failed to get usage of {0} disk: {1}".format(disk_type, disk))
             app.logger.info(traceback.format_exc())
@@ -63,7 +63,7 @@ def store_disk_stats(current_datetime, disk_type):
             stat = stats.StatPlottingTotalUsed(hostname=hostname, blockchain='chia', value=total_used, created_at=current_datetime)
             db.session.add(stat)
         db.session.commit()
-    except:
+    except Exception:
         app.logger.info(
             "Failed to store total used for {0} disks.".format(disk_type))
         app.logger.info(traceback.format_exc())
@@ -97,6 +97,6 @@ def send_stats(model, endpoint):
                 "created_at": stat.created_at,
             })
         utils.send_post(endpoint, payload, debug=False)
-    except:
+    except Exception:
         app.logger.info("Failed to load recent {0} stats and send.".format(endpoint))
         app.logger.info(traceback.format_exc())

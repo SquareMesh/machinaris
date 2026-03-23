@@ -70,7 +70,7 @@ def start_plotman(plotter):
     app.logger.info("Starting Plotman run...")
     try:
         response = utils.send_post(plotter, "/actions/", {"service": "plotting","action": "start"}, debug=False)
-    except:
+    except Exception:
         app.logger.info(traceback.format_exc())
         flash(_('Failed to start Plotman plotting run! Please see log files.'), 'danger')
     else:
@@ -94,7 +94,7 @@ def action_plots(action, plot_ids):
             )
             if response.status_code != 200:
                 error_message += response.content.decode('utf-8') + "\n"
-        except:
+        except Exception:
             error = True
             app.logger.info(traceback.format_exc())
     if error:
@@ -121,7 +121,7 @@ def stop_plotman(plotter):
     app.logger.info("Stopping Plotman run...")
     try:
         response = utils.send_post(plotter, "/actions/", payload={"service": "plotting","action": "stop"}, debug=False)
-    except:
+    except Exception:
         app.logger.info(traceback.format_exc())
         flash(_('Failed to stop Plotman plotting run!'), 'danger')
         flash('Please see /root/.chia/plotman/logs/plotman.log', 'warning')
@@ -135,7 +135,7 @@ def start_archiving(plotter):
     app.logger.info("Starting Archiver....")
     try:
         response = utils.send_post(plotter, "/actions/", {"service": "archiving","action": "start"}, debug=False)
-    except:
+    except Exception:
         app.logger.info(traceback.format_exc())
         flash(_('Failed to start Plotman archiver! Please see log files.'), 'danger')
     else:
@@ -148,7 +148,7 @@ def stop_archiving(plotter):
     app.logger.info("Stopping Archiver run....")
     try:
         response = utils.send_post(plotter, "/actions/", payload={"service": "archiving","action": "stop"}, debug=False)
-    except:
+    except Exception:
         app.logger.info(traceback.format_exc())
         flash(_('Failed to stop Plotman archiver. Please see:') + ' /root/.chia/plotman/logs/archiver.log', 'danger')
     else:
@@ -201,7 +201,7 @@ def load_config(plotter, blockchain):
     replacements = []
     try:
         replacements = load_config_replacements(blockchain)
-    except:
+    except Exception:
         app.logger.info("Unable to load replacements on install with mode={0}".format(os.environ['mode']))
         app.logger.info(traceback.format_exc())
     lines = []

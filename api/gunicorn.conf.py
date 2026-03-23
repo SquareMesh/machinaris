@@ -1,3 +1,7 @@
+# Worker recycling: restart workers after N requests to prevent memory leaks
+max_requests = 1000
+max_requests_jitter = 50
+
 # Initialize the scheduler only once, not in each worker
 from api.schedules import periodically_sync_wallet
 
@@ -30,7 +34,7 @@ def on_starting(server):
     try:
         schedule_every_x_minutes = app.config['STATUS_EVERY_X_MINUTES']
         JOB_FREQUENCY = 60 * int(schedule_every_x_minutes)
-    except:
+    except Exception:
         app.logger.info("Failed to configure job schedule frequency in minutes as setting was: '{0}'".format(schedule_every_x_minutes))
         JOB_FREQUENCY = 120 # once every two minutes
     app.logger.info("Scheduler frequency will be once every {0} seconds.".format(JOB_FREQUENCY))

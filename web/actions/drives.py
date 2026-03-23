@@ -41,7 +41,7 @@ def save_settings(form):
     try:
         with open(DRIVES_SETTINGS) as f:
             settings = json.load(f)
-    except:
+    except Exception:
         pass
     try:
         settings['good_below_temperature'] = int(form.get("good_below_temperature"))
@@ -61,7 +61,7 @@ def load_settings():
     try:
         with open(DRIVES_SETTINGS) as f:
             settings = json.load(f)
-    except:
+    except Exception:
         settings['good_below_temperature'] = 40 # Default
         settings['warn_below_temperature'] = 50 # Default
     #app.logger.info("good_below_temperature: {0}".format(settings["good_below_temperature"]))

@@ -49,7 +49,7 @@ def load_pools():
 def get_plotnft_log():
     try:
         return open('/root/.{0}/mainnet/log/plotnft.log'.format(os.environ['blockchains']),"r").read()
-    except:
+    except Exception:
         return None
 
 def get_first_pool_wallet_id():
@@ -71,7 +71,7 @@ def send_request(fullnode, selected_blockchain, launcher_ids, choices, pool_urls
                         "launcher_ids": launcher_ids, "wallet_nums": wallet_nums, "fee_mojos": fee_mojos
                     }, 
             debug=True)
-    except:
+    except Exception:
         app.logger.info(traceback.format_exc())
         flash(_('Failed to update Pool settings! Please check the logs from the Workers page.'), 'danger')
     else:

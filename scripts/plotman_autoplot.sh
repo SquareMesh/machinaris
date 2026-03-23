@@ -1,4 +1,5 @@
-#!/bin/env bash
+#!/usr/bin/env bash
+set -eo pipefail
 #
 # Starts Plotman, when AUTO_PLOT/AUTO_ARCHIVE are enabled, on a Chia/Chives/MMX/Gigahorse fullnode or a plotter instance
 #

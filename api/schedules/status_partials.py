@@ -22,7 +22,7 @@ def delete_old_partials(db):
         app.logger.debug("Purging old partials earlier than {0}".format(cutoff_str))
         db.session.query(p.Partial).filter(p.Partial.created_at < cutoff_str).delete()
         db.session.commit()
-    except:
+    except Exception:
         app.logger.info("Failed to delete old partials.")
         app.logger.info(traceback.format_exc())
 

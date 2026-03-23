@@ -110,7 +110,7 @@ def check_worker_time_near_to_controller(worker):
         worker_time = datetime.datetime.strptime(worker.time_on_worker, "%Y-%m-%d %H:%M:%S")
         if abs((worker_time - datetime.datetime.now()).total_seconds()) > (60 * 10):
             return True
-    except:
+    except Exception:
         traceback.print_exc()
     return False
 

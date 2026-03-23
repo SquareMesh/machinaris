@@ -74,7 +74,7 @@ def str_to_gibs(str):
             return float(val) * 1024 * 1024
         elif unit.lower().strip().endswith('eib'):
             return float(val) * 1024 * 1024 * 1024
-    except:
+    except Exception:
         print("Failed to convert to GiB: {0}".format(str))
         print(traceback.format_exc())
         return 0.0

@@ -105,7 +105,7 @@ def get_hostname():
     """Return the current hostname for notification messages."""
     try:
         return socket.gethostname()
-    except:
+    except Exception:
         return 'machinaris'
 
 

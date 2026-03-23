@@ -228,7 +228,7 @@ def generate_key(key_path, blockchain):
             if len(mnemonic_words) != 24:
                 flash('{0} '.format(key_path) + _('does not contain a 24-word mnemonic!'), 'danger')
                 return False
-        except:
+        except Exception:
                 flash('{0} '.format(key_path) + _('was unreadable or not found.'), 'danger')
                 return False
         flash(_('Welcome! A new key has been generated, see below. Please visit the %(link_open)sWiki%(link_close)s to get started with Machinaris. Please allow 15 minutes for Chia to begin syncing with peers.', 

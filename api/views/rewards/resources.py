@@ -40,7 +40,7 @@ class Rewards(MethodView):
             wallet_id = body['wallet_id']
             launcher_id = body['launcher_id']
             pool_contract_address = body['pool_contract_address']
-        except:
+        except Exception:
             abort("Invalid rewards recovery request without blockchain, launcher_id, or pool_contract_address.", 400)
         
         try:

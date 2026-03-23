@@ -29,7 +29,7 @@ def delete_old_alerts(db):
         db.session.query(a.Alert).filter(a.Alert.created_at <= cutoff).delete()
         db.session.commit()
         app.logger.debug("Deleted old alerts before {0}".format(cutoff.strftime("%Y-%m-%d %H:%M")))
-    except:
+    except Exception:
         app.logger.info("Failed to delete old alerts.")
         app.logger.info(traceback.format_exc())
 

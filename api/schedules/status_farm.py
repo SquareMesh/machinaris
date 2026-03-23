@@ -18,12 +18,12 @@ def safely_gather_plots_size_gibs(plots_size):
     plots_size_gibs = 0
     try:
         plots_size_gibs = converters.str_to_gibs(plots_size)
-    except:
+    except Exception:
         app.logger.info("Unconvertable plots size: {0}  Using zero.".format(plots_size))
         plots_size_gibs = 0
     try:
         float(plots_size_gibs)
-    except: 
+    except Exception:
         app.logger.info("Unfloatable plots size: {0}  Using zero.".format(plots_size))
         plots_size_gibs = 0
     return plots_size_gibs
