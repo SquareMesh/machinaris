@@ -3,7 +3,7 @@
 > Lightweight items identified but not yet explored.
 > Promote to OPEN_ISSUES when analyzed. Dismiss with reason if not needed.
 > Format defined in CLAUDE.md Section 5.1.
-> Next TODO number: TODO-022
+> Next TODO number: TODO-023
 
 ---
 
@@ -86,6 +86,10 @@ Done: 2026-03-23 — Added `max_requests = 1000` and `max_requests_jitter = 50` 
 ## TODO-021 — DONE
 ~~Replace marshmallow-toplevel (unmaintained since 2020)~~
 Done: 2026-03-23 — Created inline `TopLevelSchema` class in `api/extensions/api/__init__.py`. Updated all 21 schema files to import from there. Removed `marshmallow-toplevel` from requirements.txt and unpinned marshmallow `<4.0` constraint.
+
+## TODO-022 — Verify AUD display on farming earnings panels
+Discovered during: Dashboard earnings implementation (2026-03-24)
+AUD fiat values depend on local currency being set on Summary page and blockchain_prices_cache.json existing. User has not confirmed if AUD is displaying. Need to verify after next container restart.
 
 ## TODO-015 — DISMISSED
 ~~Encrypt or protect sensitive config files~~

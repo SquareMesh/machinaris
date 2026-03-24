@@ -5,6 +5,36 @@
 > Format defined in CLAUDE.md Section 6.
 
 ---
+## [2026-03-24] — Dashboard Farming Earnings Panels
+
+**Type:** Implementation
+**Affects:** web/actions/stats.py, web/blueprints/index.py, web/templates/index.html, web/templates/views/index_script_block.js
+**Design doc ref:** WEB-FRONTEND.md — Templates and Assets
+
+### Context
+User requested dashboard panels showing weekly and monthly XCH farming earnings with AUD conversion, placed alongside a reduced-width Chia Wallets chart.
+
+### Options Considered
+- **Option A:** Use `StatTotalCoins` (farmed block wins only) — Pro: Direct farming metric Con: Misses pool payouts and other wallet additions
+- **Option B:** Use `StatWalletBalances` (total wallet balance diff) — Pro: Captures all income sources Con: Could include non-farming transactions
+
+### Decision
+Option B — `StatWalletBalances`. The wallet balance difference over 7/30 days captures all income: block wins, pool payouts, and any other additions. Initially implemented with `StatTotalCoins` but this showed incorrect values (0.125 weekly vs expected ~1.19 at 0.17 XCH/day).
+
+### Technical Rationale
+`StatWalletBalances` records periodic snapshots of total wallet balance. Comparing the latest value to the value N days ago gives the net balance change, which represents total farming income. The `fiat.to_fiat()` function handles XCH→AUD conversion using cached blockchain pricing and exchange rates.
+
+### Impact
+- New `farming_earnings()` function in stats.py
+- Dashboard layout changed: wallets chart reduced from col-12 to col-4, two new col-4 earnings panels added
+- Chart JS font sizes reduced for compact display
+- AUD conversion depends on local currency being configured (Summary page)
+
+### Follow-up Required
+- [ ] Verify AUD values display correctly once user confirms local currency is set
+- [ ] Consider whether spending/transfers should be excluded from the diff
+
+---
 ## [2026-03-21] — Project Fork and Initial Setup
 
 **Type:** Architecture

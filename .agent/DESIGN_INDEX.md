@@ -13,7 +13,7 @@
 | API.md — Background Scheduler | IMPLEMENTED | api/schedules/, gunicorn.conf.py | 2026-03-21 | APScheduler with 22+ jobs |
 | API.md — Endpoint Catalog | IMPLEMENTED | api/views/ | 2026-03-21 | ~100 endpoints |
 | WEB-FRONTEND.md — Flask Blueprints | IMPLEMENTED | web/blueprints/ | 2026-03-22 | 15 blueprints (added auth_bp for TOTP) |
-| WEB-FRONTEND.md — Templates and Assets | IMPLEMENTED | web/templates/, web/static/ | 2026-03-22 | Jinja2 + Bootstrap 5. All |safe filters removed. Flash macro in _flash_messages.html. |
+| WEB-FRONTEND.md — Templates and Assets | IMPLEMENTED | web/templates/, web/static/ | 2026-03-24 | Jinja2 + Bootstrap 5. All |safe filters removed. Flash macro in _flash_messages.html. Dashboard earnings panels (weekly/monthly XCH + AUD). |
 | DATA-LAYER.md — Multi-Database Architecture | IMPLEMENTED | common/models/, api/default_settings.py | 2026-03-23 | 21 SQLite databases. Indexes added on hostname, blockchain, created_at. |
 | DATA-LAYER.md — ORM Models | IMPLEMENTED | common/models/ | 2026-03-23 | 18 model classes + 17 stat classes. All bare except: replaced. |
 | BLOCKCHAIN-INTEGRATION.md — Chia Integration | VERIFIED | common/config/blockchains.json, api/commands/rpc.py | 2026-03-23 | Chia-only. blockchains.json trimmed to single entry. All fork-specific code paths cleaned. |
