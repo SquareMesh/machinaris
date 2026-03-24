@@ -30,6 +30,7 @@ def index():
     p.partials_chart_data(farm_summary)
     stats.load_daily_diff(farm_summary)
     stats.wallet_chart_data(farm_summary)
+    stats.farming_earnings(farm_summary)
     warnings.check_warnings(request.args)
     return render_template('index.html', reload_seconds=120, farms=farm_summary.farms, \
         plotting=plotting, workers=workers, global_config=gc, \

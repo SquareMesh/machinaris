@@ -105,21 +105,36 @@
           </div>
         </div>
 
-        {% if farms[blockchain].wallets.dates|length > 0 %}
-        <div class="col-md-12" style="margin-top:5px; margin-bottom:5px;">
-          <div class="h-100 p-2 text-white bg-dark rounded-3">
-            <div class="position-relative">
-              <div class="position-absolute top-0 end-0" style="z-index: 2000; margin-top: -10px; margin-right: -3px;">
-                <a href="https://github.com/guydavis/machinaris/wiki/Wallets" target="_blank">
-                  <i class="fs-4 bi-question-circle"></i>
-                </a>
-              </div>
-            </div>
-            <h6 class="display-6 text-center">{{blockchain|capitalize}} - {{_('Wallets')}}</h6>
-            <div style="position: relative; height: 350px">
-              <canvas id="{{blockchain}}_wallets_chart"></canvas>
+        {% if farms[blockchain].earnings is defined %}
+        <div class="row align-items-md-stretch">
+          <div class="col-md-4" style="margin-top:5px; margin-bottom:5px;">
+            <div class="h-100 p-2 text-white bg-dark rounded-3">
+              <h4 class="display-4 text-center text-success">{{ farms[blockchain].earnings.weekly.xch }}</h4>
+              <h6 class="display-6 text-center">{{ farms[blockchain].currency_symbol }} {{_('Weekly Farm')}}</h6>
+              {% if farms[blockchain].earnings.weekly.fiat %}
+              <h6 class="text-center text-muted" style="margin-top: -5px;">{{ farms[blockchain].earnings.weekly.fiat }}</h6>
+              {% endif %}
             </div>
           </div>
+          <div class="col-md-4" style="margin-top:5px; margin-bottom:5px;">
+            <div class="h-100 p-2 text-white bg-dark rounded-3">
+              <h4 class="display-4 text-center text-success">{{ farms[blockchain].earnings.monthly.xch }}</h4>
+              <h6 class="display-6 text-center">{{ farms[blockchain].currency_symbol }} {{_('Monthly Farm')}}</h6>
+              {% if farms[blockchain].earnings.monthly.fiat %}
+              <h6 class="text-center text-muted" style="margin-top: -5px;">{{ farms[blockchain].earnings.monthly.fiat }}</h6>
+              {% endif %}
+            </div>
+          </div>
+          {% if farms[blockchain].wallets.dates|length > 0 %}
+          <div class="col-md-4" style="margin-top:5px; margin-bottom:5px;">
+            <div class="h-100 p-2 text-white bg-dark rounded-3">
+              <h6 class="display-6 text-center" style="font-size: 1.1rem;">{{blockchain|capitalize}} - {{_('Wallets')}}</h6>
+              <div style="position: relative; height: 140px">
+                <canvas id="{{blockchain}}_wallets_chart"></canvas>
+              </div>
+            </div>
+          </div>
+          {% endif %}
         </div>
         {% endif %}
 

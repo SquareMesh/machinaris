@@ -125,6 +125,33 @@ def total_coin_diff(since, blockchain):
     #app.logger.info("Result is: {0}".format(result))
     return result
 
+def farming_earnings(farm_summary):
+    for blockchain in farm_summary.farms:
+        earnings = {}
+        now = datetime.datetime.now()
+        for period_name, days in [('weekly', 7), ('monthly', 30)]:
+            xch_diff = 0.0
+            try:
+                latest = db.session.query(StatTotalCoins).filter(
+                    StatTotalCoins.blockchain == blockchain
+                ).order_by(StatTotalCoins.created_at.desc()).limit(1).first()
+                since_date = now - datetime.timedelta(days=days)
+                since_str = since_date.strftime("%Y%m%d%H%M%S")
+                before = db.session.query(StatTotalCoins).filter(
+                    StatTotalCoins.blockchain == blockchain,
+                    StatTotalCoins.created_at <= since_str
+                ).order_by(StatTotalCoins.created_at.desc()).limit(1).first()
+                if latest and before:
+                    xch_diff = max(0, latest.value - before.value)
+            except Exception as ex:
+                app.logger.debug("Failed to calc {0} farming earnings: {1}".format(period_name, str(ex)))
+            fiat_value = fiat.to_fiat(blockchain, xch_diff) if xch_diff > 0 else ''
+            earnings[period_name] = {
+                'xch': round(xch_diff, 6),
+                'fiat': fiat_value,
+            }
+        farm_summary.farms[blockchain]['earnings'] = earnings
+
 def wallet_balance_diff(since, blockchain):
     result = ''
     try:

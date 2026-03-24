@@ -63,12 +63,12 @@ var myChart = new Chart(ctx, {
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      plugins: {  
+      plugins: {
         legend: {
             labels: {
-            color: "#c7c7c7",  
+            color: "#c7c7c7",
             font: {
-              size: 18 
+              size: 10
             }
           }
         }
@@ -82,33 +82,24 @@ var myChart = new Chart(ctx, {
               ticks: {
                   color: "#c7c7c7",
                   font: {
-                    size: 16 
-                  }  
+                    size: 9
+                  },
+                  maxRotation: 45
               },
               title: {
-                  display: true,
-                  text: "{{_('Date')}}",
-                  color: "#c7c7c7",  
-                  font: {
-                    size: 18 
-                  }
+                  display: false
               }
           },
           y: {
               ticks: {
-                  color: "#c7c7c7",  
+                  color: "#c7c7c7",
                   font: {
-                    size: 16 
+                    size: 9
                   }
               },
               beginAtZero: true,
               title: {
-                  display: true,
-                  text: "{{_('Coins')}}",
-                  color: "#c7c7c7",  
-                  font: {
-                    size: 18 
-                  }
+                  display: false
               }
           }
       }
