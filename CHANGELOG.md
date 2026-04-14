@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Updated
+ - [Chia](https://github.com/Chia-Network/chia-blockchain/releases/tag/2.7.0) to v2.7.0 — Remote Wallet with new RPC calls, security hardening measures, soft fork improvements to mempool handling, connection validation, and dependencies. No database migration or config change required.
+
 ## [2.7.0] - 2026-03-21
 ### Changed
  - **Chia-only focus**: Removed all non-Chia blockchain forks from the Docker build. This project now exclusively supports the Chia blockchain, resulting in significantly faster build times and a smaller Docker image.

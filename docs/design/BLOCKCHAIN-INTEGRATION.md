@@ -182,7 +182,8 @@ Harvesters need SSL certificates from the farmer/fullnode for RPC access:
 **Key project goal:** Maintain alignment with latest Chia versions from chia.net.
 
 Current state (v2.7.0):
-- Chia v2.6.1 support
+- Chia v2.7.0 support
+- Chia 2.7.0 adds Remote Wallet with new RPC calls, security hardening, soft fork/mempool handling improvements
 - Chia 2.6.x module restructure: RPC clients moved to service directories, sized ints moved to `chia_rs`
 - V1 and V2 blockchain database format detection
 - GPU-accelerated binary support (CUDA chia-blockchain-cli)

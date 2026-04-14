@@ -5,6 +5,31 @@
 > Format defined in CLAUDE.md Section 6.
 
 ---
+## [2026-04-14] — Chia 2.7.0 Upgrade
+
+**Type:** Dependency
+**Affects:** docker/dockerfile, CI workflows (main/develop/test), docs/design/BLOCKCHAIN-INTEGRATION.md
+**Design doc ref:** BLOCKCHAIN-INTEGRATION.md §7 (Chia Version Alignment)
+
+### Context
+User requested upgrade from Chia 2.6.1 to 2.7.0 (published 2026-03-26, stable). Per BLOCKCHAIN-INTEGRATION.md §7 the project goal is to stay aligned with the latest Chia release.
+
+### Decision
+Bump `CHIA_BRANCH` from `2.6.1` to `2.7.0` in `docker/dockerfile` and the three GHCR build workflows (main, develop, test). Installer script `scripts/forks/chia_install.sh` already parameterizes the version, so no script changes were needed. GPU CUDA CLI `.deb` downloads use `${CHIA_BRANCH}` interpolation and will pull matching 2.7.0 assets.
+
+### Technical Rationale
+Chia 2.7.0 introduces Remote Wallet with new RPC calls plus security hardening, soft-fork / mempool handling improvements, and dependency updates. Chia release notes indicate no database migration or config change is required, so an in-place image rebuild is sufficient — no entrypoint or data-volume migration logic needed.
+
+### Impact
+- Next GHCR image will ship with Chia 2.7.0 runtime.
+- Existing `~/.chia` data volumes remain compatible (no DB migration).
+- Resolves the standing "v2.6.1 support" DRIFT between BLOCKCHAIN-INTEGRATION.md and upstream latest.
+
+### Follow-up Required
+- [ ] After deploy: verify container starts and `chia version` reports 2.7.0 in logs.
+- [ ] Monitor for Remote Wallet RPC surface changes that may affect our RPC client wrappers (none expected, but new endpoints exist).
+
+---
 ## [2026-03-24] — Dashboard Farming Earnings Panels
 
 **Type:** Implementation
