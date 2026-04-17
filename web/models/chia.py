@@ -13,6 +13,7 @@ if "chia" == globals.enabled_blockchains()[0]:
     from chia.util import bech32m
 
 from flask_babel import _, lazy_gettext as _l, format_decimal
+from markupsafe import Markup, escape
 
 from web import app
 from web.actions import worker as w, mapping
@@ -432,25 +433,35 @@ class Wallets:
         return None
 
     def link_to_wallet_transactions(self, blockchain, details):
+        anchor_tpl = Markup(
+            "<a href='#' class='text-white' title='{title}' "
+            "onclick='ViewTransactions(\"{bc}\", \"{wid}\");return false;'>{label}</a>:"
+        )
         lines = []
-        if globals.legacy_blockchain(blockchain) or blockchain in ['cryptodoge']: 
+        if globals.legacy_blockchain(blockchain) or blockchain in ['cryptodoge']:
             for line in details.split('\n'):
                 if 'wallet id' in line.lower():
-                    lines.append("<a href='#' class='text-white' title='" + _('View Transactions') + "' onclick='ViewTransactions(\""+ blockchain + "\", \"1\");return false;'>" + line.strip() + "</a>:")
+                    lines.append(anchor_tpl.format(
+                        title=_('View Transactions'), bc=blockchain, wid='1',
+                        label=line.strip(),
+                    ))
                 else:
-                    lines.append(line)
+                    lines.append(escape(line))
         else: # Chia and updated blockchains, have multiple wallet id #s like 1,3,4 etc.
             details_lines = details.split('\n')
             for i in range(len(details_lines)):
                 line = details_lines[i]
+                rendered = None
                 if line.strip().endswith(':') and not line.strip() == 'Connections:':
                     wallet_name = line.strip()[:-1]
                     wallet_id = self.extract_wallet_id(details_lines[i+1:])
                     if wallet_name and wallet_id:
-                        line = "<a href='#' class='text-white' title='" + _('View Transactions') + "' onclick='ViewTransactions(\""+ blockchain + "\", \"" + str(wallet_id) + "\");return false;'>" + wallet_name + "</a>:"
-                lines.append(line)
-                i += 1
-        return '\n'.join(lines)
+                        rendered = anchor_tpl.format(
+                            title=_('View Transactions'), bc=blockchain, wid=str(wallet_id),
+                            label=wallet_name,
+                        )
+                lines.append(rendered if rendered is not None else escape(line))
+        return Markup('\n').join(lines)
 
     def sum_chia_wallet_balance(self, hostname, blockchain, include_cold_balance=True):
         numeric_const_pattern = r'-Total\sBalance:\s+((?: (?: \d* \. \d+ ) | (?: \d+ \.? ) )(?: [Ee] [+-]? \d+ )?)'

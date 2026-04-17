@@ -5,6 +5,30 @@
 > Format defined in CLAUDE.md Section 6.
 
 ---
+## [2026-04-17] — Fix Wallets page showing raw `<a>` HTML in details
+
+**Type:** Bugfix
+**Affects:** web/models/chia.py (link_to_wallet_transactions)
+**Design doc ref:** WEB-FRONTEND.md — Templates and Assets
+
+### Context
+User reported the Wallets page was displaying literal `<a href='...' onclick='ViewTransactions(...)'>…</a>` tags in the wallet details `<pre>` block instead of rendering them as clickable links. Root cause: TODO-012 (2026-03-22) removed all `|safe` filters from templates, including the one on `wallet.details`. `link_to_wallet_transactions` in `web/models/chia.py` still built the details string by concatenating raw HTML anchor strings, so Jinja's default auto-escaping turned them into visible text.
+
+### Decision
+Rewrite `link_to_wallet_transactions` to return a `markupsafe.Markup` instance built from a template-based `Markup("<a …>{label}</a>").format(...)` pattern. `Markup.format` auto-escapes the substituted values, which is important because wallet names for CAT tokens come from user-created asset metadata and are therefore untrusted. Non-anchor lines are individually wrapped with `markupsafe.escape` to keep the rest of the details block safe from XSS too, before being joined with `Markup('\n').join(lines)`.
+
+### Technical Rationale
+Following TODO-012's "intentional HTML in non-flash contexts uses `markupsafe.Markup()`" pattern, but escaping user-influenced substitutions (`wallet_name`, `line.strip()`) first. A CAT token creator can pick any display name — a naive `Markup(string_with_name)` wrap would re-enable XSS via token names like `Spacebucks<script>...`. `Markup.format()` with escape-by-default substitution closes that while preserving the intentional anchor structure. Also removed a spurious `i += 1` inside `for i in range(...)` (a no-op, pre-existing clutter).
+
+### Impact
+- Wallets page now renders the per-wallet anchors as clickable links again.
+- Wallet details section is now XSS-safe against adversarial CAT token names (previously would have been vulnerable if `|safe` had still been in place).
+
+### Follow-up Required
+- [ ] After deploy: verify the Wallets page renders wallet names as clickable links (click each → opens ViewTransactions modal).
+- [ ] Sanity-check any other template that used to depend on `|safe` for server-constructed HTML. `link_to_wallet_transactions` was the one the user observed; others may exist.
+
+---
 ## [2026-04-17] — Fix TopLevelSchema marshmallow-4 regression (ISSUE-001)
 
 **Type:** Bugfix
