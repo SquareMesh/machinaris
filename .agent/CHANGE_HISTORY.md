@@ -5,6 +5,37 @@
 > Format defined in CLAUDE.md Section 6.
 
 ---
+## [2026-04-17] — Fix TopLevelSchema marshmallow-4 regression (ISSUE-001)
+
+**Type:** Bugfix
+**Affects:** api/extensions/api/__init__.py, api/utils.py
+**Design doc ref:** API.md — Flask-Smorest Framework
+
+### Context
+`/pools` page had been frozen since 2026-03-23. Traceback showed `TypeError: TopLevelSchema._deserialize() got an unexpected keyword argument 'error_store'` on every scheduled POST. Root cause: on 2026-03-23, TODO-021 replaced the unmaintained `marshmallow-toplevel` package with an inline `TopLevelSchema` that overrode `_deserialize`/`_serialize` with a narrow signature, AND simultaneously removed the `marshmallow<4.0` pin. Marshmallow 4's `Schema._do_load` passes `error_store=...` into `_deserialize`, which the override rejects. Blast radius: 21 schema files inherit `TopLevelSchema` — every scheduled POST into pools, alerts, partials, plotnfts, plots, challenges, drives, warnings, transfers, and 11 stat tables has been returning 500 for 25 days. The scheduler's outer `try/except` only catches Python exceptions (not HTTP status codes), so APScheduler kept logging "executed successfully" while nothing wrote. Logged as ISSUE-001.
+
+### Decision
+Rewrite `TopLevelSchema` to wrap/unwrap at the public `load`/`dump` boundary rather than overriding protected `_deserialize`/`_serialize`. Wrap input in `{"_toplevel": data}`, delegate to `super().load/dump`, unwrap. Version-agnostic across marshmallow 3 and 4 — if marshmallow adds more internal kwargs in the future, they flow through the parent class untouched.
+
+Also centralised HTTP error visibility in `utils.send_post` / `send_worker_post` by logging any `response.status_code >= 400`. This means any future silent-500 regression in any of the 23 scheduler POST sites surfaces in `apisrv.log` within the first run.
+
+### Technical Rationale
+Overriding `_deserialize`/`_serialize` is coupling to marshmallow internals — a fragility the original `marshmallow-toplevel` package specifically avoided by wrapping at the public API. Marshmallow's internal signature changed in 4.x (`error_store` added as a required kwarg); a wrap-at-load/dump implementation doesn't care. The parent `Schema._do_load` handles validation error aggregation, nested error propagation, and unknown-field behaviour correctly on our behalf.
+
+Consolidating the status-code check into `utils.send_post` rather than touching 23 call-sites keeps the diff small and ensures no scheduler can accidentally miss the check. The function still returns the response object unchanged — callers are unaffected.
+
+### Impact
+- Pools page resumes updating.
+- All 20 previously-frozen tables resume accepting writes: alerts, challenges, drives, partials, plotnfts, plots, plottings, transfers, warnings, plus 11 stat_* tables.
+- Web UI pages driven by those tables (Alerts, Partials, Farm Summary, Plots, stat charts) show current data again.
+- Any future 4xx/5xx from a scheduler POST is now visible in `/root/.chia/machinaris/logs/apisrv.log` as an ERROR line.
+
+### Follow-up Required
+- [ ] After deploy: verify `pools.updated_at` advances within 2 min of restart, and scheduler POSTs return 201.
+- [ ] Spot-check Alerts, Partials, Farm Summary pages for refreshed data.
+- [ ] Consider a minimal scheduler→API integration test (logged as TODO if worth chasing).
+
+---
 ## [2026-04-14] — Chia 2.7.0 Upgrade
 
 **Type:** Dependency

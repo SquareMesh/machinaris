@@ -59,16 +59,24 @@ class AutoSchema(SQLAlchemyAutoSchema):
 class TopLevelSchema(ma.Schema):
     """Schema that deserializes/serializes a top-level JSON array.
 
-    Replaces the unmaintained marshmallow-toplevel package.
-    Subclasses define a ``_toplevel`` Nested field; load/dump operate
-    on the list directly instead of wrapping it in a dict.
+    Wraps the top-level list under ``_toplevel`` before delegating to
+    marshmallow's normal load/dump pipeline, then unwraps on return. Goes
+    through the public API so internal kwargs like ``error_store`` (added in
+    marshmallow 4) are handled by the parent class rather than a fragile
+    signature override.
     """
 
-    def _deserialize(self, data, *, many=None, partial=None, unknown=None):
-        return self.fields['_toplevel']._deserialize(data, '_toplevel', data)
+    def load(self, data, *args, **kwargs):
+        result = super().load({"_toplevel": data}, *args, **kwargs)
+        if isinstance(result, dict) and "_toplevel" in result:
+            return result["_toplevel"]
+        return result
 
-    def _serialize(self, obj, *, many=None):
-        return self.fields['_toplevel']._serialize(obj, '_toplevel', obj)
+    def dump(self, obj, *args, **kwargs):
+        result = super().dump({"_toplevel": obj}, *args, **kwargs)
+        if isinstance(result, dict) and "_toplevel" in result:
+            return result["_toplevel"]
+        return result
 
 
 class SQLCursorPage(Page):

@@ -25,6 +25,8 @@ def send_post(path, payload, timeout=30, debug=False):
         http.client.HTTPConnection.debuglevel = 1
     response = requests.post(controller_url + path, headers = headers, data = json.dumps(payload), timeout=timeout)
     http.client.HTTPConnection.debuglevel = 0
+    if response.status_code >= 400:
+        app.logger.error("POST %s returned %s: %s", path, response.status_code, response.text[:500])
     return response
 
 def send_worker_post(worker, path, payload, timeout=30, debug=False):
@@ -33,6 +35,8 @@ def send_worker_post(worker, path, payload, timeout=30, debug=False):
         http.client.HTTPConnection.debuglevel = 1
     response = requests.post(_resolve_url(worker) + path, headers = headers, data = json.dumps(payload), timeout=timeout)
     http.client.HTTPConnection.debuglevel = 0
+    if response.status_code >= 400:
+        app.logger.error("POST %s (worker %s) returned %s: %s", path, getattr(worker, 'hostname', '?'), response.status_code, response.text[:500])
     return response
 
 def send_delete(path, timeout=30, debug=False):
