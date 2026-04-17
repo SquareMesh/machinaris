@@ -3,7 +3,7 @@
 > Lightweight items identified but not yet explored.
 > Promote to OPEN_ISSUES when analyzed. Dismiss with reason if not needed.
 > Format defined in CLAUDE.md Section 5.1.
-> Next TODO number: TODO-023
+> Next TODO number: TODO-025
 
 ---
 
@@ -90,6 +90,14 @@ Done: 2026-03-23 — Created inline `TopLevelSchema` class in `api/extensions/ap
 ## TODO-022 — Verify AUD display on farming earnings panels
 Discovered during: Dashboard earnings implementation (2026-03-24)
 AUD fiat values depend on local currency being set on Summary page and blockchain_prices_cache.json existing. User has not confirmed if AUD is displaying. Need to verify after next container restart.
+
+## TODO-023 — Build `00af32ac` (plot count truth + Telegram alert) and deploy
+Discovered during: Plot-loss incident (2026-04-17)
+Commit `00af32ac` is on origin/main but not built/pushed to GHCR. Three consecutive `docker build --pull` attempts failed with `archive.ubuntu.com connection refused` inside BuildKit while a plain `docker run alpine ping archive.ubuntu.com` worked. Next session: restart Docker Desktop, retry, fall back to `DOCKER_BUILDKIT=0` or base-image apt test if still failing. See memory/project_session_2026-04-17.md for full diagnostic trail.
+
+## TODO-024 — Make `/deploy` skill pipefail-safe
+Discovered during: Plot-loss incident (2026-04-17)
+`.claude/commands/deploy.md` pipes `docker build | tee`, which swallows build failures because tee always exits 0. Caused a false-success deploy today (same digest pushed). Fix: wrap build step with `set -o pipefail`, or redirect log to a file without a pipe. See memory/feedback_pipefail_on_deploy.md.
 
 ## TODO-015 — DISMISSED
 ~~Encrypt or protect sensitive config files~~
