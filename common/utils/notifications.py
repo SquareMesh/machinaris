@@ -22,6 +22,11 @@ DEFAULT_CONFIG = {
         "notify_on_decrease": False,
         "min_change_threshold": 0.0,
         "include_cold_wallet": True
+    },
+    "plot_health": {
+        "enabled": True,
+        "decrease_pct_threshold": 5,
+        "alert_on_empty_dir": True
     }
 }
 
@@ -35,6 +40,8 @@ def load_config():
                 saved = json.load(f)
                 if 'telegram' in saved:
                     config['telegram'].update(saved['telegram'])
+                if 'plot_health' in saved:
+                    config['plot_health'].update(saved['plot_health'])
         except Exception as ex:
             print("Unable to read notifications config from {0}: {1}".format(
                 NOTIFICATIONS_CONFIG, str(ex)))

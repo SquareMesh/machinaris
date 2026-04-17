@@ -5,6 +5,42 @@
 > Format defined in CLAUDE.md Section 6.
 
 ---
+## [2026-04-17] — Truthful plot count on Summary + Telegram alert on plot loss
+
+**Type:** Bugfix + Feature
+**Affects:** api/schedules/status_farm.py, api/schedules/status_plot_health.py (new), api/gunicorn.conf.py, common/utils/plot_counter.py (new), common/utils/notifications.py
+**Design doc ref:** MONITORING-ALERTS.md, TELEGRAM-NOTIFICATIONS.md
+
+### Context
+User noticed spacefarmers pool reported ~8 TB vs an expected ~275 TB of farming space. Root cause on the pool side: `/plots2` (QNAP SMB bind mount at `/mnt/remotes/QNAP_Plots`) was silently empty, so only the plots on `/plots1` were actually generating proofs. Machinaris's Summary page kept showing `2780 plots / 275.285 TiB` because `api/schedules/status_farm.py` just forwards `chia farm summary`'s output to the `farms` table — and **`chia farm summary` keeps reporting plots from Chia's persistent `plot_cache.dat`** (introduced in Chia 2.4.0) even after plot files become unreadable. Container restarts alone don't always invalidate that cache. The staleness went unnoticed for 8+ days because no alert existed for plot-count regressions.
+
+### Decision
+Two tightly-coupled changes:
+
+1. **Make Summary reflect actual on-disk plot files, not Chia's cache.** Override `farm_summary.plot_count` and `farm_summary.plots_size` in `status_farm.update()` with a live `os.scandir` walk of each directory in the `plots_dir` env var. Files are filtered to `*.plot` at ≥ 100 MB (matches `web/models/chia.py`'s `MINIMUM_K32_PLOT_SIZE_BYTES`). Missing / unreadable / empty directories contribute 0 — exactly the case we need to detect.
+2. **Add a plot-health scheduler that alerts on drops.** `api/schedules/status_plot_health.py` runs every 15 minutes, re-scans the same directories, compares to a per-directory baseline persisted at `/root/.chia/machinaris/config/plot_health_state.json`, and sends a Telegram alert when any directory (a) drops below baseline by more than `decrease_pct_threshold` (default 5%) or (b) goes from non-zero to empty. First cycle after a blank state records the baseline and does NOT alert.
+
+Reuses existing `common/utils/notifications.send_telegram()` plumbing and its config loader. New config section `plot_health` with `enabled` / `decrease_pct_threshold` / `alert_on_empty_dir` under the same `notifications.json`. Telegram must still be globally enabled — plot_health sits behind that gate.
+
+### Technical Rationale
+Chia's plot cache is by design — it makes harvester startup fast for farms with thousands of plots. Fighting that cache inside Chia would be upstream work. Counting files on disk from Python is O(N) and runs in milliseconds even for thousands of plots because `os.scandir` batches syscalls; cost is negligible at a 2-min cadence.
+
+Per-directory baseline rather than a single global number so the alert actually identifies the failing mount. `alert_on_empty_dir` is a separate flag because "0 plots in a directory that used to have many" is a categorically worse signal than a proportional drop — worth a dedicated trigger unaffected by percentage thresholds.
+
+State file is written after every cycle regardless of whether an alert fired, so a transient hiccup that resolves itself on the next cycle won't cause a runaway alert loop, and a permanent regression produces exactly one alert at the moment of change rather than repeating.
+
+### Impact
+- Machinaris Summary now reflects ground truth. If a plot mount drops, the visible plot count drops immediately rather than staying stuck at Chia's last-cached value.
+- New Telegram alert catches plot-directory regressions within 15 minutes of occurrence. Previously, the current regression was silent for 8+ days.
+- No backward-compatibility concerns: `farms.plot_count` and `farms.plots_size` keep the same schema and format; only the *source* of their values changed.
+
+### Follow-up Required
+- [ ] After deploy: verify Summary shows actual plot count (not 2780) within 2 min.
+- [ ] After 15 min: verify `/root/.chia/machinaris/config/plot_health_state.json` exists with baseline per-directory counts.
+- [ ] Smoke test: rename a `.plot` file to `.plot.bak` in `/plots1`, wait 15 min, confirm Telegram alert arrives, rename back.
+- [ ] Future: add UI for configuring `decrease_pct_threshold` / `alert_on_empty_dir` (currently file-only).
+
+---
 ## [2026-04-17] — Fix Wallets page showing raw `<a>` HTML in details
 
 **Type:** Bugfix
